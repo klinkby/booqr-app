@@ -17,6 +17,9 @@ test('login flow with token validation', async ({ page, context }) => {
 	const email = process.env.TEST_EMAIL;
 	const password = process.env.TEST_PASSWORD;
 
+	if (!email || !password) {
+		throw new Error('TEST_EMAIL and TEST_PASSWORD must be set in .env file');
+	}
 	// Fill in the login form
 	await page.fill('input[name="email"]', email);
 	await page.fill('input[name="password"]', password);

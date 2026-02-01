@@ -197,7 +197,15 @@ Notes & enforcement
 - **Unit tests**: This project does NOT include unit tests.
 
 ## Playwright Testing Principles
-- **Environment Variables**: ALWAYS store test credentials and secrets in `.env` file (gitignored), NEVER hardcode in test files
+- **Environment Variables**: ALWAYS store test credentials and secrets in `.env` file (gitignored), NEVER hardcode in test files. Document the required variables in a `.env.example` file in the project root so new developers know what to configure.
+  - Required variables for Playwright tests:
+    - `TEST_EMAIL`
+    - `TEST_PASSWORD`
+
+  Example `.env.example`:
+  ```env
+  TEST_EMAIL=your-test-user@example.com
+  TEST_PASSWORD=your-secure-test-password
 - **Configuration**: Load environment variables in `playwright.config.js` using `dotenv.config()`
 - **Test Structure**: Each test should be self-contained and clean up after itself
 - **Navigation**: Use `baseURL` in config for cleaner test URLs, navigate with `page.goto('/')`

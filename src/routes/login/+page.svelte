@@ -21,7 +21,7 @@
 			});
 
 			// Store access token (response should contain token)
-			if (response.access_token) {
+			if (response.access_token && isValidToken(response.access_token)) {
 				setAccessToken(response.access_token);
 				// Clear password from memory
 				password = '';
@@ -59,7 +59,7 @@
 		</div>
 		<form class="mt-8 space-y-6" onsubmit={handleSubmit} novalidate>
 			{#if error}
-				<div class="rounded-md bg-red-50 p-4">
+				<div role="alert" aria-live="polite" class="rounded-md bg-red-50 p-4">
 					<p class="text-sm text-red-800">{error}</p>
 				</div>
 			{/if}
