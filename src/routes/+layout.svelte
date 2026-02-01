@@ -2,7 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { AuthenticationService } from '$lib/api';
-	import { getAccessToken, clearAccessToken, isValidToken, authState } from '$lib';
+	import { clearAccessToken, authState } from '$lib';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
