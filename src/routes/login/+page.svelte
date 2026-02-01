@@ -21,7 +21,7 @@
 			});
 
 			// Store access token (response should contain token)
-			if (response.access_token) {
+			if (response.access_token && isValidToken(response.access_token)) {
 				setAccessToken(response.access_token);
 				// Clear password from memory
 				password = '';
