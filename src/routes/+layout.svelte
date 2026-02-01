@@ -32,7 +32,7 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<nav class="bg-gray-800 text-white p-4">
+<nav aria-label="Main navigation" class="bg-gray-800 text-white p-4">
 	<div class="container mx-auto flex gap-6">
 		<a href="/" class="hover:text-gray-300">Home</a>
 		<a href="/calendar" class="hover:text-gray-300">Calendar</a>
