@@ -49,16 +49,16 @@ export function isValidToken(token) {
 	try {
 		// Decode payload (second part of JWT)
 		const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-		if (payload.exp && typeof payload.exp === 'number') {
-			const now = Math.floor(Date.now() / 1000);
-			return payload.exp > now;
+		// Require expiration field for security
+		if (!payload.exp || typeof payload.exp !== 'number') {
+			return false;
 		}
+		const now = Math.floor(Date.now() / 1000);
+		return payload.exp > now;
 	} catch (e) {
 		// If decoding fails, consider it invalid
 		return false;
 	}
-
-	return true;
 }
 
 // Configure axios default instance with interceptors
