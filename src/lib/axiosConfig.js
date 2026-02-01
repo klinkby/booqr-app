@@ -86,6 +86,7 @@ function setupAxiosInterceptors() {
 				}
 			} catch (e) {
 				// If URL parsing fails, don't set credentials
+				// Note: Not logging URL to avoid exposing sensitive query parameters
 			}
 		}
 		return request;
