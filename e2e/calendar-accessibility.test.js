@@ -31,5 +31,5 @@ test('calendar page has accessible error state', async ({ page }) => {
 	await expect(errorElement).toBeVisible();
 	
 	// Verify error message content
-	await expect(errorElement.locator('p')).toContainText('Failed to load vacancies');
+	await expect(errorElement.locator('p')).toContainText('Error: Failed to load vacancies');
 });
