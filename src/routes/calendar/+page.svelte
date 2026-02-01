@@ -28,9 +28,13 @@
 	<h1 class="text-3xl font-bold mb-6">Calendar</h1>
 
 	{#if loading}
-		<p>Loading vacancies...</p>
+		<div role="status" aria-live="polite">
+			<p>Loading vacancies...</p>
+		</div>
 	{:else if error}
-		<p class="text-red-600">Error: {error}</p>
+		<div role="alert" aria-live="assertive">
+			<p class="text-red-600">Error: {error}</p>
+		</div>
 	{:else if vacancies.length === 0}
 		<p>No vacancies found.</p>
 	{:else}
