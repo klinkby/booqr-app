@@ -13,7 +13,7 @@
 				VacancyService.getVacancies(null, null, start, num)
 			);
 		} catch (err) {
-			error = err.message || 'Failed to fetch vacancies';
+			error = 'Failed to load vacancies. Please try again.';
 		} finally {
 			loading = false;
 		}
