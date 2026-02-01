@@ -77,8 +77,16 @@ function setupAxiosInterceptors() {
 			request.headers['Authorization'] = `Bearer ${token}`;
 		}
 		// Ensure credentials are included for refresh cookie only for our API
-		if (request.url && (request.url.startsWith('/api/') || (request.url.includes('://') && new URL(request.url).pathname.startsWith('/api/')))) {
-			request.withCredentials = true;
+		if (request.url) {
+			try {
+				const isApiPath = request.url.startsWith('/api/') || 
+					(request.url.includes('://') && new URL(request.url).pathname.startsWith('/api/'));
+				if (isApiPath) {
+					request.withCredentials = true;
+				}
+			} catch (e) {
+				// If URL parsing fails, don't set credentials
+			}
 		}
 		return request;
 	});
