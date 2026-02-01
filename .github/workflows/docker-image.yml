@@ -22,7 +22,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
             
     - name: Log in to Docker Hub
-      if: ${{ secrets.DOCKERHUB_PAT != '' }}
+      if: ${{ github.actor != 'dependabot[bot]' }}
       uses: docker/login-action@v3
       with:
         username: klinkby
@@ -42,7 +42,7 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
-        push: ${{ secrets.DOCKERHUB_PAT != '' }}
+        push: ${{ github.actor != 'dependabot[bot]' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
