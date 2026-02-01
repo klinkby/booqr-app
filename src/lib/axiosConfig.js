@@ -87,7 +87,21 @@ function setupAxiosInterceptors() {
 			// Handle errors during request preparation
 			return Promise.reject(error);
 		}
-	);
+		// Ensure credentials are included for refresh cookie only for our API
+		if (request.url) {
+			try {
+				const isApiPath = request.url.startsWith('/api/') || 
+					(request.url.includes('://') && new URL(request.url).pathname.startsWith('/api/'));
+				if (isApiPath) {
+					request.withCredentials = true;
+				}
+			} catch (e) {
+				// If URL parsing fails, don't set credentials
+				// Note: Not logging URL to avoid exposing sensitive query parameters
+			}
+		}
+		return request;
+	});
 
 	// Refresh auth logic
 	const refreshAuthLogic = (failedRequest) =>
