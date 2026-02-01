@@ -1,4 +1,36 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Read the axiosConfig.js file to extract isValidToken function
+const axiosConfigPath = join(__dirname, '..', 'src', 'lib', 'axiosConfig.js');
+const axiosConfigSource = readFileSync(axiosConfigPath, 'utf-8');
+
+// Helper to test token validation in the browser context using the actual implementation
+async function testTokenValidation(page, token) {
+	return await page.evaluate(
+		({ token, axiosConfigSource }) => {
+			// Extract and execute isValidToken function from source
+			const funcMatch = axiosConfigSource.match(
+				/export function isValidToken\(token\) \{[\s\S]*?\n\}/
+			);
+			if (!funcMatch) throw new Error('Could not find isValidToken function');
+
+			// Create a function from the source
+			const funcBody = funcMatch[0]
+				.replace('export function isValidToken(token) {', '')
+				.replace(/\}$/, '');
+			const isValidToken = new Function('token', funcBody);
+
+			return isValidToken(token);
+		},
+		{ token, axiosConfigSource }
+	);
+}
 
 test.describe('Token validation', () => {
 	test('rejects tokens without expiration field', async ({ page }) => {
@@ -11,28 +43,7 @@ test.describe('Token validation', () => {
 		const tokenWithoutExp = `${header}.${payload}.${signature}`;
 		
 		// Test that isValidToken rejects tokens without exp
-		const result = await page.evaluate((token) => {
-			// Import the validation function
-			const isValidToken = (token) => {
-				if (!token || typeof token !== 'string') return false;
-				const parts = token.split('.');
-				if (parts.length !== 3) return false;
-				
-				try {
-					const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-					// Require expiration field for security
-					if (!payload.exp || typeof payload.exp !== 'number') {
-						return false;
-					}
-					const now = Math.floor(Date.now() / 1000);
-					return payload.exp > now;
-				} catch (e) {
-					return false;
-				}
-			};
-			
-			return isValidToken(token);
-		}, tokenWithoutExp);
+		const result = await testTokenValidation(page, tokenWithoutExp);
 		
 		expect(result).toBe(false);
 	});
@@ -48,28 +59,7 @@ test.describe('Token validation', () => {
 		const expiredToken = `${header}.${payload}.${signature}`;
 		
 		// Test that isValidToken rejects expired tokens
-		const result = await page.evaluate((token) => {
-			// Import the validation function
-			const isValidToken = (token) => {
-				if (!token || typeof token !== 'string') return false;
-				const parts = token.split('.');
-				if (parts.length !== 3) return false;
-				
-				try {
-					const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-					// Require expiration field for security
-					if (!payload.exp || typeof payload.exp !== 'number') {
-						return false;
-					}
-					const now = Math.floor(Date.now() / 1000);
-					return payload.exp > now;
-				} catch (e) {
-					return false;
-				}
-			};
-			
-			return isValidToken(token);
-		}, expiredToken);
+		const result = await testTokenValidation(page, expiredToken);
 		
 		expect(result).toBe(false);
 	});
@@ -85,28 +75,7 @@ test.describe('Token validation', () => {
 		const validToken = `${header}.${payload}.${signature}`;
 		
 		// Test that isValidToken accepts valid tokens
-		const result = await page.evaluate((token) => {
-			// Import the validation function
-			const isValidToken = (token) => {
-				if (!token || typeof token !== 'string') return false;
-				const parts = token.split('.');
-				if (parts.length !== 3) return false;
-				
-				try {
-					const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-					// Require expiration field for security
-					if (!payload.exp || typeof payload.exp !== 'number') {
-						return false;
-					}
-					const now = Math.floor(Date.now() / 1000);
-					return payload.exp > now;
-				} catch (e) {
-					return false;
-				}
-			};
-			
-			return isValidToken(token);
-		}, validToken);
+		const result = await testTokenValidation(page, validToken);
 		
 		expect(result).toBe(true);
 	});
@@ -124,29 +93,7 @@ test.describe('Token validation', () => {
 		];
 		
 		for (const testCase of testCases) {
-			const result = await page.evaluate((token) => {
-				// Import the validation function
-				const isValidToken = (token) => {
-					if (!token || typeof token !== 'string') return false;
-					const parts = token.split('.');
-					if (parts.length !== 3) return false;
-					
-					try {
-						const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-						// Require expiration field for security
-						if (!payload.exp || typeof payload.exp !== 'number') {
-							return false;
-						}
-						const now = Math.floor(Date.now() / 1000);
-						return payload.exp > now;
-					} catch (e) {
-						return false;
-					}
-				};
-				
-				return isValidToken(token);
-			}, testCase.token);
-			
+			const result = await testTokenValidation(page, testCase.token);
 			expect(result).toBe(false);
 		}
 	});
@@ -161,28 +108,7 @@ test.describe('Token validation', () => {
 		const tokenWithStringExp = `${header}.${payload}.${signature}`;
 		
 		// Test that isValidToken rejects tokens with non-numeric exp
-		const result = await page.evaluate((token) => {
-			// Import the validation function
-			const isValidToken = (token) => {
-				if (!token || typeof token !== 'string') return false;
-				const parts = token.split('.');
-				if (parts.length !== 3) return false;
-				
-				try {
-					const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-					// Require expiration field for security
-					if (!payload.exp || typeof payload.exp !== 'number') {
-						return false;
-					}
-					const now = Math.floor(Date.now() / 1000);
-					return payload.exp > now;
-				} catch (e) {
-					return false;
-				}
-			};
-			
-			return isValidToken(token);
-		}, tokenWithStringExp);
+		const result = await testTokenValidation(page, tokenWithStringExp);
 		
 		expect(result).toBe(false);
 	});
