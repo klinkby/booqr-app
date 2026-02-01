@@ -44,7 +44,7 @@
 			const response = await AuthenticationService.refresh();
 			if (response.access_token && isValidToken(response.access_token)) {
 				setAccessToken(response.access_token);
-				goto('/');
+				await goto('/');
 			}
 		} catch (err) {
 			// Silent fail for background refresh on login page
