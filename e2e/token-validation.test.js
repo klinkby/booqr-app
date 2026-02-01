@@ -10,6 +10,14 @@ const __dirname = dirname(__filename);
 const axiosConfigPath = join(__dirname, '..', 'src', 'lib', 'axiosConfig.js');
 const axiosConfigSource = readFileSync(axiosConfigPath, 'utf-8');
 
+// Helper to create JWT tokens for testing
+function createToken(payloadData) {
+	const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+	const payload = btoa(JSON.stringify(payloadData));
+	const signature = 'fake-signature';
+	return `${header}.${payload}.${signature}`;
+}
+
 // Helper to test token validation in the browser context using the actual implementation
 async function testTokenValidation(page, token) {
 	return await page.evaluate(
@@ -37,10 +45,7 @@ test.describe('Token validation', () => {
 		await page.goto('/');
 		
 		// Create a JWT token without exp field
-		const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-		const payload = btoa(JSON.stringify({ sub: '1234567890', name: 'Test User' }));
-		const signature = 'fake-signature';
-		const tokenWithoutExp = `${header}.${payload}.${signature}`;
+		const tokenWithoutExp = createToken({ sub: '1234567890', name: 'Test User' });
 		
 		// Test that isValidToken rejects tokens without exp
 		const result = await testTokenValidation(page, tokenWithoutExp);
@@ -52,11 +57,8 @@ test.describe('Token validation', () => {
 		await page.goto('/');
 		
 		// Create a JWT token with expired timestamp
-		const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
 		const expiredTime = Math.floor(Date.now() / 1000) - 3600; // 1 hour ago
-		const payload = btoa(JSON.stringify({ sub: '1234567890', name: 'Test User', exp: expiredTime }));
-		const signature = 'fake-signature';
-		const expiredToken = `${header}.${payload}.${signature}`;
+		const expiredToken = createToken({ sub: '1234567890', name: 'Test User', exp: expiredTime });
 		
 		// Test that isValidToken rejects expired tokens
 		const result = await testTokenValidation(page, expiredToken);
@@ -68,11 +70,8 @@ test.describe('Token validation', () => {
 		await page.goto('/');
 		
 		// Create a JWT token with future expiration
-		const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
 		const futureTime = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
-		const payload = btoa(JSON.stringify({ sub: '1234567890', name: 'Test User', exp: futureTime }));
-		const signature = 'fake-signature';
-		const validToken = `${header}.${payload}.${signature}`;
+		const validToken = createToken({ sub: '1234567890', name: 'Test User', exp: futureTime });
 		
 		// Test that isValidToken accepts valid tokens
 		const result = await testTokenValidation(page, validToken);
@@ -102,10 +101,7 @@ test.describe('Token validation', () => {
 		await page.goto('/');
 		
 		// Create a JWT token with string exp field
-		const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-		const payload = btoa(JSON.stringify({ sub: '1234567890', name: 'Test User', exp: '2026-12-31' }));
-		const signature = 'fake-signature';
-		const tokenWithStringExp = `${header}.${payload}.${signature}`;
+		const tokenWithStringExp = createToken({ sub: '1234567890', name: 'Test User', exp: '2026-12-31' });
 		
 		// Test that isValidToken rejects tokens with non-numeric exp
 		const result = await testTokenValidation(page, tokenWithStringExp);
