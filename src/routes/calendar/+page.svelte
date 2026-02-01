@@ -13,6 +13,10 @@
 				VacancyService.getVacancies(null, null, start, num)
 			);
 		} catch (err) {
+			// Log error in development mode for debugging
+			if (import.meta.env.DEV) {
+				console.error('Failed to fetch vacancies:', err);
+			}
 			error = 'Failed to load vacancies. Please try again.';
 		} finally {
 			loading = false;

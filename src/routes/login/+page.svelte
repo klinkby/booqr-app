@@ -31,6 +31,10 @@
 				error = 'Authentication failed. Please try again.';
 			}
 		} catch (err) {
+			// Log error in development mode for debugging
+			if (import.meta.env.DEV) {
+				console.error('Login error:', err);
+			}
 			// Try to use the error message from API if available
 			error = err.message || 'Authentication failed. Please check your credentials.';
 		} finally {
@@ -44,9 +48,13 @@
 			const response = await AuthenticationService.refresh();
 			if (response.access_token && isValidToken(response.access_token)) {
 				setAccessToken(response.access_token);
-				goto('/');
+				await goto('/');
 			}
 		} catch (err) {
+			// Log error in development mode for debugging
+			if (import.meta.env.DEV) {
+				console.error('Token refresh error on login page:', err);
+			}
 			// Silent fail for background refresh on login page
 		}
 	});
