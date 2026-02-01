@@ -216,7 +216,8 @@ export const catchErrorCodes = (options, result) => {
     };
     const error = errors[result.status];
     if (error) {
-        throw new ApiError(options, result, error);
+        const message = result.body?.title || error;
+        throw new ApiError(options, result, message);
     }
     if (!result.ok) {
         const errorStatus = result.status ?? 'unknown';

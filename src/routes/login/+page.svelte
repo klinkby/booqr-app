@@ -31,8 +31,8 @@
 				error = 'Authentication failed. Please try again.';
 			}
 		} catch (err) {
-			// Generic error message to avoid information disclosure
-			error = 'Authentication failed. Please check your credentials.';
+			// Try to use the error message from API if available
+			error = err.message || 'Authentication failed. Please check your credentials.';
 		} finally {
 			loading = false;
 		}
