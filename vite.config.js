@@ -19,11 +19,7 @@ export default defineConfig({
 			compress: {
 				drop_console: true,
 				drop_debugger: true,
-				pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'],
-				passes: 2,
-				unsafe: true,
-				unsafe_math: true,
-				unsafe_proto: true
+				passes: 2
 			},
 			mangle: {
 				safari10: true
@@ -52,7 +48,7 @@ export default defineConfig({
 			},
 			// Enable tree shaking
 			treeshake: {
-				moduleSideEffects: false,
+				moduleSideEffects: 'no-external',
 				propertyReadSideEffects: false,
 				tryCatchDeoptimization: false
 			}
