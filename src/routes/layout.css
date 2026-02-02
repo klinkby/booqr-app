@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 
-/* Optimize Tailwind output by only keeping used utilities */
-@theme {
-	/* Keep default theme but allow tree-shaking */
-}
+/* Enable tree-shaking by declaring an empty theme.
+   This allows Tailwind to automatically purge unused utilities
+   while using the framework's built-in default theme. */
+@theme {}

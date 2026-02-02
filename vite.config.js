@@ -46,7 +46,11 @@ export default defineConfig({
 				chunkFileNames: '_app/immutable/chunks/[name]-[hash].js',
 				assetFileNames: '_app/immutable/assets/[name]-[hash][extname]'
 			},
-			// Enable tree shaking
+			// Enable aggressive tree shaking
+			// - moduleSideEffects: 'no-external' preserves side effects in our code
+			//   but removes them from node_modules, allowing better optimization
+			// - propertyReadSideEffects: false assumes property reads don't have side effects
+			// - tryCatchDeoptimization: false allows more aggressive optimization
 			treeshake: {
 				moduleSideEffects: 'no-external',
 				propertyReadSideEffects: false,
