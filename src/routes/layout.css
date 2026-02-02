@@ -1,2 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
+
+/* Optimize Tailwind output by only keeping used utilities */
+@theme {
+	/* Keep default theme but allow tree-shaking */
+}
