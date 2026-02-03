@@ -63,7 +63,7 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
 	<div class="max-w-md w-full space-y-8">
 		<div>
-			<h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+			<h1 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h1>
 		</div>
 		<form class="mt-8 space-y-6" onsubmit={handleSubmit} novalidate>
 			{#if error}
@@ -72,7 +72,9 @@
 				</div>
 			{/if}
 
-			<div class="rounded-md shadow-sm space-y-4">
+			<fieldset class="rounded-md shadow-sm space-y-4" disabled={loading}>
+				<legend class="sr-only">Sign in</legend>
+
 				<div>
 					<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
 						Email address
@@ -88,6 +90,7 @@
 						placeholder="Email address"
 					/>
 				</div>
+
 				<div>
 					<label for="password" class="block text-sm font-medium text-gray-700 mb-1">
 						Password
@@ -103,7 +106,7 @@
 						placeholder="Password"
 					/>
 				</div>
-			</div>
+			</fieldset>
 
 			<div>
 				<button

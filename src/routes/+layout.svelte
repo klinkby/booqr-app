@@ -32,16 +32,29 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<nav aria-label="Main navigation" class="bg-gray-800 text-white p-4">
-	<div class="container mx-auto flex gap-6">
-		<a href="/" class="hover:text-gray-300">Home</a>
-		<a href="/calendar" class="hover:text-gray-300">Calendar</a>
-		{#if authState.isLoggedIn}
-			<button onclick={handleLogout} class="hover:text-gray-300">Logout</button>
-		{:else}
-			<a href="/login" class="hover:text-gray-300">Login</a>
-		{/if}
-	</div>
-</nav>
+<!-- Skip link for keyboard users -->
+<a class="sr-only focus:not-sr-only" href="#main">Skip to content</a>
 
-{@render children()}
+<header>
+	<nav aria-label="Main navigation" class="bg-gray-800 text-white p-4">
+		<div class="container mx-auto flex gap-6">
+			<a href="/" class="hover:text-gray-300">Home</a>
+			<a href="/calendar" class="hover:text-gray-300">Calendar</a>
+			{#if authState.isLoggedIn}
+				<button onclick={handleLogout} class="hover:text-gray-300">Logout</button>
+			{:else}
+				<a href="/login" class="hover:text-gray-300">Login</a>
+			{/if}
+		</div>
+	</nav>
+</header>
+
+<main id="main">
+	{@render children()}
+</main>
+
+<footer class="bg-gray-100 text-gray-600 p-4 mt-8">
+	<div class="container mx-auto text-sm">
+		<small>&copy; {new Date().getFullYear()} Booqr</small>
+	</div>
+</footer>
