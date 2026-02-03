@@ -1,7 +1,6 @@
 <script>
 	import { AuthenticationService } from '$lib/api';
 	import { setAccessToken, isValidToken } from '$lib';
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
 	let email = $state('');
@@ -42,22 +41,7 @@
 		}
 	}
 
-	onMount(async () => {
-		try {
-			// Try to refresh token on start
-			const response = await AuthenticationService.refresh();
-			if (response.access_token && isValidToken(response.access_token)) {
-				setAccessToken(response.access_token);
-				await goto('/');
-			}
-		} catch (err) {
-			// Log error in development mode for debugging
-			if (import.meta.env.DEV) {
-				console.error('Token refresh error on login page:', err);
-			}
-			// Silent fail for background refresh on login page
-		}
-	});
+
 </script>
 
 <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
