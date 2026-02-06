@@ -13,16 +13,7 @@ export default defineConfig({
 	},
 	build: {
 		target: 'es2022',
-		minify: 'esbuild',
-		rollupOptions: {
-			output: {
-				manualChunks(id) {
-					if (id.includes('node_modules')) {
-						return 'vendor';
-					}
-				}
-			}
-		}
+		minify: 'esbuild'
 	},
 	plugins: [tailwindcss(), sveltekit()]
 });

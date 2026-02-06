@@ -6,9 +6,9 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Read the axiosConfig.js file to extract isValidToken function
-const axiosConfigPath = join(__dirname, '..', 'src', 'lib', 'axiosConfig.js');
-const axiosConfigSource = readFileSync(axiosConfigPath, 'utf-8');
+// Read the auth.svelte.js file to extract isValidToken function
+const authPath = join(__dirname, '..', 'src', 'lib', 'auth.svelte.js');
+const authSource = readFileSync(authPath, 'utf-8');
 
 // Helper to create JWT tokens for testing
 function createToken(payloadData) {
@@ -21,9 +21,9 @@ function createToken(payloadData) {
 // Helper to test token validation in the browser context using the actual implementation
 async function testTokenValidation(page, token) {
 	return await page.evaluate(
-		({ token, axiosConfigSource }) => {
+		({ token, authSource }) => {
 			// Extract and execute isValidToken function from source
-			const funcMatch = axiosConfigSource.match(
+			const funcMatch = authSource.match(
 				/export function isValidToken\(token\) \{[\s\S]*?\n\}/
 			);
 			if (!funcMatch) throw new Error('Could not find isValidToken function');
@@ -36,7 +36,7 @@ async function testTokenValidation(page, token) {
 
 			return isValidToken(token);
 		},
-		{ token, axiosConfigSource }
+		{ token, authSource }
 	);
 }
 

@@ -2,12 +2,11 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { AuthenticationService } from '$lib/api';
-	import { clearAccessToken, authState } from '$lib';
-	import { onMount } from 'svelte';
+	import { auth } from '$lib';
 	import { goto } from '$app/navigation';
 
 	let { children } = $props();
-
+	
 	async function handleLogout(event) {
 		event.preventDefault();
 
@@ -17,30 +16,24 @@
 			// Continue with logout even if API call fails
 			// Don't log error to console in production for security
 		} finally {
-			clearAccessToken();
+			auth.clear();
 			goto('/');
 		}
 	}
-
-	onMount(() => {
-		// Listen for storage changes to update auth state (for other tabs)
-		const checkAuth = () => authState.refresh();
-		window.addEventListener('storage', checkAuth);
-		return () => window.removeEventListener('storage', checkAuth);
-	});
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
 <!-- Skip link for keyboard users -->
-<a class="sr-only focus:not-sr-only" href="#main">Skip to content</a>
-
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded">
+	Skip to main content
+</a>
 <header>
 	<nav aria-label="Main navigation" class="bg-gray-800 text-white p-4">
 		<div class="container mx-auto flex gap-6">
 			<a href="/" class="hover:text-gray-300">Home</a>
 			<a href="/calendar" class="hover:text-gray-300">Calendar</a>
-			{#if authState.isLoggedIn}
+			{#if auth.isLoggedIn}
 				<button onclick={handleLogout} class="hover:text-gray-300">Logout</button>
 			{:else}
 				<a href="/login" class="hover:text-gray-300">Login</a>
@@ -49,7 +42,7 @@
 	</nav>
 </header>
 
-<main id="main">
+<main id="main-content">
 	{@render children()}
 </main>
 
