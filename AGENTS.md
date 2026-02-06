@@ -23,7 +23,7 @@ Agents should focus on small, composable changes that align with these constrain
 - **API Client**: The API is called using axios.
 
 ## API Client Configuration
-- **Axios Setup**: Configured in `src/lib/axiosConfig.js` with interceptors for authentication
+- **Auth Setup**: Configured in `src/lib/auth.svelte.js` with token management and OpenAPI configuration
 - **Initialization**: `configureApiClient()` is called in `src/routes/+layout.js` to set up interceptors on app start
 - **Generated API Services**: Auto-generated services in `src/lib/api/services/` use the default axios instance with configured interceptors
 - **OpenAPI Config**: `OpenAPI.TOKEN`, `OpenAPI.WITH_CREDENTIALS`, and `OpenAPI.CREDENTIALS` are configured for the generated API client
@@ -38,7 +38,7 @@ Agents should focus on small, composable changes that align with these constrain
   - Calls `POST /api/auth/refresh` with httponly cookie to get new access token
   - Automatically retries failed request with new token
   - Queues simultaneous requests during refresh to prevent multiple refresh calls
-- **Token Management**: Centralized in `src/lib/axiosConfig.js`. ONLY `setAccessToken()` and `clearAccessToken()` should be used to modify the token.
+- **Token Management**: Centralized in `src/lib/auth.svelte.js`. ONLY `setAccessToken()` and `clearAccessToken()` should be used to modify the token.
 - **Auth Flow**:
   1. Request fails with 401 Unauthorized
   2. Interceptor calls `POST /api/auth/refresh` (with `skipAuthRefresh: true` to prevent infinite loop)
@@ -69,8 +69,7 @@ Agents should focus on small, composable changes that align with these constrain
 ## API Pagination
 - **Collection GET endpoints**: Support `Start` (index) and `Num` (page size) parameters for pagination
 - **Default page size**: Always use `Num=100` (maximum result set size)
-- **Auto-pagination**: If a response returns exactly `Num` results, automatically fetch next page with `Start = Start + Num` and append results until fewer than `Num` results are returned
-- **Pagination Utility**: Use `fetchPaged(fetchFn, pageSize)` from `$lib` for automatic pagination handling
+- **Pagination**: If a response returns exactly `Num` results, then next page can be fetched with `Start = Start + Num`.
 
 ## Application Structure
 - **Routes**: SvelteKit file-based routing in `src/routes/`

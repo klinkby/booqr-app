@@ -1,6 +1,5 @@
 <script>
 	import { VacancyService } from '$lib/api';
-	import { fetchPaged } from '$lib';
 	import { onMount } from 'svelte';
 
 	let vacancies = $state([]);
@@ -9,9 +8,8 @@
 
 	async function fetchAllVacancies() {
 		try {
-			vacancies = await fetchPaged((start, num) =>
-				VacancyService.getVacancies(null, null, start, num)
-			);
+			const v = await VacancyService.getVacancies(null, null, null, null);
+			vacancies = v.items;
 		} catch (err) {
 			// Log error in development mode for debugging
 			if (import.meta.env.DEV) {

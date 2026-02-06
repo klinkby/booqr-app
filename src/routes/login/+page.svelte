@@ -1,6 +1,6 @@
 <script>
 	import { AuthenticationService } from '$lib/api';
-	import { setAccessToken, isValidToken } from '$lib';
+	import { auth } from '$lib';
 	import { goto } from '$app/navigation';
 
 	let email = $state('');
@@ -18,12 +18,11 @@
 				email,
 				password
 			});
-
+			// Clear password from memory
+			password = '';
+			auth.accessToken = response.access_token;
 			// Store access token (response should contain token)
-			if (response.access_token && isValidToken(response.access_token)) {
-				setAccessToken(response.access_token);
-				// Clear password from memory
-				password = '';
+			if (auth.isLoggedIn) {
 				// Redirect to home or dashboard
 				await goto('/');
 			} else {
