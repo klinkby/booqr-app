@@ -1,20 +1,90 @@
-import { getAccessToken, isValidToken } from './axiosConfig.js';
+import { OpenAPI } from '$lib/api/index.js';
 import { browser } from '$app/environment';
 
-class AuthState {
-	isLoggedIn = $state(false);
+const tokenName = 'access_token';
 
-	constructor() {
-		// Only refresh auth state in browser environment to avoid SSR issues
-		// with sessionStorage and atob() access
-		if (browser) {
-			this.refresh();
+class AuthState {
+	#token = $state(bootstrapToken());
+
+	isLoggedIn = $derived(this.#token !== null);
+
+	get accessToken() {
+		return this.#token;
+	}
+
+	set accessToken(jwtBearer) {
+		if (!browser) return;
+		
+		const tokenObj = parseToken(jwtBearer);
+		
+		if (validate(tokenObj)) {
+			sessionStorage.setItem(tokenName, jwtBearer);
+			this.#token = jwtBearer;
+		} else {
+			sessionStorage.removeItem(tokenName);
+			this.#token = null;
 		}
 	}
 
-	refresh() {
-		this.isLoggedIn = isValidToken(getAccessToken());
+	clear() {
+		this.accessToken = null;
 	}
 }
 
-export const authState = new AuthState();
+export const auth = new AuthState();
+
+// Configure OpenAPI to read from authState reactively
+if (browser) {
+	Object.defineProperty(OpenAPI, 'TOKEN', {
+		get: () => auth.accessToken,
+		enumerable: true,
+		configurable: true
+	});
+	Object.defineProperty(OpenAPI, 'WITH_CREDENTIALS', {
+		get: () => auth.isLoggedIn,
+		enumerable: true,
+		configurable: true
+	});
+	OpenAPI.CREDENTIALS = 'include';
+}
+
+function bootstrapToken() {
+	if (!browser) return null;
+	
+	const jwtBearer = sessionStorage.getItem(tokenName);
+	if (jwtBearer === null || typeof jwtBearer !== 'string') return null;
+
+	const tokenObj = parseToken(jwtBearer);
+	if (!validate(tokenObj)) {
+		sessionStorage.removeItem(tokenName);
+		return null;
+	}
+	
+	return jwtBearer;
+}
+
+function parseToken(jwtBearer) {
+	if (jwtBearer === null || typeof jwtBearer !== 'string') return null;
+	
+	const parts = jwtBearer.split('.');
+	if (parts.length !== 3) return null;
+
+	try {
+		// Decode payload (second part of JWT)
+		return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+	}
+	catch {
+		return null;
+	}
+}
+
+function validate(tokenObj) {
+	if (!tokenObj || typeof tokenObj !== 'object') return false;
+	
+	// Require expiration field
+	if (!tokenObj.exp || typeof tokenObj.exp !== 'number') return false;
+	const now = Math.floor(Date.now() / 1000);
+
+	// Valid if not yet expired
+	return tokenObj.exp > now;
+}

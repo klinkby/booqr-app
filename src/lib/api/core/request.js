@@ -2,8 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import axios from 'axios';
-import FormData from 'form-data';
 import { ApiError } from './ApiError';
 import { CancelablePromise } from './CancelablePromise';
 export const isDefined = (value) => {
@@ -27,9 +25,6 @@ export const isBlob = (value) => {
 };
 export const isFormData = (value) => {
     return value instanceof FormData;
-};
-export const isSuccess = (status) => {
-    return status >= 200 && status < 300;
 };
 export const base64 = (str) => {
     try {
@@ -117,19 +112,17 @@ export const resolve = async (options, resolver) => {
     }
     return resolver;
 };
-export const getHeaders = async (config, options, formData) => {
+export const getHeaders = async (config, options) => {
     const [token, username, password, additionalHeaders] = await Promise.all([
         resolve(options, config.TOKEN),
         resolve(options, config.USERNAME),
         resolve(options, config.PASSWORD),
         resolve(options, config.HEADERS),
     ]);
-    const formHeaders = typeof formData?.getHeaders === 'function' && formData?.getHeaders() || {};
     const headers = Object.entries({
         Accept: 'application/json',
         ...additionalHeaders,
         ...options.headers,
-        ...formHeaders,
     })
         .filter(([_, value]) => isDefined(value))
         .reduce((headers, [key, value]) => ({
@@ -157,49 +150,63 @@ export const getHeaders = async (config, options, formData) => {
             headers['Content-Type'] = 'application/json';
         }
     }
-    return headers;
+    return new Headers(headers);
 };
 export const getRequestBody = (options) => {
-    if (options.body) {
-        return options.body;
+    if (options.body !== undefined) {
+        if (options.mediaType?.includes('/json')) {
+            return JSON.stringify(options.body);
+        }
+        else if (isString(options.body) || isBlob(options.body) || isFormData(options.body)) {
+            return options.body;
+        }
+        else {
+            return JSON.stringify(options.body);
+        }
     }
     return undefined;
 };
-export const sendRequest = async (config, options, url, body, formData, headers, onCancel, axiosClient) => {
-    const source = axios.CancelToken.source();
-    const requestConfig = {
-        url,
+export const sendRequest = async (config, options, url, body, formData, headers, onCancel) => {
+    const controller = new AbortController();
+    const request = {
         headers,
-        data: body ?? formData,
+        body: body ?? formData,
         method: options.method,
-        withCredentials: config.WITH_CREDENTIALS,
-        withXSRFToken: config.CREDENTIALS === 'include' ? config.WITH_CREDENTIALS : false,
-        cancelToken: source.token,
+        signal: controller.signal,
     };
-    onCancel(() => source.cancel('The user aborted a request.'));
-    try {
-        return await axiosClient.request(requestConfig);
+    if (config.WITH_CREDENTIALS) {
+        request.credentials = config.CREDENTIALS;
     }
-    catch (error) {
-        const axiosError = error;
-        if (axiosError.response) {
-            return axiosError.response;
-        }
-        throw error;
-    }
+    onCancel(() => controller.abort());
+    return await fetch(url, request);
 };
 export const getResponseHeader = (response, responseHeader) => {
     if (responseHeader) {
-        const content = response.headers[responseHeader];
+        const content = response.headers.get(responseHeader);
         if (isString(content)) {
             return content;
         }
     }
     return undefined;
 };
-export const getResponseBody = (response) => {
+export const getResponseBody = async (response) => {
     if (response.status !== 204) {
-        return response.data;
+        try {
+            const contentType = response.headers.get('Content-Type');
+            if (contentType) {
+                const jsonTypes = ['application/json', 'application/problem+json'];
+                const isJSON = jsonTypes.some(type => contentType.toLowerCase().startsWith(type));
+                if (isJSON) {
+                    return await response.json();
+                }
+                else {
+                    return await response.text();
+                }
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
     }
     return undefined;
 };
@@ -216,8 +223,7 @@ export const catchErrorCodes = (options, result) => {
     };
     const error = errors[result.status];
     if (error) {
-        const message = result.body?.title || error;
-        throw new ApiError(options, result, message);
+        throw new ApiError(options, result, error);
     }
     if (!result.ok) {
         const errorStatus = result.status ?? 'unknown';
@@ -237,24 +243,23 @@ export const catchErrorCodes = (options, result) => {
  * Request method
  * @param config The OpenAPI configuration object
  * @param options The request options from the service
- * @param axiosClient The axios client instance to use
  * @returns CancelablePromise<T>
  * @throws ApiError
  */
-export const request = (config, options, axiosClient = axios) => {
+export const request = (config, options) => {
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
             const url = getUrl(config, options);
             const formData = getFormData(options);
             const body = getRequestBody(options);
-            const headers = await getHeaders(config, options, formData);
+            const headers = await getHeaders(config, options);
             if (!onCancel.isCancelled) {
-                const response = await sendRequest(config, options, url, body, formData, headers, onCancel, axiosClient);
-                const responseBody = getResponseBody(response);
+                const response = await sendRequest(config, options, url, body, formData, headers, onCancel);
+                const responseBody = await getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
                 const result = {
                     url,
-                    ok: isSuccess(response.status),
+                    ok: response.ok,
                     status: response.status,
                     statusText: response.statusText,
                     body: responseHeader ?? responseBody,
