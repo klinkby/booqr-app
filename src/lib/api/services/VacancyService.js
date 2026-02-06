@@ -8,7 +8,7 @@ export class VacancyService {
      * @param toTime
      * @param start
      * @param num
-     * @returns CollectionResponseOfCalendarEvent OK
+     * @returns CalendarEvent OK
      * @throws ApiError
      */
     static getVacancies(fromTime, toTime, start, num) {

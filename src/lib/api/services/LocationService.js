@@ -6,7 +6,7 @@ export class LocationService {
      * Location
      * @param start
      * @param num
-     * @returns CollectionResponseOfLocation OK
+     * @returns Location OK
      * @throws ApiError
      */
     static getLocations(start, num) {
