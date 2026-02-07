@@ -19,7 +19,7 @@ export class BookingService {
                 401: `Unauthorized`,
             },
         });
-    }Array
+    }
     /**
      * Delete a booking
      * Booking
