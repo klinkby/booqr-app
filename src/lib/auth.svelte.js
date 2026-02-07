@@ -9,6 +9,7 @@ class AuthState {
 	isLoggedIn = $derived(this.#token !== null);
 	
 	role = $derived(parseToken(this.#token)?.role ?? null);
+	sub = $derived(parseToken(this.#token)?.sub ?? null);
 	isEmployee = $derived(this.role === 'Employee' || this.role === 'Admin');
 
 	get accessToken() {
