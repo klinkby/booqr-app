@@ -10,7 +10,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"test:e2e": "playwright test",
 		"test": "npm run test:e2e",
-		"import-api": "openapi -i https://www.booqr.dk/api/v1.json -o ./src/lib/.api-tmp --client fetch && tsc ./src/lib/.api-tmp/index.ts --target es2022 --module esnext --moduleResolution node --outDir ./src/lib/api --allowJs --skipLibCheck --allowSyntheticDefaultImports --esModuleInterop --lib es2022,dom && rm -rf ./src/lib/.api-tmp"
+		"import-api": "openapi -i https://www.booqr.dk/api/v1.json -o ./src/lib/.api-tmp --client fetch && tsc ./src/lib/.api-tmp/index.ts --target es2022 --module esnext --moduleResolution node --outDir ./src/lib/api --allowJs --skipLibCheck --allowSyntheticDefaultImports --esModuleInterop --lib es2022,dom && node scripts/postprocess-api-models.js ./src/lib/.api-tmp/models ./src/lib/api/models && rm -rf ./src/lib/.api-tmp"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.58.1",

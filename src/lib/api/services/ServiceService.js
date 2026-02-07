@@ -6,7 +6,7 @@ export class ServiceService {
      * Service
      * @param start
      * @param num
-     * @returns Service OK
+     * @returns CollectionResponseOfService OK
      * @throws ApiError
      */
     static getServices(start, num) {

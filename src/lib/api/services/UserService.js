@@ -46,7 +46,7 @@ export class UserService {
      * @param toTime
      * @param start
      * @param num
-     * @returns MyBooking OK
+     * @returns CollectionResponseOfMyBooking OK
      * @throws ApiError
      */
     static getMyBookings(id, fromTime, toTime, start, num) {
@@ -96,7 +96,7 @@ export class UserService {
      * User
      * @param start
      * @param num
-     * @returns User OK
+     * @returns CollectionResponseOfUser OK
      * @throws ApiError
      */
     static getUsers(start, num) {
