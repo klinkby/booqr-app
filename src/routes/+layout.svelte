@@ -33,6 +33,9 @@
 		<div class="container mx-auto flex gap-6">
 			<a href="/" class="hover:text-gray-300">Home</a>
 			<a href="/calendar" class="hover:text-gray-300">Calendar</a>
+			{#if auth.isEmployee}
+				<a href="/admin/services" class="hover:text-gray-300">Admin</a>
+			{/if}
 			{#if auth.isLoggedIn}
 				<button onclick={handleLogout} class="hover:text-gray-300">Logout</button>
 			{:else}

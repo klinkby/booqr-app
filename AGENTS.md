@@ -50,6 +50,19 @@ Agents should focus on small, composable changes that align with these constrain
 - **Login**: Use `AuthenticationService.login()` with email/password, set `auth.accessToken` from `response.access_token`, clear password from memory. Redirect to `/` on success.
 - **Logout**: Call `AuthenticationService.logout()`, `auth.clear()`, redirect to home page via `goto('/')`
 - **Auth State**: Reactive `auth.isLoggedIn` (derived from token presence) drives UI state (e.g., Login/Logout toggle in nav)
+- **Sample JWT token**:
+```json
+{
+  "sub": "1",
+  "email": "m@kli.dk",
+  "role": "Customer",
+  "nbf": 1770475680,
+  "exp": 1770479280,
+  "iat": 1770475680,
+  "iss": "booqr",
+  "aud": "https://www.booqr.dk"
+}
+```
 
 ## Security Considerations (OWASP Aligned)
 - **Secrets Management**: **NEVER** store secrets, credentials, or API keys in code files. ALWAYS use `.env` file (gitignored) for sensitive data.
@@ -76,9 +89,67 @@ Agents should focus on small, composable changes that align with these constrain
   - `/` - Home page
   - `/calendar` - Displays all vacancies using `VacancyService.getVacancies()` with auto-pagination
   - `/login` - Login form with email/password fields
-- **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home, Calendar, and Login/Logout links
+  - `/admin/` - Protected admin area (requires login + Employee role)
+  - `/admin/services` - Service management page
+- **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home, Calendar, and Login/Logout links. Admin link shown only to employees (`auth.isEmployee`).
 - **Navigation**: Login/Logout toggle based on `sessionStorage.access_token` presence
 - **Shared Utilities**: Place reusable functions in `src/lib/` and export via `src/lib/index.js`
+- **Reusable Components**: Place shared Svelte components in `src/lib/components/` and export via `src/lib/index.js`
+
+## Admin Section
+- **Auth Guard**: `src/routes/admin/+layout.svelte` redirects unauthenticated users to `/login` via `$effect` and only renders children for logged-in employees. Non-employee users see "Access denied".
+- **Nav Link**: The top-level layout conditionally shows the Admin link when `auth.isEmployee` is true.
+- **Adding Admin Pages**: Create new routes under `src/routes/admin/` — they automatically inherit the auth guard from the admin layout.
+
+## Reusable Components (`src/lib/components/`)
+
+### DataTable (`src/lib/components/DataTable.svelte`)
+A generic, accessible data table component for listing and paging through records with optional row actions.
+
+**Import**: `import { DataTable } from '$lib';`
+
+**Props** (via `$props()`):
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `columns` | `Array<{ key: string, label: string }>` | required | Column definitions — `key` maps to row property, `label` is header text |
+| `rows` | `Array<object>` | required | Data rows to display |
+| `hasPreviousPage` | `boolean` | `false` | Enables Previous button |
+| `hasNextPage` | `boolean` | `false` | Enables Next button |
+| `onedit` | `(row) => void` | `undefined` | Edit callback — if omitted, no Edit button shown |
+| `ondelete` | `(row) => void` | `undefined` | Delete callback — if omitted, no Delete button shown |
+| `onnextpage` | `() => void` | `undefined` | Next page callback |
+| `onpreviouspage` | `() => void` | `undefined` | Previous page callback |
+
+**Conditional rendering**:
+- The Actions column only renders if `onedit` or `ondelete` is provided.
+- The pagination nav only renders if `onnextpage` or `onpreviouspage` is provided.
+
+**Styling**: Uses the app's gray/indigo Tailwind palette — gray-50 header backgrounds, indigo-600 action links and paging buttons, `disabled:opacity-50` for disabled paging state.
+
+**Usage example**:
+```svelte
+<script>
+  import { DataTable } from '$lib';
+
+  const columns = [
+    { key: 'name', label: 'Name' },
+    { key: 'duration', label: 'Duration' }
+  ];
+  let rows = $state([]);
+</script>
+
+<DataTable
+  {columns}
+  {rows}
+  hasNextPage={true}
+  onedit={(row) => console.log('edit', row)}
+  ondelete={(row) => console.log('delete', row)}
+  onnextpage={() => loadNext()}
+  onpreviouspage={() => loadPrev()}
+/>
+```
+
+**Adding new reusable components**: Create a `.svelte` file in `src/lib/components/`, then add a `export { default as ComponentName } from './components/ComponentName.svelte';` line to `src/lib/index.js`.
 
 ## Semantic HTML5 & Accessibility (required)
 
