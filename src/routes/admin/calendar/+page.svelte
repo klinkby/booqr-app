@@ -16,7 +16,7 @@
 		{ key: 'serviceId', label: 'Service' },
 		{ key: 'locationId', label: 'Location' }
 	];
-	const fetchBookings = (start, num) => UserService.getMyBookings(auth.sub, null, null, start, num);
+	const fetchBookings = (start, num) => UserService.getMyBookings(auth.userId, null, null, start, num);
 </script>
 
 <div class="container mx-auto p-4">
