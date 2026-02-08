@@ -1,6 +1,7 @@
 # Klinkby.Booqr.App
 
 [![Docker Image CI](https://github.com/klinkby/booqr-app/actions/workflows/docker-image.yml/badge.svg?branch=main)](https://github.com/klinkby/booqr-app/actions/workflows/docker-image.yml)
+[![CodeQL](https://github.com/klinkby/booqr-app/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/klinkby/booqr-app/actions/workflows/github-code-scanning/codeql)
 [![License](https://img.shields.io/github/license/klinkby/booqr-app.svg)](LICENSE)
 
 A modern Single Page Application (SPA) built with Svelte 5 and SvelteKit, designed as the frontend for the Booqr booking
