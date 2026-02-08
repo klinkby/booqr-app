@@ -2,11 +2,15 @@
 	import { AuthenticationService } from '$lib/api';
 	import { auth, Form } from '$lib';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	let email = $state('');
 	let password = $state('');
 	let error = $state(null);
 	let loading = $state(false);
+
+	// Use $derived for reactive access to URL search params (Svelte 5 best practice)
+	let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/');
 
 	async function handleSubmit() {
 		error = null;
@@ -22,8 +26,8 @@
 			auth.accessToken = response.access_token;
 			// Store access token (response should contain token)
 			if (auth.isLoggedIn) {
-				// Redirect to home or dashboard
-				await goto('/');
+				// Redirect to the page that triggered login, or home if none
+				await goto(returnUrl);
 			} else {
 				error = 'Authentication failed. Please try again.';
 			}
@@ -38,7 +42,6 @@
 			loading = false;
 		}
 	}
-
 
 </script>
 

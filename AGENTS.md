@@ -50,6 +50,38 @@ Agents should focus on small, composable changes that align with these constrain
 - **Login**: Use `AuthenticationService.login()` with email/password, set `auth.accessToken` from `response.access_token`, clear password from memory. Redirect to `/` on success.
 - **Logout**: Call `AuthenticationService.logout()`, `auth.clear()`, redirect to home page via `goto('/')`
 - **Auth State**: Reactive `auth.isLoggedIn` (derived from token presence) drives UI state (e.g., Login/Logout toggle in nav)
+- **Return URL After Re-authentication**: When token refresh fails and user is redirected to login, they should return to their original page after successful login:
+  - **Pattern**: Capture current URL → Pass as query param to login → Redirect back after login
+  - **Implementation in `invokeApi.js`**: On refresh failure, capture `window.location.pathname + window.location.search` and redirect to `/login?returnUrl=${encodeURIComponent(returnUrl)}`
+  ```js
+  async function doRefresh() {
+    try {
+      const response = await AuthenticationService.refresh();
+      auth.accessToken = response.access_token;
+    } catch (error) {
+      auth.clear();
+      // Capture current URL to return after re-authentication
+      const returnUrl = window.location.pathname + window.location.search;
+      await goto(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
+      throw error;
+    }
+  }
+  ```
+  - **Implementation in login page**: Read `returnUrl` from query params using `$derived` with `$page` store (Svelte 5 best practice), redirect to captured URL after successful login
+  ```js
+  import { page } from '$app/stores';
+
+  // Use $derived for reactive access to URL search params
+  let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/');
+
+  async function handleSubmit() {
+    // ... authentication logic ...
+    if (auth.isLoggedIn) {
+      await goto(returnUrl);  // Return to original page
+    }
+  }
+  ```
+  - **Svelte 5 Note**: Using `$page` store in Svelte 5 components with runes triggers an informational deprecation warning. This is expected during the SvelteKit transition period and doesn't affect functionality. The `$derived($page.url.searchParams.get(...))` pattern is the current recommended approach until SvelteKit provides the planned `SvelteURL` reactive API.
 - **Sample JWT token**:
 ```json
 {
