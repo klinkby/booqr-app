@@ -28,9 +28,9 @@
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded">
 	Skip to main content
 </a>
-<header>
-	<nav aria-label="Main navigation" class="bg-gray-800 text-white p-4">
-		<div class="container mx-auto flex gap-6">
+<header class="bg-gray-800 text-white">
+	<nav aria-label="Main navigation" class="container mx-auto px-4 py-4 max-w-7xl">
+		<div class="flex gap-6">
 			<a href="/" class="hover:text-gray-300">Home</a>
 			<a href="/calendar" class="hover:text-gray-300">Calendar</a>
 			{#if auth.isEmployee}
@@ -45,12 +45,12 @@
 	</nav>
 </header>
 
-<main id="main-content">
+<main id="main-content" class="container mx-auto px-4 py-8 max-w-7xl">
 	{@render children()}
 </main>
 
-<footer class="bg-gray-100 text-gray-600 p-4 mt-8">
-	<div class="container mx-auto text-sm">
+<footer class="bg-gray-100 text-gray-600 mt-8">
+	<div class="container mx-auto px-4 py-4 max-w-7xl text-sm">
 		<small>&copy; {new Date().getFullYear()} Booqr</small>
 	</div>
 </footer>
