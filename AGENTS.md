@@ -88,10 +88,14 @@ Agents should focus on small, composable changes that align with these constrain
 - **Routes**: SvelteKit file-based routing in `src/routes/`
   - `/` - Home page
   - `/calendar` - Displays all vacancies using `VacancyService.getVacancies()` with auto-pagination
-  - `/login` - Login form with email/password fields
+  - `/login` - Login form with email/password fields, uses Form component
   - `/admin/` - Protected admin area (requires login + Employee role)
-  - `/admin/services` - Service management page
+  - `/admin/services` - Service list page with Create button and Edit actions
+  - `/admin/services/new` - Create service form page
+  - `/admin/services/[id]` - Edit service form page (dynamic route)
 - **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home, Calendar, and Login/Logout links. Admin link shown only to employees (`auth.isEmployee`).
+  - **Responsive Layout**: Main content constrained with `container mx-auto px-4 py-8 max-w-7xl` for consistent centering and max-width (1280px) across all pages
+  - **Header/Footer**: Use same responsive constraints for visual alignment
 - **Navigation**: Login/Logout toggle based on `sessionStorage.access_token` presence
 - **Shared Utilities**: Place reusable functions in `src/lib/` and export via `src/lib/index.js`
 - **Reusable Components**: Place shared Svelte components in `src/lib/components/` and export via `src/lib/index.js`
@@ -100,6 +104,23 @@ Agents should focus on small, composable changes that align with these constrain
 - **Auth Guard**: `src/routes/admin/+layout.svelte` redirects unauthenticated users to `/login` via `$effect` and only renders children for logged-in employees. Non-employee users see "Access denied".
 - **Nav Link**: The top-level layout conditionally shows the Admin link when `auth.isEmployee` is true.
 - **Adding Admin Pages**: Create new routes under `src/routes/admin/` — they automatically inherit the auth guard from the admin layout.
+
+### CRUD Pattern for Admin Resources
+When building admin CRUD interfaces, follow this pattern used in the Services implementation:
+
+**List Page** (`/admin/services/+page.svelte`):
+- Use `PaginatedTable` component with `columns`, `fetchCommand`, and `onedit` callback
+- Add a "Create" button in the header that navigates to `/admin/services/new`
+- Wire `onedit` to navigate to `/admin/services/{id}`
+
+**Form Page** (`/admin/services/[id]/+page.svelte`):
+- Use dynamic route with `[id]` parameter
+- Derive `isEdit` mode from `id !== 'new'`
+- Use `Form` component with fields injected as children
+- Load existing data with `onMount` for edit mode
+- Call appropriate API service method (`addX` for create, `updateX` for edit)
+- Provide `oncancel` callback to navigate back to list page
+- Use `max-w-2xl` wrapper for form to constrain width
 
 ## Reusable Components (`src/lib/components/`)
 
@@ -147,6 +168,83 @@ A generic, accessible data table component for listing and paging through record
   onnextpage={() => loadNext()}
   onpreviouspage={() => loadPrev()}
 />
+```
+
+### Form (`src/lib/components/Form.svelte`)
+A semantic, accessible form wrapper component that handles submission, error display, loading states, and action buttons. Consumers inject their own form fields as children.
+
+**Import**: `import { Form } from '$lib';`
+
+**Props** (via `$props()`):
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `legend` | `string` | required | Screen-reader text for the `<fieldset>` (visually hidden with `sr-only`) |
+| `error` | `string \| null` | `null` | Error message to display above the form |
+| `loading` | `boolean` | `false` | Disables fieldset and buttons, shows loading text on submit |
+| `submitLabel` | `string` | `'Submit'` | Label for the submit button |
+| `onsubmit` | `(event) => void` | required | Submit handler — `preventDefault` is handled by the component |
+| `oncancel` | `() => void` | `undefined` | Cancel callback — if omitted, no Cancel button shown |
+| `children` | snippet | required | Form fields to render inside the fieldset |
+
+**Features**:
+- Automatically calls `event.preventDefault()` on submit
+- Error alert stays in DOM (toggled with `class:hidden`) for reliable `aria-live` announcements
+- Submit button shows "Please wait…" during loading
+- Both submit and cancel buttons disabled during loading
+- Uses `novalidate` on form for custom validation handling
+
+**Styling**: Uses app's gray/indigo Tailwind palette — red error alerts, gray Cancel button, indigo Submit button, consistent focus rings.
+
+**Usage example**:
+```svelte
+<script>
+  import { Form } from '$lib';
+  import { goto } from '$app/navigation';
+
+  let name = $state('');
+  let error = $state(null);
+  let loading = $state(false);
+
+  async function handleSubmit() {
+    error = null;
+    loading = true;
+    try {
+      await SomeService.create({ name });
+      goto('/success');
+    } catch (err) {
+      error = err.message || 'Failed to save. Please try again.';
+    } finally {
+      loading = false;
+    }
+  }
+
+  function handleCancel() {
+    goto('/back');
+  }
+</script>
+
+<Form
+  legend="Create item"
+  {error}
+  {loading}
+  submitLabel="Create"
+  onsubmit={handleSubmit}
+  oncancel={handleCancel}
+>
+  <div>
+    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+      Name
+    </label>
+    <input
+      id="name"
+      name="name"
+      type="text"
+      required
+      bind:value={name}
+      class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    />
+  </div>
+</Form>
 ```
 
 **Adding new reusable components**: Create a `.svelte` file in `src/lib/components/`, then add a `export { default as ComponentName } from './components/ComponentName.svelte';` line to `src/lib/index.js`.
