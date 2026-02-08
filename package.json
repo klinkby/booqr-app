@@ -13,6 +13,7 @@
 		"import-api": "openapi -i https://www.booqr.dk/api/v1.json -o ./src/lib/.api-tmp --client fetch && tsc ./src/lib/.api-tmp/index.ts --target es2022 --module esnext --moduleResolution node --outDir ./src/lib/api --allowJs --skipLibCheck --allowSyntheticDefaultImports --esModuleInterop --lib es2022,dom && node scripts/postprocess-api-models.js ./src/lib/.api-tmp/models ./src/lib/api/models && rm -rf ./src/lib/.api-tmp"
 	},
 	"devDependencies": {
+		"@event-calendar/core": "^5.3.2",
 		"@playwright/test": "^1.58.1",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.50.2",

@@ -247,6 +247,93 @@ A semantic, accessible form wrapper component that handles submission, error dis
 </Form>
 ```
 
+### Calendar (`src/lib/components/Calendar.svelte`)
+A weekly calendar view component that displays time-based events using the `@event-calendar/core` library. The component is purely presentational (no IO) and relies on parent components to provide event data.
+
+**Import**: `import { Calendar } from '$lib';`
+
+**Props** (via `$props()`):
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `events` | `Array<object>` | `[]` | Array of event objects in Event Calendar format |
+| `onDatesChange` | `(info) => void` | `undefined` | Callback when user navigates to different week — receives `{start, end, startStr, endStr, view}` |
+
+**Event Object Format**:
+Events must be provided in Event Calendar format:
+```js
+{
+  id: string | number,           // Unique identifier
+  start: string | Date,           // ISO8601 string or Date object
+  end: string | Date,             // ISO8601 string or Date object
+  title: string,                  // Display text
+  backgroundColor: string,        // CSS color (optional)
+  textColor: string,              // CSS color (optional)
+  extendedProps: object           // Custom data (optional)
+}
+```
+
+**Configuration**:
+- Weekly view with hourly time grid (6 AM - 10 PM)
+- Week starts on Monday
+- No all-day slot (optimized for time-specific events)
+- Navigation toolbar: Previous, Next, Today buttons
+
+**Transforming API Data**:
+API `CalendarEvent` objects must be transformed to Event Calendar format:
+```js
+function transformVacancyToEvent(vacancy) {
+  return {
+    id: vacancy.id,
+    start: vacancy.startTime,      // ISO8601 string
+    end: vacancy.endTime,          // ISO8601 string
+    title: vacancy.bookingId ? 'Booked' : 'Available',
+    classNames: vacancy.bookingId
+      ? ['!bg-red-500', '!text-white', '!border-red-600']
+      : ['!bg-green-500', '!text-white', '!border-green-600'],
+    extendedProps: {
+      employeeId: vacancy.employeeId,
+      locationId: vacancy.locationId,
+      bookingId: vacancy.bookingId
+    }
+  };
+}
+```
+
+**Usage example**:
+```svelte
+<script>
+  import { Calendar } from '$lib';
+  import { VacancyService } from '$lib/api';
+  import { invokeApi } from '$lib/invokeApi';
+
+  let events = $state([]);
+
+  async function fetchVacancies(startDate, endDate) {
+    const response = await invokeApi(() =>
+      VacancyService.getVacancies(
+        startDate.toISOString(),
+        endDate.toISOString(),
+        0,
+        100
+      )
+    );
+    events = response.items.map(transformVacancyToEvent);
+  }
+
+  function handleDatesChange(info) {
+    fetchVacancies(info.start, info.end);
+  }
+</script>
+
+<Calendar {events} onDatesChange={handleDatesChange} />
+```
+
+**Styling**:
+- Uses Event Calendar's default styles from `@event-calendar/core/index.css`
+- Component is unstyled (no wrapper) — parent pages can wrap with Tailwind utilities as needed
+- Event styling uses Tailwind classes via `classNames` property with `!important` modifier to override defaults
+- Example: `classNames: ['!bg-red-500', '!text-white', '!border-red-600']`
+
 **Adding new reusable components**: Create a `.svelte` file in `src/lib/components/`, then add a `export { default as ComponentName } from './components/ComponentName.svelte';` line to `src/lib/index.js`.
 
 ## Semantic HTML5 & Accessibility (required)
