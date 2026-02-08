@@ -161,7 +161,7 @@
 	<h1 class="text-3xl font-bold mb-6">Calendar</h1>
 
 	{#if error}
-		<div role="alert" class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-md">
+		<div role="alert" aria-live="assertive" class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-md">
 			{error}
 		</div>
 	{/if}
