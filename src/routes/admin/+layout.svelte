@@ -1,8 +1,8 @@
 <script>
-	import { auth } from '$lib';
-	import { goto } from '$app/navigation';
+	import {auth} from '$lib';
+	import {goto} from '$app/navigation';
 
-	let { children } = $props();
+	let {children} = $props();
 
 	$effect(() => {
 		if (!auth.isLoggedIn) {

@@ -1,9 +1,9 @@
 <script>
-	import { ServiceService } from '$lib/api';
-	import { Form, invokeApi } from '$lib';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import {ServiceService} from '$lib/api';
+	import {Form, invokeApi} from '$lib';
+	import {goto} from '$app/navigation';
+	import {onMount} from 'svelte';
+	import {page} from '$app/stores';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
@@ -38,9 +38,9 @@
 
 		try {
 			if (isEdit) {
-				await invokeApi(() => ServiceService.updateService(id, { name, duration }));
+				await invokeApi(() => ServiceService.updateService(id, {name, duration}));
 			} else {
-				await invokeApi(() => ServiceService.addService({ name, duration }));
+				await invokeApi(() => ServiceService.addService({name, duration}));
 			}
 			await goto('/admin/services');
 		} catch (err) {
