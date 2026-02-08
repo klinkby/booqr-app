@@ -289,10 +289,9 @@ A weekly calendar view component that displays time-based events using the `@eve
 
 **Import**: `import { Calendar } from '$lib';`
 
-**Required Plugin**: To enable click interactions, the `Interaction` plugin from `@event-calendar/interaction` must be included in the Calendar component:
+**Required Plugin**: To enable click interactions, the `Interaction` plugin from `@event-calendar/core` must be included in the Calendar component:
 ```js
-import { Calendar, TimeGrid } from '@event-calendar/core';
-import { Interaction } from '@event-calendar/interaction';
+import { Calendar, TimeGrid, Interaction } from '@event-calendar/core';
 
 <Calendar plugins={[TimeGrid, Interaction]} {options} />
 ```
@@ -402,8 +401,7 @@ function transformVacancyToEvent(vacancy) {
 
 **Important**: The Calendar component in `/src/lib/components/Calendar.svelte` must include the Interaction plugin for `onDateClick` to work:
 ```js
-import { Calendar, TimeGrid } from '@event-calendar/core';
-import { Interaction } from '@event-calendar/interaction';
+import { Calendar, TimeGrid, Interaction } from '@event-calendar/core';
 
 <Calendar plugins={[TimeGrid, Interaction]} {options} />
 ```
