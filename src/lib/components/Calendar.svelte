@@ -1,10 +1,11 @@
 <script>
-    import {Calendar, TimeGrid} from '@event-calendar/core';
+    import {Calendar, TimeGrid, Interaction} from '@event-calendar/core';
     import '@event-calendar/core/index.css';
 
     let {
         events = [],
-        onDatesChange = undefined
+        onDatesChange = undefined,
+        onDateClick = undefined
     } = $props();
 
     // Use $derived to reactively compute options based on props
@@ -24,8 +25,10 @@
             today: 'Today'
         },
         // Event Calendar calls this when date range changes
-        datesSet: onDatesChange
+        datesSet: onDatesChange,
+        // Event Calendar calls this when user clicks on a date/time
+        dateClick: onDateClick
     });
 </script>
 
-<Calendar plugins={[TimeGrid]} {options} />
+<Calendar plugins={[TimeGrid, Interaction]} {options} />

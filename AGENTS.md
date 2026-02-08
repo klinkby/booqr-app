@@ -119,13 +119,18 @@ Agents should focus on small, composable changes that align with these constrain
 ## Application Structure
 - **Routes**: SvelteKit file-based routing in `src/routes/`
   - `/` - Home page
-  - `/calendar` - Displays all vacancies using `VacancyService.getVacancies()` with auto-pagination
   - `/login` - Login form with email/password fields, uses Form component
   - `/admin/` - Protected admin area (requires login + Employee role)
+  - `/admin/calendar` - Interactive calendar for managing vacancies:
+    - Weekly time grid view (6 AM - 10 PM)
+    - Click-to-create: Employees click time slots to create vacancies
+    - Side panel form: VacancyForm appears in right panel (384px width)
+    - Auto-refresh: Calendar updates after creating vacancies
+    - Uses Calendar component with Interaction plugin for click handling
   - `/admin/services` - Service list page with Create button and Edit actions
   - `/admin/services/new` - Create service form page
   - `/admin/services/[id]` - Edit service form page (dynamic route)
-- **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home, Calendar, and Login/Logout links. Admin link shown only to employees (`auth.isEmployee`).
+- **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home and Login/Logout links. Admin link shown only to employees (`auth.isEmployee`).
   - **Responsive Layout**: Main content constrained with `container mx-auto px-4 py-8 max-w-7xl` for consistent centering and max-width (1280px) across all pages
   - **Header/Footer**: Use same responsive constraints for visual alignment
 - **Navigation**: Login/Logout toggle based on `sessionStorage.access_token` presence
@@ -284,11 +289,20 @@ A weekly calendar view component that displays time-based events using the `@eve
 
 **Import**: `import { Calendar } from '$lib';`
 
+**Required Plugin**: To enable click interactions, the `Interaction` plugin from `@event-calendar/interaction` must be included in the Calendar component:
+```js
+import { Calendar, TimeGrid } from '@event-calendar/core';
+import { Interaction } from '@event-calendar/interaction';
+
+<Calendar plugins={[TimeGrid, Interaction]} {options} />
+```
+
 **Props** (via `$props()`):
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `events` | `Array<object>` | `[]` | Array of event objects in Event Calendar format |
 | `onDatesChange` | `(info) => void` | `undefined` | Callback when user navigates to different week — receives `{start, end, startStr, endStr, view}` |
+| `onDateClick` | `(info) => void` | `undefined` | Callback when user clicks on a date/time slot — receives `{date, dateStr, allDay, resource, jsEvent, view}`. **Requires Interaction plugin**. |
 
 **Event Object Format**:
 Events must be provided in Event Calendar format:
@@ -331,14 +345,16 @@ function transformVacancyToEvent(vacancy) {
 }
 ```
 
-**Usage example**:
+**Usage example** (from `/admin/calendar`):
 ```svelte
 <script>
   import { Calendar } from '$lib';
   import { VacancyService } from '$lib/api';
   import { invokeApi } from '$lib/invokeApi';
+  import { auth } from '$lib';
 
   let events = $state([]);
+  let showForm = $state(false);
 
   async function fetchVacancies(startDate, endDate) {
     const response = await invokeApi(() =>
@@ -355,9 +371,41 @@ function transformVacancyToEvent(vacancy) {
   function handleDatesChange(info) {
     fetchVacancies(info.start, info.end);
   }
+
+  function handleDateClick(info) {
+    // Pre-fill form with clicked time (1-hour duration)
+    const startDate = new Date(info.date);
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+    formData.startTime = startDate.toISOString().slice(0, 16);
+    formData.endTime = endDate.toISOString().slice(0, 16);
+    showForm = true;
+  }
 </script>
 
-<Calendar {events} onDatesChange={handleDatesChange} />
+<!-- Flex layout with calendar and side panel -->
+<div class="flex gap-6">
+  <div class="flex-1 min-w-0">
+    <Calendar
+      {events}
+      onDatesChange={handleDatesChange}
+      onDateClick={handleDateClick}
+    />
+  </div>
+
+  {#if showForm}
+    <div class="w-96 shrink-0">
+      <!-- VacancyForm appears here -->
+    </div>
+  {/if}
+</div>
+```
+
+**Important**: The Calendar component in `/src/lib/components/Calendar.svelte` must include the Interaction plugin for `onDateClick` to work:
+```js
+import { Calendar, TimeGrid } from '@event-calendar/core';
+import { Interaction } from '@event-calendar/interaction';
+
+<Calendar plugins={[TimeGrid, Interaction]} {options} />
 ```
 
 **Styling**:
@@ -365,6 +413,73 @@ function transformVacancyToEvent(vacancy) {
 - Component is unstyled (no wrapper) — parent pages can wrap with Tailwind utilities as needed
 - Event styling uses Tailwind classes via `classNames` property with `!important` modifier to override defaults
 - Example: `classNames: ['!bg-red-500', '!text-white', '!border-red-600']`
+
+### VacancyForm (`src/lib/components/VacancyForm.svelte`)
+A form component for creating new vacancies with location and employee assignment. Uses the Form component internally and is displayed as a side panel in the admin calendar.
+
+**Import**: `import { VacancyForm } from '$lib';`
+
+**Props** (via `$props()` with `$bindable`):
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `startTime` | `string` (bindable) | `''` | ISO8601 datetime string for vacancy start (format: `YYYY-MM-DDTHH:mm`) |
+| `endTime` | `string` (bindable) | `''` | ISO8601 datetime string for vacancy end |
+| `locationId` | `string` (bindable) | `''` | Selected location ID |
+| `employeeId` | `string` (bindable) | `''` | Selected employee ID (required) |
+| `locations` | `Array<object>` | `[]` | Array of location objects with `{id, name}` |
+| `employees` | `Array<object>` | `[]` | Array of employee objects with `{id, name, email}` |
+| `error` | `string \| null` | `null` | Error message to display |
+| `loading` | `boolean` | `false` | Loading state for submit button |
+| `onsubmit` | `(event) => void` | required | Submit handler |
+| `oncancel` | `() => void` | required | Cancel handler |
+
+**Features**:
+- Uses `$bindable` props for two-way data binding (Svelte 5 pattern)
+- Wraps Form component with pre-styled sticky panel layout
+- Datetime-local inputs for start/end times
+- Location and employee dropdowns with validation
+- All fields required for submission
+
+**Usage example** (from `/admin/calendar`):
+```svelte
+<script>
+  import { VacancyForm } from '$lib';
+
+  let formData = $state({
+    startTime: '',
+    endTime: '',
+    locationId: '',
+    employeeId: ''
+  });
+  let locations = $state([]);
+  let employees = $state([]);
+  let formError = $state(null);
+  let formLoading = $state(false);
+
+  async function handleSubmit() {
+    // Create vacancy via API
+  }
+
+  function handleCancel() {
+    showForm = false;
+  }
+</script>
+
+<VacancyForm
+  bind:startTime={formData.startTime}
+  bind:endTime={formData.endTime}
+  bind:locationId={formData.locationId}
+  bind:employeeId={formData.employeeId}
+  {locations}
+  {employees}
+  error={formError}
+  loading={formLoading}
+  onsubmit={handleSubmit}
+  oncancel={handleCancel}
+/>
+```
+
+**Styling**: Includes sticky positioning (`sticky top-4`) and gray panel background for side panel display.
 
 **Adding new reusable components**: Create a `.svelte` file in `src/lib/components/`, then add a `export { default as ComponentName } from './components/ComponentName.svelte';` line to `src/lib/index.js`.
 

@@ -32,7 +32,6 @@
 	<nav aria-label="Main navigation" class="container mx-auto px-4 py-4 max-w-7xl">
 		<div class="flex gap-6">
 			<a href="/" class="hover:text-gray-300">Home</a>
-			<a href="/calendar" class="hover:text-gray-300">Calendar</a>
 			{#if auth.isEmployee}
 				<a href="/admin/calendar" class="hover:text-gray-300">Admin</a>
 			{/if}
