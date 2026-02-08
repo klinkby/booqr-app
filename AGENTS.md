@@ -401,8 +401,7 @@ function transformVacancyToEvent(vacancy) {
 
 **Important**: The Calendar component in `/src/lib/components/Calendar.svelte` must include the Interaction plugin for `onDateClick` to work:
 ```js
-import { Calendar, TimeGrid } from '@event-calendar/core';
-import { Interaction } from '@event-calendar/interaction';
+import { Calendar, TimeGrid, Interaction } from '@event-calendar/core';
 
 <Calendar plugins={[TimeGrid, Interaction]} {options} />
 ```
