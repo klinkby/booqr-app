@@ -10,8 +10,25 @@
 	let loading = $state(false);
 
 	// Use $derived for reactive access to URL search params (Svelte 5 best practice)
-	let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/');
+	function normalizeReturnUrl(raw) {
+		if (!raw || typeof raw !== 'string') {
+			return '/';
+		}
 
+		// Only allow same-origin, absolute paths starting with a single "/"
+		if (!raw.startsWith('/') || raw.startsWith('//')) {
+			return '/';
+		}
+
+		// Disallow explicit schemes (e.g., "http://", "javascript:", etc.)
+		if (raw.includes('://')) {
+			return '/';
+		}
+
+		return raw;
+	}
+
+	let returnUrl = $derived(normalizeReturnUrl($page.url.searchParams.get('returnUrl')));
 	async function handleSubmit() {
 		error = null;
 		loading = true;
