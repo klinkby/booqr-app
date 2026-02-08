@@ -1,8 +1,8 @@
 <script>
-	import { AuthenticationService } from '$lib/api';
-	import { auth, Form } from '$lib';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import {AuthenticationService} from '$lib/api';
+	import {auth, Form} from '$lib';
+	import {goto} from '$app/navigation';
+	import {page} from '$app/stores';
 
 	let email = $state('');
 	let password = $state('');
@@ -29,6 +29,7 @@
 	}
 
 	let returnUrl = $derived(normalizeReturnUrl($page.url.searchParams.get('returnUrl')));
+
 	async function handleSubmit() {
 		error = null;
 		loading = true;
@@ -66,36 +67,36 @@
 	<h1 class="text-3xl font-bold mb-6">Sign in to your account</h1>
 
 	<div class="max-w-2xl">
-		<Form legend="Sign in" {error} {loading} submitLabel="Sign in" onsubmit={handleSubmit}>
+		<Form {error} legend="Sign in" {loading} onsubmit={handleSubmit} submitLabel="Sign in">
 			<div>
-				<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="email">
 					Email address
 				</label>
 				<input
-					id="email"
-					name="email"
-					type="email"
 					autocomplete="email"
-					required
 					bind:value={email}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					id="email"
+					name="email"
 					placeholder="Email address"
+					required
+					type="email"
 				/>
 			</div>
 
 			<div>
-				<label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="password">
 					Password
 				</label>
 				<input
-					id="password"
-					name="password"
-					type="password"
 					autocomplete="current-password"
-					required
 					bind:value={password}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					id="password"
+					name="password"
 					placeholder="Password"
+					required
+					type="password"
 				/>
 			</div>
 		</Form>

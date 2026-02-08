@@ -3,6 +3,7 @@
 **IMPORTANT**: All project guidelines and instructions are maintained in `AGENTS.md`.
 
 Please read `AGENTS.md` for comprehensive instructions on:
+
 - Framework and technology choices (Svelte 5, SvelteKit, Tailwind CSS)
 - API client configuration and authentication patterns
 - Security considerations and OWASP compliance

@@ -1,15 +1,15 @@
 <script>
-	import { VacancyService, LocationService, UserService } from '$lib/api';
-	import { Calendar, VacancyForm, auth } from '$lib';
-	import { invokeApi } from '$lib/invokeApi';
-	import { onMount } from 'svelte';
+	import {LocationService, UserService, VacancyService} from '$lib/api';
+	import {auth, Calendar, VacancyForm} from '$lib';
+	import {invokeApi} from '$lib/invokeApi';
+	import {onMount} from 'svelte';
 
 	let events = $state([]);
 	let loading = $state(false);
 	let error = $state(null);
 
 	// Track current date range for refreshing
-	let currentDateRange = $state({ start: null, end: null });
+	let currentDateRange = $state({start: null, end: null});
 
 	// Form state for creating vacancies
 	let showForm = $state(false);
@@ -152,7 +152,7 @@
 	 * @param {object} info - Contains {start, end, startStr, endStr, view}
 	 */
 	function handleDatesChange(info) {
-		currentDateRange = { start: info.start, end: info.end };
+		currentDateRange = {start: info.start, end: info.end};
 		fetchVacancies(info.start, info.end);
 	}
 </script>
@@ -171,8 +171,8 @@
 		<div class="flex-1 min-w-0">
 			<Calendar
 				{events}
-				onDatesChange={handleDatesChange}
 				onDateClick={handleDateClick}
+				onDatesChange={handleDatesChange}
 			/>
 		</div>
 

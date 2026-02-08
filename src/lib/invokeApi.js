@@ -1,6 +1,6 @@
-import { ApiError, AuthenticationService } from '$lib/api';
-import { auth } from './auth.svelte.js';
-import { goto } from '$app/navigation';
+import {ApiError, AuthenticationService} from '$lib/api';
+import {auth} from './auth.svelte.js';
+import {goto} from '$app/navigation';
 
 let refreshPromise = null;
 

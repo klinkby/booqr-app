@@ -1,5 +1,5 @@
 <script>
-	import {Calendar, TimeGrid, Interaction} from '@event-calendar/core';
+	import {Calendar, Interaction, TimeGrid} from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
 
 	let {
@@ -31,4 +31,4 @@
 	});
 </script>
 
-<Calendar plugins={[TimeGrid, Interaction]} {options} />
+<Calendar {options} plugins={[TimeGrid, Interaction]}/>

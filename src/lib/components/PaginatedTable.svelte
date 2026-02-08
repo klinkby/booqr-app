@@ -1,9 +1,9 @@
 <script>
 	import DataTable from './DataTable.svelte';
-	import { invokeApi } from '$lib/invokeApi';
-	import { onMount } from 'svelte';
+	import {invokeApi} from '$lib/invokeApi';
+	import {onMount} from 'svelte';
 
-	let { columns, fetchCommand, onedit = undefined, ondelete = undefined } = $props();
+	let {columns, fetchCommand, onedit = undefined, ondelete = undefined} = $props();
 
 	const PAGE_SIZE = 100;
 	let rows = $state([]);

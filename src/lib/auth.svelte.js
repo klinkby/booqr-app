@@ -1,5 +1,5 @@
-import { OpenAPI } from '$lib/api/index.js';
-import { browser } from '$app/environment';
+import {OpenAPI} from '$lib/api/index.js';
+import {browser} from '$app/environment';
 
 const tokenName = 'access_token';
 
@@ -7,7 +7,7 @@ class AuthState {
 	#token = $state(bootstrapToken());
 
 	isLoggedIn = $derived(this.#token !== null);
-	
+
 	userId = $derived(parseToken(this.#token)?.sub ?? null);
 	role = $derived(parseToken(this.#token)?.role ?? null);
 	isEmployee = $derived(this.role === 'Employee' || this.role === 'Admin');
@@ -18,9 +18,9 @@ class AuthState {
 
 	set accessToken(jwtBearer) {
 		if (!browser) return;
-		
+
 		const tokenObj = parseToken(jwtBearer);
-		
+
 		if (validate(tokenObj)) {
 			sessionStorage.setItem(tokenName, jwtBearer);
 			this.#token = jwtBearer;
@@ -54,7 +54,7 @@ if (browser) {
 
 function bootstrapToken() {
 	if (!browser) return null;
-	
+
 	const jwtBearer = sessionStorage.getItem(tokenName);
 	if (jwtBearer === null || typeof jwtBearer !== 'string') return null;
 
@@ -63,28 +63,27 @@ function bootstrapToken() {
 		sessionStorage.removeItem(tokenName);
 		return null;
 	}
-	
+
 	return jwtBearer;
 }
 
 function parseToken(jwtBearer) {
 	if (jwtBearer === null || typeof jwtBearer !== 'string') return null;
-	
+
 	const parts = jwtBearer.split('.');
 	if (parts.length !== 3) return null;
 
 	try {
 		// Decode payload (second part of JWT)
 		return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-	}
-	catch {
+	} catch {
 		return null;
 	}
 }
 
 function validate(tokenObj) {
 	if (!tokenObj || typeof tokenObj !== 'object') return false;
-	
+
 	// Require expiration field
 	if (!tokenObj.exp || typeof tokenObj.exp !== 'number') return false;
 	const now = Math.floor(Date.now() / 1000);

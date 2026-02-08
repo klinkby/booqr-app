@@ -1,9 +1,9 @@
 <script>
-	import { UserService } from '$lib/api';
-	import { Form, invokeApi } from '$lib';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import {UserService} from '$lib/api';
+	import {Form, invokeApi} from '$lib';
+	import {goto} from '$app/navigation';
+	import {onMount} from 'svelte';
+	import {page} from '$app/stores';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
@@ -42,9 +42,9 @@
 
 		try {
 			if (isEdit) {
-				await invokeApi(() => UserService.updateUser(id, { name, phone }));
+				await invokeApi(() => UserService.updateUser(id, {name, phone}));
 			} else {
-				await invokeApi(() => UserService.addUser({ email }));
+				await invokeApi(() => UserService.addUser({email}));
 			}
 			await goto('/admin/contacts');
 		} catch (err) {
