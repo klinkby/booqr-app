@@ -89,6 +89,7 @@
 				name="locationId"
 				required
 			>
+				<option value="" disabled selected>Select a location</option>
 				{#each locations as location}
 					<option value={location.id}>{location.name}</option>
 				{/each}
