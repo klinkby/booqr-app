@@ -5,8 +5,23 @@
 	let {
 		events = [],
 		onDatesChange = undefined,
-		onDateClick = undefined
+		onDateClick = undefined,
+		onEventResize = undefined,
+		onEventDrop = undefined
 	} = $props();
+
+	let cal;
+
+	function handleKeydown(e) {
+		if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+		if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+		const key = e.key.toLowerCase();
+
+		if (key === 'p') cal?.prev();
+		if (key === 'n') cal?.next();
+		if (key === 't') cal?.setOption('date', new Date());
+	}
 
 	// Use $derived to reactively compute options based on props
 	let options = $derived({
@@ -27,8 +42,11 @@
 		// Event Calendar calls this when date range changes
 		datesSet: onDatesChange,
 		// Event Calendar calls this when user clicks on a date/time
-		dateClick: onDateClick
+		dateClick: onDateClick,
+		eventResize: onEventResize,
+		eventDrop: onEventDrop
 	});
 </script>
 
-<Calendar {options} plugins={[TimeGrid, Interaction]}/>
+<svelte:window onkeydown={handleKeydown}/>
+<Calendar bind:this={cal} {options} plugins={[TimeGrid, Interaction]}/>

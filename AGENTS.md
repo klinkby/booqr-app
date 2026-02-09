@@ -383,83 +383,29 @@ Events must be provided in Event Calendar format:
 - No all-day slot (optimized for time-specific events)
 - Navigation toolbar: Previous, Next, Today buttons
 
-**Transforming API Data**:
-API `CalendarEvent` objects must be transformed to Event Calendar format:
+**Timezone Handling**:
+
+The API always uses UTC for all datetime values. The `@event-calendar/core` library's internal `_fromISOString` parser
+extracts numeric components from ISO strings via regex and stores them directly in `Date.UTC()`, **ignoring** any `Z`
+suffix or timezone offset. This means passing a UTC string like `"2026-02-09T08:00:00Z"` would display as 08:00
+regardless of the user's timezone.
+
+To display correct local times, UTC strings from the API **must be converted to local timezone-free ISO strings** before
+passing to the calendar. The `/admin/calendar` page uses a `utcToLocalIso()` helper for this:
 
 ```js
-function transformVacancyToEvent(vacancy) {
-  return {
-    id: vacancy.id,
-    start: vacancy.startTime,      // ISO8601 string
-    end: vacancy.endTime,          // ISO8601 string
-    title: vacancy.bookingId ? 'Booked' : 'Available',
-    classNames: vacancy.bookingId
-      ? ['!bg-red-500', '!text-white', '!border-red-600']
-      : ['!bg-green-500', '!text-white', '!border-green-600'],
-    extendedProps: {
-      employeeId: vacancy.employeeId,
-      locationId: vacancy.locationId,
-      bookingId: vacancy.bookingId
-    }
-  };
+// Convert UTC ISO string to local timezone-free ISO string for @event-calendar
+function utcToLocalIso(utcString) {
+  const d = new Date(utcString);        // Parses UTC, d holds local representation
+  return `${toLocalDate(d)}T${toLocalTime(d)}`; // e.g. "2026-02-09T10:00" (local)
 }
 ```
 
-**Usage example** (from `/admin/calendar`):
-
-```svelte
-<script>
-  import { Calendar } from '$lib';
-  import { VacancyService } from '$lib/api';
-  import { invokeApi } from '$lib/invokeApi';
-  import { auth } from '$lib';
-
-  let events = $state([]);
-  let showForm = $state(false);
-
-  async function fetchVacancies(startDate, endDate) {
-    const response = await invokeApi(() =>
-      VacancyService.getVacancies(
-        startDate.toISOString(),
-        endDate.toISOString(),
-        0,
-        100
-      )
-    );
-    events = response.items.map(transformVacancyToEvent);
-  }
-
-  function handleDatesChange(info) {
-    fetchVacancies(info.start, info.end);
-  }
-
-  function handleDateClick(info) {
-    // Pre-fill form with clicked time (1-hour duration)
-    const startDate = new Date(info.date);
-    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
-    formData.startTime = startDate.toISOString().slice(0, 16);
-    formData.endTime = endDate.toISOString().slice(0, 16);
-    showForm = true;
-  }
-</script>
-
-<!-- Flex layout with calendar and side panel -->
-<div class="flex gap-6">
-  <div class="flex-1 min-w-0">
-    <Calendar
-      {events}
-      onDatesChange={handleDatesChange}
-      onDateClick={handleDateClick}
-    />
-  </div>
-
-  {#if showForm}
-    <div class="w-96 shrink-0">
-      <!-- VacancyForm appears here -->
-    </div>
-  {/if}
-</div>
-```
+**Rules**:
+- **API → Calendar**: Always convert UTC strings to local via `utcToLocalIso()` in `transformVacancyToEvent()`
+- **Calendar → API**: Use `new Date(localString).toISOString()` to convert local back to UTC for API submission
+- **Form date/time extraction**: Use `Date.getFullYear()`, `getMonth()`, `getDate()`, `getHours()`, `getMinutes()` (local
+	getters) — never `.toISOString().slice()` which gives UTC
 
 **Important**: The Calendar component in `/src/lib/components/Calendar.svelte` must include the Interaction plugin for
 `onDateClick` to work:
@@ -487,8 +433,9 @@ and is displayed as a side panel in the admin calendar.
 **Props** (via `$props()` with `$bindable`):
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `startTime` | `string` (bindable) | `''` | ISO8601 datetime string for vacancy start (format: `YYYY-MM-DDTHH:mm`) |
-| `endTime` | `string` (bindable) | `''` | ISO8601 datetime string for vacancy end |
+| `date` | `string` | `''` | Date for the vacancy in `YYYY-MM-DD` format (displayed as read-only formatted text) |
+| `startTime` | `string` (bindable) | `''` | Start time in `HH:mm` format (5-minute step) |
+| `endTime` | `string` (bindable) | `''` | End time in `HH:mm` format (5-minute step) |
 | `locationId` | `string` (bindable) | `''` | Selected location ID |
 | `employeeId` | `string` (bindable) | `''` | Selected employee ID (required) |
 | `locations` | `Array<object>` | `[]` | Array of location objects with `{id, name}` |
@@ -502,7 +449,9 @@ and is displayed as a side panel in the admin calendar.
 
 - Uses `$bindable` props for two-way data binding (Svelte 5 pattern)
 - Wraps Form component with pre-styled sticky panel layout
-- Datetime-local inputs for start/end times
+- Date is set by the calendar click and shown as formatted read-only text (e.g. "Monday, February 9, 2026")
+- Time-only inputs (`type="time"` with `step="300"` for 5-minute intervals) for start/end — side by side
+- Built-in validation: end time must be after start time (blocks submission and shows error)
 - Location and employee dropdowns with validation
 - All fields required for submission
 
@@ -513,6 +462,7 @@ and is displayed as a side panel in the admin calendar.
   import { VacancyForm } from '$lib';
 
   let formData = $state({
+    date: '',
     startTime: '',
     endTime: '',
     locationId: '',
@@ -524,7 +474,8 @@ and is displayed as a side panel in the admin calendar.
   let formLoading = $state(false);
 
   async function handleSubmit() {
-    // Create vacancy via API
+    // Create vacancy via API — recombine date+time to UTC:
+    // new Date(formData.date + 'T' + formData.startTime).toISOString()
   }
 
   function handleCancel() {
@@ -533,6 +484,7 @@ and is displayed as a side panel in the admin calendar.
 </script>
 
 <VacancyForm
+  date={formData.date}
   bind:startTime={formData.startTime}
   bind:endTime={formData.endTime}
   bind:locationId={formData.locationId}

@@ -13,9 +13,36 @@
 		event.preventDefault();
 		onsubmit(event);
 	}
+
+	function handleKeydown(e) {
+		const target = e.target;
+		const tagName = target && target.tagName ? target.tagName.toUpperCase() : '';
+
+		if (e.key === 'Escape' && oncancel && !loading) {
+			e.preventDefault();
+			oncancel();
+			return;
+		}
+
+		if (e.key === 'Enter' && !loading) {
+			// Do not submit when focused on textarea, buttons, or links
+			if (tagName === 'TEXTAREA' || tagName === 'BUTTON' || tagName === 'A') {
+				return;
+			}
+
+			e.preventDefault();
+			const form = /** @type {HTMLFormElement} */ (e.currentTarget);
+
+			if (form && typeof form.requestSubmit === 'function') {
+				form.requestSubmit();
+			} else if (form) {
+				form.submit();
+			}
+		}
+	}
 </script>
 
-<form novalidate onsubmit={handleSubmit}>
+<form novalidate onsubmit={handleSubmit} onkeydown={handleKeydown}>
 	<div aria-live="polite" class="rounded-md bg-red-50 p-4 mb-4" class:hidden={!error} role="alert">
 		<p class="text-sm text-red-800">{error}</p>
 	</div>
