@@ -5,8 +5,8 @@
  *
  * Usage: node scripts/postprocess-api-models.js <ts-models-dir> <js-models-dir>
  */
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import {readdirSync, readFileSync, writeFileSync} from 'node:fs';
+import {join} from 'node:path';
 
 const [tsDir, jsDir] = process.argv.slice(2);
 

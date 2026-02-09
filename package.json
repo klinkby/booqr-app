@@ -1,29 +1,30 @@
 {
-	"name": "booqr-app",
-	"private": true,
-	"version": "0.0.1",
-	"type": "module",
-	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
-		"test:e2e": "playwright test",
-		"test": "npm run test:e2e",
-		"import-api": "openapi -i https://www.booqr.dk/api/v1.json -o ./src/lib/.api-tmp --client fetch && tsc ./src/lib/.api-tmp/index.ts --target es2022 --module esnext --moduleResolution node --outDir ./src/lib/api --allowJs --skipLibCheck --allowSyntheticDefaultImports --esModuleInterop --lib es2022,dom && node scripts/postprocess-api-models.js ./src/lib/.api-tmp/models ./src/lib/api/models && rm -rf ./src/lib/.api-tmp"
-	},
-	"devDependencies": {
-		"@playwright/test": "^1.58.1",
-		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.50.2",
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
-		"@tailwindcss/forms": "^0.5.11",
-		"@tailwindcss/vite": "^4.1.18",
-		"dotenv": "^17.2.3",
-		"openapi-typescript-codegen": "^0.30.0",
-		"svelte": "^5.49.1",
-		"tailwindcss": "^4.1.18",
-		"typescript": "^5.9.3",
-		"vite": "^7.3.1"
-	}
+  "name": "booqr-app",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "test:e2e": "playwright test",
+    "test": "npm run test:e2e",
+    "import-api": "openapi -i https://www.booqr.dk/api/v1.json -o ./src/lib/.api-tmp --client fetch && tsc ./src/lib/.api-tmp/index.ts --target es2022 --module esnext --moduleResolution node --outDir ./src/lib/api --allowJs --skipLibCheck --allowSyntheticDefaultImports --esModuleInterop --lib es2022,dom && node scripts/postprocess-api-models.js ./src/lib/.api-tmp/models ./src/lib/api/models && rm -rf ./src/lib/.api-tmp"
+  },
+  "devDependencies": {
+    "@event-calendar/core": "^5.3.2",
+    "@playwright/test": "^1.58.1",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.50.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/vite": "^4.1.18",
+    "dotenv": "^17.2.3",
+    "openapi-typescript-codegen": "^0.30.0",
+    "svelte": "^5.49.1",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
 }

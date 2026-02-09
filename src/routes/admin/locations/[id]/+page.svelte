@@ -1,9 +1,9 @@
 <script>
-	import { LocationService } from '$lib/api';
-	import { Form, invokeApi } from '$lib';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import {LocationService} from '$lib/api';
+	import {Form, invokeApi} from '$lib';
+	import {goto} from '$app/navigation';
+	import {onMount} from 'svelte';
+	import {page} from '$app/stores';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
@@ -43,7 +43,7 @@
 		loading = true;
 
 		try {
-			const payload = { name, address1, address2, zip, city };
+			const payload = {name, address1, address2, zip, city};
 			if (isEdit) {
 				await invokeApi(() => LocationService.updateLocation(id, payload));
 			} else {

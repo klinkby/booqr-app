@@ -1,6 +1,6 @@
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
-test('login flow with token validation', async ({ page, context }) => {
+test('login flow with token validation', async ({page, context}) => {
 	// Step 1: Clear "refresh_token" httponly cookie
 	await context.clearCookies();
 

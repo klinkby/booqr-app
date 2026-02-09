@@ -1,6 +1,6 @@
-import { ApiError, AuthenticationService } from '$lib/api';
-import { auth } from './auth.svelte.js';
-import { goto } from '$app/navigation';
+import {ApiError, AuthenticationService} from '$lib/api';
+import {auth} from './auth.svelte.js';
+import {goto} from '$app/navigation';
 
 let refreshPromise = null;
 
@@ -39,7 +39,9 @@ async function doRefresh() {
 		auth.accessToken = response.access_token;
 	} catch (error) {
 		auth.clear();
-		await goto('/login');
+		// Capture current URL to return after re-authentication
+		const returnUrl = window.location.pathname + window.location.search;
+		await goto(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
 		throw error;
 	}
 }
