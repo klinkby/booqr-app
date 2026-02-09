@@ -5,7 +5,9 @@
 	let {
 		events = [],
 		onDatesChange = undefined,
-		onDateClick = undefined
+		onDateClick = undefined,
+		onEventResize = undefined,
+		onEventDrop = undefined
 	} = $props();
 
 	let cal;
@@ -36,7 +38,9 @@
 		// Event Calendar calls this when date range changes
 		datesSet: onDatesChange,
 		// Event Calendar calls this when user clicks on a date/time
-		dateClick: onDateClick
+		dateClick: onDateClick,
+		eventResize: onEventResize,
+		eventDrop: onEventDrop
 	});
 </script>
 

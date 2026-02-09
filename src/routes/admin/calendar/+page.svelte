@@ -31,6 +31,8 @@
 			start: formData.date + 'T' + formData.startTime,
 			end: formData.date + 'T' + formData.endTime,
 			title: 'New Vacancy',
+			startEditable: true,
+			durationEditable: true,
 			classNames: ['!bg-gray-300', '!text-gray-600', '!border-gray-400', '!border-dashed']
 		};
 	});
@@ -71,7 +73,7 @@
 		return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 	}
 
-	function grautcToLocalIso(utcString) {
+	function utcToLocalIso(utcString) {
 		const d = new Date(utcString);
 		return `${toLocalDate(d)}T${toLocalTime(d)}`;
 	}
@@ -129,6 +131,20 @@
 		formError = null;
 	}
 
+	function handleEventResize(info) {
+		if (info.event.id === 'preview') {
+			formData.endTime = toLocalTime(info.event.end);
+		}
+	}
+
+	function handleEventDrop(info) {
+		if (info.event.id === 'preview') {
+			formData.date = toLocalDate(info.event.start);
+			formData.startTime = toLocalTime(info.event.start);
+			formData.endTime = toLocalTime(info.event.end);
+		}
+	}
+
 	/**
 	 * Transform API CalendarEvent to Event Calendar format
 	 * @param {import('$lib/api').CalendarEvent} vacancy
@@ -136,8 +152,8 @@
 	function transformVacancyToEvent(vacancy) {
 		return {
 			id: vacancy.id,
-			start: grautcToLocalIso(vacancy.startTime),
-			end: grautcToLocalIso(vacancy.endTime),
+			start: utcToLocalIso(vacancy.startTime),
+			end: utcToLocalIso(vacancy.endTime),
 			title: vacancy.bookingId ? 'Booked' : 'Available',
 			classNames: vacancy.bookingId
 				? ['!bg-red-500', '!text-white', '!border-red-600']
@@ -204,6 +220,8 @@
 				events={calendarEvents}
 				onDateClick={handleDateClick}
 				onDatesChange={handleDatesChange}
+				onEventResize={handleEventResize}
+				onEventDrop={handleEventDrop}
 			/>
 		</div>
 

@@ -390,18 +390,18 @@ suffix or timezone offset. This means passing a UTC string like `"2026-02-09T08:
 regardless of the user's timezone.
 
 To display correct local times, UTC strings from the API **must be converted to local timezone-free ISO strings** before
-passing to the calendar. The `/admin/calendar` page uses a `grautcToLocalIso()` helper for this:
+passing to the calendar. The `/admin/calendar` page uses a `utcToLocalIso()` helper for this:
 
 ```js
 // Convert UTC ISO string to local timezone-free ISO string for @event-calendar
-function grautcToLocalIso(utcString) {
+function utcToLocalIso(utcString) {
   const d = new Date(utcString);        // Parses UTC, d holds local representation
   return `${toLocalDate(d)}T${toLocalTime(d)}`; // e.g. "2026-02-09T10:00" (local)
 }
 ```
 
 **Rules**:
-- **API → Calendar**: Always convert UTC strings to local via `grautcToLocalIso()` in `transformVacancyToEvent()`
+- **API → Calendar**: Always convert UTC strings to local via `utcToLocalIso()` in `transformVacancyToEvent()`
 - **Calendar → API**: Use `new Date(localString).toISOString()` to convert local back to UTC for API submission
 - **Form date/time extraction**: Use `Date.getFullYear()`, `getMonth()`, `getDate()`, `getHours()`, `getMinutes()` (local
 	getters) — never `.toISOString().slice()` which gives UTC

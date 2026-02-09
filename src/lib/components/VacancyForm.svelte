@@ -89,7 +89,6 @@
 				name="locationId"
 				required
 			>
-				<option value="">Select a location</option>
 				{#each locations as location}
 					<option value={location.id}>{location.name}</option>
 				{/each}
@@ -107,7 +106,6 @@
 				name="employeeId"
 				required
 			>
-				<option value="">Select an employee</option>
 				{#each employees as employee}
 					<option value={employee.id}>{employee.name || employee.email}</option>
 				{/each}
