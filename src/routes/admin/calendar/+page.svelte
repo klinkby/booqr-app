@@ -14,6 +14,7 @@
 	// Form state for creating vacancies
 	let showForm = $state(false);
 	let formData = $state({
+		date: '',
 		startTime: '',
 		endTime: '',
 		employeeId: '',
@@ -21,6 +22,19 @@
 	});
 	let formLoading = $state(false);
 	let formError = $state(null);
+
+	// Live preview event shown on calendar while form is open
+	const previewEvent = $derived.by(() => {
+		if (!showForm || !formData.date || !formData.startTime || !formData.endTime) return null;
+		return {
+			id: 'preview',
+			start: formData.date + 'T' + formData.startTime,
+			end: formData.date + 'T' + formData.endTime,
+			title: 'New Vacancy',
+			classNames: ['!bg-gray-300', '!text-gray-600', '!border-gray-400', '!border-dashed']
+		};
+	});
+	const calendarEvents = $derived(previewEvent ? [...events, previewEvent] : events);
 
 	// Dropdowns data
 	let locations = $state([]);
@@ -45,16 +59,33 @@
 	 * Handle date/time click on calendar
 	 * @param {object} info - Contains {date, dateStr, allDay, resource, jsEvent, view}
 	 */
+	function pad(n) {
+		return String(n).padStart(2, '0');
+	}
+
+	function toLocalDate(d) {
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+	}
+
+	function toLocalTime(d) {
+		return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+	}
+
+	function grautcToLocalIso(utcString) {
+		const d = new Date(utcString);
+		return `${toLocalDate(d)}T${toLocalTime(d)}`;
+	}
+
 	function handleDateClick(info) {
-		// Calculate default end time (1 hour after start)
 		const startDate = new Date(info.date);
 		const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour
 
 		formData = {
-			startTime: startDate.toISOString().slice(0, 16), // Format for datetime-local input
-			endTime: endDate.toISOString().slice(0, 16),
-			employeeId: auth.userId || '', // Default to current user
-			locationId: locations[0]?.id || '' // Default to first location
+			date: toLocalDate(startDate),
+			startTime: toLocalTime(startDate),
+			endTime: toLocalTime(endDate),
+			employeeId: auth.userId || '',
+			locationId: locations[0]?.id || ''
 		};
 		formError = null;
 		showForm = true;
@@ -72,8 +103,8 @@
 				VacancyService.addVacancy({
 					employeeId: formData.employeeId || null,
 					locationId: Number(formData.locationId),
-					startTime: new Date(formData.startTime).toISOString(),
-					endTime: new Date(formData.endTime).toISOString()
+					startTime: new Date(formData.date + 'T' + formData.startTime).toISOString(),
+					endTime: new Date(formData.date + 'T' + formData.endTime).toISOString()
 				})
 			);
 
@@ -105,8 +136,8 @@
 	function transformVacancyToEvent(vacancy) {
 		return {
 			id: vacancy.id,
-			start: vacancy.startTime,
-			end: vacancy.endTime,
+			start: grautcToLocalIso(vacancy.startTime),
+			end: grautcToLocalIso(vacancy.endTime),
 			title: vacancy.bookingId ? 'Booked' : 'Available',
 			classNames: vacancy.bookingId
 				? ['!bg-red-500', '!text-white', '!border-red-600']
@@ -170,7 +201,7 @@
 		<!-- Calendar section -->
 		<div class="flex-1 min-w-0">
 			<Calendar
-				{events}
+				events={calendarEvents}
 				onDateClick={handleDateClick}
 				onDatesChange={handleDatesChange}
 			/>
@@ -180,6 +211,7 @@
 		{#if showForm}
 			<div class="w-96 shrink-0">
 				<VacancyForm
+					date={formData.date}
 					bind:startTime={formData.startTime}
 					bind:endTime={formData.endTime}
 					bind:locationId={formData.locationId}
