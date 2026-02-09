@@ -13,9 +13,17 @@
 		event.preventDefault();
 		onsubmit(event);
 	}
+
+	function handleKeydown(e) {
+		if (e.key === 'Escape' && oncancel) oncancel();
+		if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && !loading) {
+			e.preventDefault();
+			onsubmit(e);
+		}
+	}
 </script>
 
-<form novalidate onsubmit={handleSubmit}>
+<form novalidate onsubmit={handleSubmit} onkeydown={handleKeydown}>
 	<div aria-live="polite" class="rounded-md bg-red-50 p-4 mb-4" class:hidden={!error} role="alert">
 		<p class="text-sm text-red-800">{error}</p>
 	</div>
