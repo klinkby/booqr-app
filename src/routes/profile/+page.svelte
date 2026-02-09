@@ -20,7 +20,7 @@
 	// Auth guard: redirect unauthenticated users
 	$effect(() => {
 		if (!auth.isLoggedIn) {
-			goto('/login');
+			goto('/login?returnUrl=/profile');
 		}
 	});
 
