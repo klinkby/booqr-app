@@ -1,12 +1,13 @@
 <script>
 	import {auth} from '$lib';
 	import {goto} from '$app/navigation';
+	import {page} from '$app/stores';
 
 	let {children} = $props();
 
 	$effect(() => {
 		if (!auth.isLoggedIn) {
-			goto('/login');
+			goto(`/login?returnUrl=${encodeURIComponent($page.url.pathname)}`);
 		}
 	});
 </script>

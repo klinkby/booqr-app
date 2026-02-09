@@ -39,6 +39,7 @@
 				<a href="/admin/calendar" class="hover:text-gray-300">Admin</a>
 			{/if}
 			{#if auth.isLoggedIn}
+				<a href="/profile" class="hover:text-gray-300">My Profile</a>
 				<button onclick={handleLogout} class="hover:text-gray-300">Logout</button>
 			{:else}
 				<a href="/login" class="hover:text-gray-300">Login</a>

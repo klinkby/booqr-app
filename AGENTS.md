@@ -152,6 +152,7 @@ dependencies.
 
 - **Routes**: SvelteKit file-based routing in `src/routes/`
 	- `/` - Home page
+    - `/profile` - My Profile page (any logged-in user) - edit name/phone, request password reset
 	- `/login` - Login form with email/password fields, uses Form component
 	- `/admin/` - Protected admin area (requires login + Employee role)
 	- `/admin/calendar` - Interactive calendar for managing vacancies:
