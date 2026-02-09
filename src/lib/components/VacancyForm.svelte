@@ -107,6 +107,7 @@
 				name="employeeId"
 				required
 			>
+				<option value="" disabled selected>Select an employee</option>
 				{#each employees as employee}
 					<option value={employee.id}>{employee.name || employee.email}</option>
 				{/each}
