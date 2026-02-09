@@ -15,10 +15,29 @@
 	}
 
 	function handleKeydown(e) {
-		if (e.key === 'Escape' && oncancel) oncancel();
-		if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && !loading) {
+		const target = e.target;
+		const tagName = target && target.tagName ? target.tagName.toUpperCase() : '';
+
+		if (e.key === 'Escape' && oncancel && !loading) {
 			e.preventDefault();
-			onsubmit(e);
+			oncancel();
+			return;
+		}
+
+		if (e.key === 'Enter' && !loading) {
+			// Do not submit when focused on textarea, buttons, or links
+			if (tagName === 'TEXTAREA' || tagName === 'BUTTON' || tagName === 'A') {
+				return;
+			}
+
+			e.preventDefault();
+			const form = /** @type {HTMLFormElement} */ (e.currentTarget);
+
+			if (form && typeof form.requestSubmit === 'function') {
+				form.requestSubmit();
+			} else if (form) {
+				form.submit();
+			}
 		}
 	}
 </script>
