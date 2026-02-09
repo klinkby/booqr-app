@@ -50,8 +50,7 @@
 				invokeApi(() => UserService.getUsers(0, 100))
 			]);
 			locations = locationsRes.items;
-			// Filter only employees (role = 'Employee')
-			employees = usersRes.items.filter(user => user.role === 'Employee');
+			employees = usersRes.items.filter(user => user.role === 'Employee' || user.role === 'Admin');
 		} catch (err) {
 			// Silently fail - form just won't have dropdown options
 		}
