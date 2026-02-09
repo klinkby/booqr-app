@@ -89,11 +89,12 @@ Agents should focus on small, composable changes that align with these constrain
   - `/` - Home page
   - `/calendar` - Displays all vacancies using `VacancyService.getVacancies()` with auto-pagination
   - `/login` - Login form with email/password fields, uses Form component
+  - `/profile` - My Profile page (any logged-in user) - edit name/phone, request password reset
   - `/admin/` - Protected admin area (requires login + Employee role)
   - `/admin/services` - Service list page with Create button and Edit actions
   - `/admin/services/new` - Create service form page
   - `/admin/services/[id]` - Edit service form page (dynamic route)
-- **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home, Calendar, and Login/Logout links. Admin link shown only to employees (`auth.isEmployee`).
+- **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home, Calendar, My Profile (logged-in users), and Login/Logout links. Admin link shown only to employees (`auth.isEmployee`).
   - **Responsive Layout**: Main content constrained with `container mx-auto px-4 py-8 max-w-7xl` for consistent centering and max-width (1280px) across all pages
   - **Header/Footer**: Use same responsive constraints for visual alignment
 - **Navigation**: Login/Logout toggle based on `sessionStorage.access_token` presence
