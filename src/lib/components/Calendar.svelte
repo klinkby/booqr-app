@@ -8,6 +8,15 @@
 		onDateClick = undefined
 	} = $props();
 
+	let cal;
+
+	function handleKeydown(e) {
+		if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+		if (e.key === 'p') cal?.prev();
+		if (e.key === 'n') cal?.next();
+		if (e.key === 't') cal?.setOption('date', new Date());
+	}
+
 	// Use $derived to reactively compute options based on props
 	let options = $derived({
 		view: 'timeGridWeek',
@@ -31,4 +40,5 @@
 	});
 </script>
 
-<Calendar {options} plugins={[TimeGrid, Interaction]}/>
+<svelte:window onkeydown={handleKeydown}/>
+<Calendar bind:this={cal} {options} plugins={[TimeGrid, Interaction]}/>
