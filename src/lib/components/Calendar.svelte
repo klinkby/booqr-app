@@ -14,9 +14,13 @@
 
 	function handleKeydown(e) {
 		if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
-		if (e.key === 'p') cal?.prev();
-		if (e.key === 'n') cal?.next();
-		if (e.key === 't') cal?.setOption('date', new Date());
+		if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+		const key = e.key.toLowerCase();
+
+		if (key === 'p') cal?.prev();
+		if (key === 'n') cal?.next();
+		if (key === 't') cal?.setOption('date', new Date());
 	}
 
 	// Use $derived to reactively compute options based on props
