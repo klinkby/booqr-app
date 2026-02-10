@@ -1,4 +1,6 @@
 <script>
+	import { OpenAPI } from '$lib/api/core/OpenAPI';
+	import { request } from '$lib/api/core/request';
 	import { Form, PasswordReset } from '$lib';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -32,19 +34,16 @@
 
 		loading = true;
 		try {
-			const query = $page.url.search;
-			const response = await fetch(`/api/users/change-password${query}`, {
+			await request(OpenAPI, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ password }),
+				url: '/api/users/change-password',
+				query: Object.fromEntries($page.url.searchParams),
+				body: { password },
+				mediaType: 'application/json',
+				errors: {
+					400: 'Bad Request',
+				},
 			});
-
-			if (!response.ok) {
-				if (response.status === 400) {
-					throw new Error('Invalid or expired password reset link.');
-				}
-				throw new Error('Failed to change password. Please try again.');
-			}
 
 			password = '';
 			confirmPassword = '';
