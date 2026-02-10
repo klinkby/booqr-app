@@ -1,6 +1,6 @@
 <script>
 	import { UserService } from '$lib/api';
-	import { auth, Form, invokeApi } from '$lib';
+	import { auth, Form, PasswordReset, invokeApi } from '$lib';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
@@ -11,11 +11,6 @@
 	let loading = $state(false);
 	let loadingData = $state(true);
 	let successMessage = $state(null);
-
-	// Password reset state
-	let resetMessage = $state(null);
-	let resetError = $state(null);
-	let resetLoading = $state(false);
 
 	// Auth guard: redirect unauthenticated users
 	$effect(() => {
@@ -57,23 +52,6 @@
 			error = err.message || 'Failed to update profile. Please try again.';
 		} finally {
 			loading = false;
-		}
-	}
-
-	async function handleResetPassword() {
-		resetError = null;
-		resetMessage = null;
-		resetLoading = true;
-		try {
-			await invokeApi(() => UserService.resetPassword({ email }));
-			resetMessage = 'A password reset link has been sent to your email.';
-		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to request password reset:', err);
-			}
-			resetError = err.message || 'Failed to request password reset. Please try again.';
-		} finally {
-			resetLoading = false;
 		}
 	}
 
@@ -163,29 +141,7 @@
 					<p class="text-sm text-gray-600 mb-4">
 						Request a password reset link to be sent to your email address.
 					</p>
-
-					<!-- Success message -->
-					{#if resetMessage}
-						<div role="status" aria-live="polite" class="rounded-md bg-green-50 p-4 mb-4">
-							<p class="text-sm text-green-800">{resetMessage}</p>
-						</div>
-					{/if}
-
-					<!-- Error message -->
-					{#if resetError}
-						<div role="alert" aria-live="polite" class="rounded-md bg-red-50 p-4 mb-4">
-							<p class="text-sm text-red-800">{resetError}</p>
-						</div>
-					{/if}
-
-					<button
-						type="button"
-						disabled={resetLoading}
-						onclick={handleResetPassword}
-						class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{resetLoading ? 'Please wait…' : 'Request Password Reset'}
-					</button>
+					<PasswordReset {email} invoker={invokeApi} />
 				</div>
 			</section>
 		{/if}

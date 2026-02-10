@@ -8,6 +8,9 @@ It follows secure, accessible, and simply standards-first principles.
 - **Framework**: SvelteKit with Svelte 5 in SPA mode, targeting static site deployments. Agents MUST prefer Svelte 5
 	features, specifically **runes** (`$state`, `$derived`, `$effect`, `$props`, etc.) for reactivity and state
 	management. For navigation, use `import { goto } from '$app/navigation'; goto(url);` instead of `window.location`.
+- **`$derived` vs `$derived.by`**: Use `$derived(expression)` for simple expressions (e.g.,
+	`$derived($page.url.searchParams.get('x'))`). Use `$derived.by(fn)` when the derivation needs a function body with
+	logic. **Never** use `$derived(() => ...)` — that stores the function itself, not its return value.
 - **Event Handling**: Use Svelte 5 event attributes (e.g., `onclick={handler}`, `onsubmit={handler}`) instead of Svelte
 	4 `on:click`.
 - **Styling**: Tailwind CSS with the official `forms` plugin ensures a minimal but extendable design system.
@@ -28,6 +31,22 @@ dependencies.
 - **API Client**: Generated using `openapi-typescript-codegen` with the `fetch` client. No axios dependency.
 - **Collection Responses**: API collection endpoints return `{ items: T[] }` wrappers. Callers must access `.items` to
 	get the array.
+- **Extending Generated Services**: When a generated service method doesn't support needed options (e.g., query params),
+	import and call the core `request` function directly instead of using raw `fetch`. This preserves OpenAPI config (base
+	URL, credentials, error handling via `ApiError`):
+	```js
+	import { OpenAPI } from '$lib/api/core/OpenAPI';
+	import { request } from '$lib/api/core/request';
+
+	await request(OpenAPI, {
+		method: 'POST',
+		url: '/api/users/change-password',
+		query: Object.fromEntries($page.url.searchParams),
+		body: { password },
+		mediaType: 'application/json',
+		errors: { 400: 'Bad Request' },
+	});
+	```
 
 ## API Client Configuration
 
@@ -153,7 +172,11 @@ dependencies.
 - **Routes**: SvelteKit file-based routing in `src/routes/`
 	- `/` - Home page
     - `/profile` - My Profile page (any logged-in user) - edit name/phone, request password reset
-	- `/login` - Login form with email/password fields, uses Form component
+	- `/login` - Login form with email/password fields, uses Form component. Includes "Forgot your password?" toggle that
+		shows the PasswordReset component.
+	- `/change-password` - Anonymous page for setting a new password via email reset link. Validates `expires` query param
+		client-side; forwards all query params to `POST /api/users/change-password`. Shows PasswordReset component when link
+		is expired.
 	- `/admin/` - Protected admin area (requires login + Employee role)
 	- `/admin/calendar` - Interactive calendar for managing vacancies:
 		- Weekly time grid view (6 AM - 10 PM)
@@ -499,6 +522,49 @@ and is displayed as a side panel in the admin calendar.
 ```
 
 **Styling**: Includes sticky positioning (`sticky top-4`) and gray panel background for side panel display.
+
+### PasswordReset (`src/lib/components/PasswordReset.svelte`)
+
+A self-contained component for requesting a password reset email. Manages its own loading, error, and success states
+internally. Used on the profile page (authenticated), login page (anonymous), and change-password page (expired link).
+
+**Import**: `import { PasswordReset } from '$lib';`
+
+**Props** (via `$props()` with `$bindable`):
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `email` | `string` (bindable) | `''` | Email address for the reset request. Pre-filled when known (profile), editable
+when not (login). |
+| `invoker` | `(fn) => Promise` | `undefined` | Optional wrapper for the API call (e.g., `invokeApi` for authenticated
+contexts with token refresh). When omitted, calls the API directly. |
+
+**Behavior**:
+
+- When `invoker` is provided: hides the email input (email is already known), wraps API call for token refresh
+- When `invoker` is omitted: shows an email input field so the user can enter their address
+- Calls `UserService.resetPassword({ email })` on button click
+- Success/error messages use `aria-live` regions, kept in DOM with `class:hidden` toggle
+
+**Usage examples**:
+
+```svelte
+<!-- Profile page: email known, authenticated -->
+<PasswordReset {email} invoker={invokeApi} />
+
+<!-- Login page: email bindable, anonymous -->
+<PasswordReset bind:email={email} />
+
+<!-- Change-password page: fully anonymous -->
+<PasswordReset />
+```
+
+### Password Validation
+
+Client-side password validation uses this regex pattern:
+```js
+/^(?=(.*[0-9]))(?=.*[!@#$%^&*()\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z])).{8,}$/
+```
+Requirements: at least 8 characters, one uppercase, one lowercase, one digit, one special character.
 
 **Adding new reusable components**: Create a `.svelte` file in `src/lib/components/`, then add a
 `export { default as ComponentName } from './components/ComponentName.svelte';` line to `src/lib/index.js`.
