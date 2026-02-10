@@ -14,7 +14,7 @@
 
 	let expires = $derived($page.url.searchParams.get('expires'));
 
-	let expired = $derived(() => {
+	let expired = $derived.by(() => {
 		if (!expires) return true;
 		return new Date(expires + 'Z') <= new Date();
 	});
@@ -63,7 +63,7 @@
 	<h1 class="text-3xl font-bold mb-6">Change Password</h1>
 
 	<div class="max-w-2xl">
-		{#if expired()}
+		{#if expired}
 			<div role="alert" class="rounded-md bg-red-50 p-4 mb-6">
 				<p class="text-sm text-red-800">This password reset link has expired. Please request a new one.</p>
 			</div>
