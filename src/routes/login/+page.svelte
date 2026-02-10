@@ -1,8 +1,10 @@
 <script>
 	import {AuthenticationService} from '$lib/api';
-	import {auth, Form} from '$lib';
+	import {auth, Form, PasswordReset} from '$lib';
 	import {goto} from '$app/navigation';
 	import {page} from '$app/stores';
+
+	let showPasswordReset = $state(false);
 
 	let email = $state('');
 	let password = $state('');
@@ -100,5 +102,22 @@
 				/>
 			</div>
 		</Form>
+
+		<p class="mt-4 text-sm text-gray-600">
+			<button
+				type="button"
+				onclick={() => showPasswordReset = !showPasswordReset}
+				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
+			>
+				{showPasswordReset ? 'Back to sign in' : 'Forgot your password?'}
+			</button>
+		</p>
+
+		{#if showPasswordReset}
+			<section aria-labelledby="reset-heading" class="mt-4">
+				<h2 id="reset-heading" class="text-lg font-semibold mb-3">Reset Password</h2>
+				<PasswordReset bind:email={email} />
+			</section>
+		{/if}
 	</div>
 </div>
