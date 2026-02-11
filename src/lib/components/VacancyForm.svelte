@@ -2,6 +2,7 @@
 	import {Form} from '$lib';
 
 	let {
+		mode = 'create', // 'create' or 'view'
 		date = '',
 		startTime = $bindable(''),
 		endTime = $bindable(''),
@@ -12,8 +13,11 @@
 		error = null,
 		loading = false,
 		onsubmit,
-		oncancel
+		oncancel,
+		ondelete = undefined
 	} = $props();
+
+	const isReadonly = $derived(mode === 'view');
 
 	const timeError = $derived(
 		startTime && endTime && endTime <= startTime ? 'End time must be after start time' : null
@@ -32,15 +36,24 @@
 </script>
 
 <div class="sticky top-4 p-6 bg-gray-50 border border-gray-200 rounded-lg">
-	<h2 class="text-xl font-semibold mb-4">Create New Vacancy</h2>
+	<h2 class="text-xl font-semibold mb-4">{isReadonly ? 'Vacancy Details' : 'Create New Vacancy'}</h2>
 
 	<Form
 		error={timeError || error}
-		legend="Create vacancy"
+		legend={isReadonly ? 'View vacancy' : 'Create vacancy'}
 		{loading}
 		{oncancel}
-		onsubmit={(e) => { if (!timeError) onsubmit(e); }}
-		submitLabel="Create Vacancy"
+		onsubmit={(e) => { 
+			if (isReadonly) {
+				// In readonly mode, submit button acts as close button
+				oncancel();
+			} else if (!timeError) {
+				onsubmit(e);
+			}
+		}}
+		submitLabel={isReadonly ? 'Close' : 'Create Vacancy'}
+		deleteLabel={isReadonly ? 'Delete' : undefined}
+		ondelete={ondelete}
 	>
 		{#if formattedDate}
 			<p class="text-sm font-medium text-gray-700">{formattedDate}</p>
@@ -59,6 +72,7 @@
 					required
 					step="300"
 					type="time"
+					disabled={isReadonly}
 				/>
 			</div>
 
@@ -74,6 +88,7 @@
 					required
 					step="300"
 					type="time"
+					disabled={isReadonly}
 				/>
 			</div>
 		</div>
@@ -88,6 +103,7 @@
 				id="locationId"
 				name="locationId"
 				required
+				disabled={isReadonly}
 			>
 				<option value="" disabled selected>Select a location</option>
 				{#each locations as location}
@@ -106,6 +122,7 @@
 				id="employeeId"
 				name="employeeId"
 				required
+				disabled={isReadonly}
 			>
 				<option value="" disabled selected>Select an employee</option>
 				{#each employees as employee}

@@ -4,8 +4,10 @@
 		error = null,
 		loading = false,
 		submitLabel = 'Submit',
+		deleteLabel = undefined,
 		onsubmit,
 		oncancel = undefined,
+		ondelete = undefined,
 		children
 	} = $props();
 
@@ -53,6 +55,15 @@
 	</fieldset>
 
 	<div class="flex items-center justify-end gap-3 mt-6">
+		{#if ondelete && deleteLabel}
+			<button
+				type="button"
+				disabled={loading}
+				class="mr-auto px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+				onclick={ondelete}
+			>{deleteLabel}
+			</button>
+		{/if}
 		{#if oncancel}
 			<button
 				type="button"

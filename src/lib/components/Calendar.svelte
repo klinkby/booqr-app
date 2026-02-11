@@ -4,8 +4,10 @@
 
 	let {
 		events = [],
+		slotMaxTime = '18:00:00',
 		onDatesChange = undefined,
 		onDateClick = undefined,
+		onEventClick = undefined,
 		onEventResize = undefined,
 		onEventDrop = undefined
 	} = $props();
@@ -30,7 +32,7 @@
 		firstDay: 1, // Start week on Monday
 		allDaySlot: false, // Hide all-day slot since we're showing time-specific vacancies
 		slotMinTime: '06:00:00', // Start day at 6 AM
-		slotMaxTime: '22:00:00', // End day at 10 PM
+		slotMaxTime, // End day (reactive, can be expanded)
 		headerToolbar: {
 			start: 'prev,next today',
 			center: 'title',
@@ -43,6 +45,8 @@
 		datesSet: onDatesChange,
 		// Event Calendar calls this when user clicks on a date/time
 		dateClick: onDateClick,
+		// Event Calendar calls this when user clicks on an event
+		eventClick: onEventClick,
 		eventResize: onEventResize,
 		eventDrop: onEventDrop
 	});
