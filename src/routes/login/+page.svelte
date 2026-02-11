@@ -119,5 +119,12 @@
 				<PasswordReset bind:email={email} />
 			</section>
 		{/if}
+
+		<p class="mt-4 text-sm text-gray-600">
+			Don't have an account?
+			<a href="/sign-up" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline">
+				Sign up
+			</a>
+		</p>
 	</div>
 </div>

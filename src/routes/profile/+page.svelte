@@ -1,6 +1,6 @@
 <script>
 	import { UserService } from '$lib/api';
-	import { auth, Form, PasswordReset, invokeApi } from '$lib';
+	import { auth, Form, ContactFields, PasswordReset, invokeApi } from '$lib';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
@@ -87,49 +87,7 @@
 						submitLabel="Save Changes"
 						onsubmit={handleSubmit}
 					>
-						<!-- Email: read-only display -->
-						<div>
-							<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-								Email
-							</label>
-							<input
-								id="email"
-								name="email"
-								type="email"
-								disabled
-								bind:value={email}
-								class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm"
-								title="Email cannot be changed"
-							/>
-						</div>
-
-						<!-- Name: editable -->
-						<div>
-							<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-								Name
-							</label>
-							<input
-								id="name"
-								name="name"
-								type="text"
-								bind:value={name}
-								class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-							/>
-						</div>
-
-						<!-- Phone: editable -->
-						<div>
-							<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-								Phone
-							</label>
-							<input
-								id="phone"
-								name="phone"
-								type="tel"
-								bind:value={phone}
-								class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-							/>
-						</div>
+						<ContactFields bind:email bind:name bind:phone emailDisabled />
 					</Form>
 				</div>
 			</section>
