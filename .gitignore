@@ -23,7 +23,3 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .idea
-
-# Screenshots (temporary for demos)
-*.png
-!static/**/*.png

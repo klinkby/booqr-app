@@ -14,9 +14,6 @@ It follows secure, accessible, and simply standards-first principles.
 - **Event Handling**: Use Svelte 5 event attributes (e.g., `onclick={handler}`, `onsubmit={handler}`) instead of Svelte
 	4 `on:click`.
 - **Styling**: Tailwind CSS with the official `forms` plugin ensures a minimal but extendable design system.
-- **Dark Mode**: Tailwind CSS v4 enables dark mode by default using the `prefers-color-scheme` media query. Use the
-	`dark:` variant (e.g., `dark:bg-gray-900`, `dark:text-white`) to apply styles when the user's OS is set to dark mode.
-	No configuration is required — this is equivalent to `darkMode: 'media'` in Tailwind v3.
 - **Components**: Prefer small, composable components. Use snippets (`{#snippet name(args)}...{/snippet}`) for reusable
 	UI fragments within a component.
 - **Tooling**: Keeps dependencies lean by relying on native ES2022 features and avoiding TypeScript tooling.
