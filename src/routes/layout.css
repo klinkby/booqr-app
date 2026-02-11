@@ -2,6 +2,27 @@
 
 @plugin '@tailwindcss/forms';
 
+/*
+ * Dark Mode Configuration:
+ * Tailwind CSS v4 enables dark mode by default using the 'prefers-color-scheme' media query.
+ * This means the 'dark:' variant utilities will automatically apply when the user's
+ * operating system is set to dark mode. No additional configuration is required.
+ *
+ * Usage: Apply dark mode variants to any utility class, e.g.:
+ *   - dark:bg-gray-900 (dark background)
+ *   - dark:text-white (dark text color)
+ *   - dark:border-gray-700 (dark border color)
+ */
+
+/* Global dark mode styles for html and body */
+html {
+	@apply bg-white dark:bg-gray-950;
+}
+
+body {
+	@apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+}
+
 /*!* Screen-reader only utility (minimal fallback if Tailwind's sr-only isn't available at runtime) *!*/
 /*.sr-only {*/
 /*	position: absolute !important;*/
