@@ -50,6 +50,13 @@
 		eventResize: onEventResize,
 		eventDrop: onEventDrop
 	});
+
+	// Update calendar when slotMaxTime changes
+	$effect(() => {
+		if (cal && slotMaxTime) {
+			cal.setOption('slotMaxTime', slotMaxTime);
+		}
+	});
 </script>
 
 <svelte:window onkeydown={handleKeydown}/>

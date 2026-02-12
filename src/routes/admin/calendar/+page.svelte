@@ -271,23 +271,29 @@
 	}
 
 	/**
-	 * Expand calendar view by 6 hours (max 2 times)
+	 * Expand calendar view by 6 hours (max 2 times, not beyond midnight)
 	 */
 	function expandCalendar() {
-		if (expandCount < 2) {
+		const currentHour = parseInt(slotMaxTime.split(':')[0]);
+		const newHour = currentHour + 6;
+		
+		// Cap at midnight and only increment if we actually change the time
+		if (newHour < 24) {
+			slotMaxTime = `${newHour.toString().padStart(2, '0')}:00:00`;
 			expandCount++;
-			const currentHour = parseInt(slotMaxTime.split(':')[0]);
-			const newHour = currentHour + 6;
-			// Cap at midnight (24:00 or 00:00 next day)
-			slotMaxTime = newHour >= 24 ? '24:00:00' : `${newHour.toString().padStart(2, '0')}:00:00`;
+		} else if (currentHour < 24) {
+			// If we're not already at midnight, go to midnight
+			slotMaxTime = '24:00:00';
+			expandCount++;
 		}
+		// If already at midnight (24:00:00), do nothing
 	}
 </script>
 
 <div class="container mx-auto px-4 py-8 max-w-7xl">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-3xl font-bold">Calendar</h1>
-		{#if expandCount < 2}
+		{#if slotMaxTime !== '24:00:00'}
 			<button
 				onclick={expandCalendar}
 				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
