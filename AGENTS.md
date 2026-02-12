@@ -291,8 +291,10 @@ buttons. Consumers inject their own form fields as children.
 | `error` | `string \| null` | `null` | Error message to display above the form |
 | `loading` | `boolean` | `false` | Disables fieldset and buttons, shows loading text on submit |
 | `submitLabel` | `string` | `'Submit'` | Label for the submit button |
+| `deleteLabel` | `string` | `undefined` | Label for the delete button — if omitted, no Delete button shown |
 | `onsubmit` | `(event) => void` | required | Submit handler — `preventDefault` is handled by the component |
 | `oncancel` | `() => void` | `undefined` | Cancel callback — if omitted, no Cancel button shown |
+| `ondelete` | `() => void` | `undefined` | Delete callback — if omitted, no Delete button shown |
 | `children` | snippet | required | Form fields to render inside the fieldset |
 
 **Features**:
@@ -300,7 +302,8 @@ buttons. Consumers inject their own form fields as children.
 - Automatically calls `event.preventDefault()` on submit
 - Error alert stays in DOM (toggled with `class:hidden`) for reliable `aria-live` announcements
 - Submit button shows "Please wait…" during loading
-- Both submit and cancel buttons disabled during loading
+- All buttons disabled during loading
+- Delete button appears on the left (with `mr-auto`) in red styling
 - Uses `novalidate` on form for custom validation handling
 
 **Styling**: Uses app's gray/indigo Tailwind palette — red error alerts, gray Cancel button, indigo Submit button,
@@ -379,10 +382,17 @@ import { Calendar, TimeGrid, Interaction } from '@event-calendar/core';
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `events` | `Array<object>` | `[]` | Array of event objects in Event Calendar format |
+| `slotMaxTime` | `string` | `'18:00:00'` | End time for the calendar view (can be dynamically adjusted) |
 | `onDatesChange` | `(info) => void` | `undefined` | Callback when user navigates to different week — receives
 `{start, end, startStr, endStr, view}` |
 | `onDateClick` | `(info) => void` | `undefined` | Callback when user clicks on a date/time slot — receives
 `{date, dateStr, allDay, resource, jsEvent, view}`. **Requires Interaction plugin**. |
+| `onEventClick` | `(info) => void` | `undefined` | Callback when user clicks on an event — receives
+`{event, jsEvent, view}`. **Requires Interaction plugin**. |
+| `onEventResize` | `(info) => void` | `undefined` | Callback when user resizes an event (requires event to have
+`durationEditable: true`) |
+| `onEventDrop` | `(info) => void` | `undefined` | Callback when user drags an event (requires event to have
+`startEditable: true`) |
 
 **Event Object Format**:
 Events must be provided in Event Calendar format:
@@ -393,6 +403,8 @@ Events must be provided in Event Calendar format:
   start: string | Date,           // ISO8601 string or Date object
   end: string | Date,             // ISO8601 string or Date object
   title: string,                  // Display text
+  startEditable: boolean,         // Allow dragging (default: true)
+  durationEditable: boolean,      // Allow resizing (default: true)
   backgroundColor: string,        // CSS color (optional)
   textColor: string,              // CSS color (optional)
   extendedProps: object           // Custom data (optional)
@@ -401,10 +413,11 @@ Events must be provided in Event Calendar format:
 
 **Configuration**:
 
-- Weekly view with hourly time grid (6 AM - 10 PM)
+- Weekly view with hourly time grid (6 AM - configurable end time, default 6 PM)
 - Week starts on Monday
 - No all-day slot (optimized for time-specific events)
 - Navigation toolbar: Previous, Next, Today buttons
+- End time can be dynamically adjusted via `slotMaxTime` prop
 
 **Timezone Handling**:
 
@@ -448,14 +461,15 @@ import { Calendar, TimeGrid, Interaction } from '@event-calendar/core';
 
 ### VacancyForm (`src/lib/components/VacancyForm.svelte`)
 
-A form component for creating new vacancies with location and employee assignment. Uses the Form component internally
-and is displayed as a side panel in the admin calendar.
+A form component for creating and viewing vacancies with location and employee assignment. Supports both create and
+read-only view modes. Uses the Form component internally and is displayed as a side panel in the admin calendar.
 
 **Import**: `import { VacancyForm } from '$lib';`
 
 **Props** (via `$props()` with `$bindable`):
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `mode` | `string` | `'create'` | Form mode: `'create'` or `'view'` (read-only) |
 | `date` | `string` | `''` | Date for the vacancy in `YYYY-MM-DD` format (displayed as read-only formatted text) |
 | `startTime` | `string` (bindable) | `''` | Start time in `HH:mm` format (5-minute step) |
 | `endTime` | `string` (bindable) | `''` | End time in `HH:mm` format (5-minute step) |
@@ -465,18 +479,22 @@ and is displayed as a side panel in the admin calendar.
 | `employees` | `Array<object>` | `[]` | Array of employee objects with `{id, name, email}` |
 | `error` | `string \| null` | `null` | Error message to display |
 | `loading` | `boolean` | `false` | Loading state for submit button |
-| `onsubmit` | `(event) => void` | required | Submit handler |
+| `onsubmit` | `(event) => void` | required | Submit handler (not called in view mode) |
 | `oncancel` | `() => void` | required | Cancel handler |
+| `ondelete` | `() => void` | `undefined` | Delete handler — shown only in view mode |
 
 **Features**:
 
 - Uses `$bindable` props for two-way data binding (Svelte 5 pattern)
 - Wraps Form component with pre-styled sticky panel layout
+- **Dual mode**: `mode='create'` for creating new vacancies, `mode='view'` for read-only details
+- In view mode: all fields disabled, submit button becomes "Close", delete button available
 - Date is set by the calendar click and shown as formatted read-only text (e.g. "Monday, February 9, 2026")
 - Time-only inputs (`type="time"` with `step="300"` for 5-minute intervals) for start/end — side by side
 - Built-in validation: end time must be after start time (blocks submission and shows error)
 - Location and employee dropdowns with validation
 - All fields required for submission
+- Panel width: `w-80` (320px) for better mobile experience
 
 **Usage example** (from `/admin/calendar`):
 

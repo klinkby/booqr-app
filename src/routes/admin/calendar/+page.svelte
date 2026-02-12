@@ -8,11 +8,17 @@
 	let loading = $state(false);
 	let error = $state(null);
 
+	// Calendar view settings
+	let slotMaxTime = $state('18:00:00'); // Default end time
+	let expandCount = $state(0); // Track number of expansions (max 2)
+
 	// Track current date range for refreshing
 	let currentDateRange = $state({start: null, end: null});
 
 	// Form state for creating vacancies
 	let showForm = $state(false);
+	let formMode = $state('create'); // 'create' or 'view'
+	let selectedVacancyId = $state(null);
 	let formData = $state({
 		date: '',
 		startTime: '',
@@ -25,7 +31,7 @@
 
 	// Live preview event shown on calendar while form is open
 	const previewEvent = $derived.by(() => {
-		if (!showForm || !formData.date || !formData.startTime || !formData.endTime) return null;
+		if (!showForm || formMode !== 'create' || !formData.date || !formData.startTime || !formData.endTime) return null;
 		return {
 			id: 'preview',
 			start: formData.date + 'T' + formData.startTime,
@@ -81,6 +87,8 @@
 		const startDate = new Date(info.date);
 		const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour
 
+		formMode = 'create';
+		selectedVacancyId = null;
 		formData = {
 			date: toLocalDate(startDate),
 			startTime: toLocalTime(startDate),
@@ -90,6 +98,39 @@
 		};
 		formError = null;
 		showForm = true;
+	}
+
+	/**
+	 * Handle event click on calendar - show details in read-only mode
+	 * @param {object} info - Contains {event, jsEvent, view}
+	 */
+	async function handleEventClick(info) {
+		// Ignore clicks on preview event
+		if (info.event.id === 'preview') return;
+
+		formMode = 'view';
+		selectedVacancyId = info.event.id;
+		formError = null;
+		formLoading = true;
+		showForm = true;
+
+		try {
+			const vacancy = await invokeApi(() => VacancyService.getVacancyById(info.event.id));
+			const startDate = new Date(vacancy.startTime);
+			const endDate = new Date(vacancy.endTime);
+
+			formData = {
+				date: toLocalDate(startDate),
+				startTime: toLocalTime(startDate),
+				endTime: toLocalTime(endDate),
+				employeeId: vacancy.employeeId || '',
+				locationId: vacancy.locationId?.toString() || ''
+			};
+		} catch (err) {
+			formError = err.message || 'Failed to load vacancy details';
+		} finally {
+			formLoading = false;
+		}
 	}
 
 	/**
@@ -130,6 +171,31 @@
 		formError = null;
 	}
 
+	/**
+	 * Handle vacancy deletion
+	 */
+	async function handleDelete() {
+		if (!selectedVacancyId) return;
+
+		formError = null;
+		formLoading = true;
+
+		try {
+			await invokeApi(() => VacancyService.deleteVacancy(selectedVacancyId));
+
+			// Close form and refresh calendar events
+			showForm = false;
+			// Re-fetch vacancies for current date range
+			if (currentDateRange.start && currentDateRange.end) {
+				await fetchVacancies(currentDateRange.start, currentDateRange.end);
+			}
+		} catch (err) {
+			formError = err.message || 'Failed to delete vacancy';
+		} finally {
+			formLoading = false;
+		}
+	}
+
 	function handleEventResize(info) {
 		if (info.event.id === 'preview') {
 			formData.endTime = toLocalTime(info.event.end);
@@ -154,6 +220,8 @@
 			start: utcToLocalIso(vacancy.startTime),
 			end: utcToLocalIso(vacancy.endTime),
 			title: vacancy.bookingId ? 'Booked' : 'Available',
+			startEditable: false, // Saved events should not be draggable
+			durationEditable: false, // Saved events should not be resizable
 			classNames: vacancy.bookingId
 				? ['!bg-red-500', '!text-white', '!border-red-600']
 				: ['!bg-green-500', '!text-white', '!border-green-600'],
@@ -201,10 +269,39 @@
 		currentDateRange = {start: info.start, end: info.end};
 		fetchVacancies(info.start, info.end);
 	}
+
+	/**
+	 * Expand calendar view by 6 hours (max 2 times, not beyond midnight)
+	 */
+	function expandCalendar() {
+		const currentHour = parseInt(slotMaxTime.split(':')[0]);
+		const newHour = currentHour + 6;
+		
+		// Cap at midnight and only increment if we actually change the time
+		if (newHour < 24) {
+			slotMaxTime = `${newHour.toString().padStart(2, '0')}:00:00`;
+			expandCount++;
+		} else if (currentHour < 24) {
+			// If we're not already at midnight, go to midnight
+			slotMaxTime = '24:00:00';
+			expandCount++;
+		}
+		// If already at midnight (24:00:00), do nothing
+	}
 </script>
 
 <div class="container mx-auto px-4 py-8 max-w-7xl">
-	<h1 class="text-3xl font-bold mb-6">Calendar</h1>
+	<div class="flex justify-between items-center mb-6">
+		<h1 class="text-3xl font-bold">Calendar</h1>
+		{#if slotMaxTime !== '24:00:00'}
+			<button
+				onclick={expandCalendar}
+				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+			>
+				Extend Hours (+6h)
+			</button>
+		{/if}
+	</div>
 
 	{#if error}
 		<div role="alert" aria-live="assertive" class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-md">
@@ -217,7 +314,9 @@
 		<div class="flex-1 min-w-0">
 			<Calendar
 				events={calendarEvents}
+				{slotMaxTime}
 				onDateClick={handleDateClick}
+				onEventClick={handleEventClick}
 				onDatesChange={handleDatesChange}
 				onEventResize={handleEventResize}
 				onEventDrop={handleEventDrop}
@@ -226,8 +325,9 @@
 
 		<!-- Form panel -->
 		{#if showForm}
-			<div class="w-96 shrink-0">
+			<div class="w-80 shrink-0">
 				<VacancyForm
+					mode={formMode}
 					date={formData.date}
 					bind:startTime={formData.startTime}
 					bind:endTime={formData.endTime}
@@ -239,6 +339,7 @@
 					loading={formLoading}
 					onsubmit={handleFormSubmit}
 					oncancel={handleFormCancel}
+					ondelete={formMode === 'view' ? handleDelete : undefined}
 				/>
 			</div>
 		{/if}
