@@ -76,12 +76,23 @@ test.describe('Calendar UX Adjustments', () => {
 	test('form panel width is narrower (w-80 instead of w-96)', async ({page}) => {
 		await page.goto('/admin/calendar');
 
-		// Click on the calendar to open the form
-		// We need to wait for the calendar to render first
-		await page.waitForTimeout(1000);
+		// Wait for the calendar component to be visible
+		await expect(page.locator('h1:has-text("Calendar")')).toBeVisible();
 
-		// The form should not be visible initially
-		await expect(page.locator('text=Create New Vacancy')).not.toBeVisible();
+		// Click on a time slot to open the form (simulate clicking Monday at 10:00)
+		// The calendar renders with time slots that we can click
+		const timeSlot = page.locator('.ec-time-grid').first();
+		await expect(timeSlot).toBeVisible({timeout: 5000});
+		
+		// Click to open the form
+		await timeSlot.click();
+
+		// Wait for form to appear
+		await expect(page.locator('text=Create New Vacancy')).toBeVisible({timeout: 3000});
+
+		// Verify the form panel has the w-80 class (320px width)
+		const formPanel = page.locator('.w-80').first();
+		await expect(formPanel).toBeVisible();
 	});
 
 	test('form shows "Vacancy Details" title in view mode', async ({page}) => {
@@ -104,11 +115,17 @@ test.describe('Calendar UX Adjustments', () => {
 		await page.goto('/admin/calendar');
 
 		// Wait for calendar to load
-		await page.waitForTimeout(1000);
+		await expect(page.locator('h1:has-text("Calendar")')).toBeVisible();
+		
+		// Wait for events to be rendered (green/red event blocks)
+		const eventElement = page.locator('.ec-event').first();
+		await expect(eventElement).toBeVisible({timeout: 5000});
+		
+		// Click on the event to open view mode
+		await eventElement.click();
 
-		// In a real test, we would click on an event to trigger the view mode
-		// For now, we just verify the components are present
-		await expect(page.locator('h1')).toHaveText('Calendar');
+		// Verify view mode form appears
+		await expect(page.locator('text=Vacancy Details')).toBeVisible({timeout: 3000});
 	});
 
 	test('delete button exists in Form component', async ({page}) => {
@@ -122,11 +139,12 @@ test.describe('Calendar UX Adjustments', () => {
 	test('calendar supports event click handler', async ({page}) => {
 		await page.goto('/admin/calendar');
 
-		// Wait for calendar to render
-		await page.waitForTimeout(1000);
-
+		// Wait for calendar to render with proper elements
+		await expect(page.locator('h1:has-text("Calendar")')).toBeVisible();
+		
 		// The Calendar component now has onEventClick prop
 		// Events should be clickable when rendered
-		await expect(page.locator('h1')).toHaveText('Calendar');
+		const calendarContainer = page.locator('.ec');
+		await expect(calendarContainer).toBeVisible({timeout: 5000});
 	});
 });
