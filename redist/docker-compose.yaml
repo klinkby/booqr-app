@@ -3,18 +3,18 @@ services:
   app:
     # image: "klinkby/booqr-app:4"
     build: ..
-    ports:
-      - "8080:8080/tcp"
     read_only: true
     tmpfs:
-      - "/tmp:mode=1777"
+      - "/tmp:mode=1777,noexec,nosuid"
+    volumes:
+      - app-sock:/var/run/lighttpd
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "wget -qO- http://127.0.0.1:8080/" ]
+      test: [ "CMD-SHELL", "test -S /var/run/lighttpd/sock" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -23,3 +23,6 @@ services:
         limits:
           cpus: "1.0"
           memory: "64M"
+
+volumes:
+  app-sock:
