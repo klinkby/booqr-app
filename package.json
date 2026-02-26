@@ -22,7 +22,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "dotenv": "^17.3.1",
     "openapi-typescript-codegen": "^0.30.0",
-    "svelte": "^5.51.1",
+    "svelte": "^5.53.5",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
