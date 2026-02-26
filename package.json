@@ -20,7 +20,7 @@
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/vite": "^4.1.18",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "openapi-typescript-codegen": "^0.30.0",
     "svelte": "^5.51.1",
     "tailwindcss": "^4.1.18",
