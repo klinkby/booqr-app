@@ -13,7 +13,7 @@
     "import-api": "curl -sf -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' https://www.booqr.dk/api/v1.json -o /tmp/booqr-v1.json && openapi -i /tmp/booqr-v1.json -o ./src/lib/.api-tmp --client fetch && tsc ./src/lib/.api-tmp/index.ts --target es2022 --module esnext --moduleResolution node --outDir ./src/lib/api --allowJs --skipLibCheck --allowSyntheticDefaultImports --esModuleInterop --lib es2022,dom && node scripts/postprocess-api-models.js ./src/lib/.api-tmp/models ./src/lib/api/models && rm -rf ./src/lib/.api-tmp"
   },
   "devDependencies": {
-    "@event-calendar/core": "^5.3.2",
+    "@event-calendar/core": "^5.4.0",
     "@playwright/test": "^1.58.2",
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.52.2",
