@@ -1,5 +1,5 @@
 <script>
-	import {ServiceService} from '$lib/api';
+	import {ServiceService, UserService} from '$lib/api';
 	import {Form, invokeApi} from '$lib';
 	import {goto} from '$app/navigation';
 	import {onMount} from 'svelte';
@@ -10,23 +10,43 @@
 
 	let name = $state('');
 	let duration = $state('');
+	let selectedEmployeeIds = $state([]);
+	let employees = $state([]);
 	let error = $state(null);
 	let loading = $state(false);
 	let loadingData = $state(false);
 
-	async function loadService() {
-		if (!isEdit) return;
+	function isSelected(empId) {
+		return selectedEmployeeIds.includes(String(empId));
+	}
 
+	function toggleEmployee(empId) {
+		const strId = String(empId);
+		if (isSelected(empId)) {
+			selectedEmployeeIds = selectedEmployeeIds.filter(x => x !== strId);
+		} else {
+			selectedEmployeeIds = [...selectedEmployeeIds, strId];
+		}
+	}
+
+	async function loadData() {
 		loadingData = true;
 		try {
-			const service = await invokeApi(() => ServiceService.getServiceById(id));
-			name = service.name;
-			duration = service.duration;
+			const [employeesRes, service] = await Promise.all([
+				invokeApi(() => UserService.getUsers(undefined, 'Employee')),
+				isEdit ? invokeApi(() => ServiceService.getServiceById(id)) : Promise.resolve(null)
+			]);
+			employees = employeesRes.items;
+			if (service) {
+				name = service.name;
+				duration = service.duration;
+				selectedEmployeeIds = (service.employees || []).map(String);
+			}
 		} catch (err) {
 			if (import.meta.env.DEV) {
-				console.error('Failed to load service:', err);
+				console.error('Failed to load data:', err);
 			}
-			error = 'Failed to load service. Please try again.';
+			error = 'Failed to load data. Please try again.';
 		} finally {
 			loadingData = false;
 		}
@@ -38,9 +58,9 @@
 
 		try {
 			if (isEdit) {
-				await invokeApi(() => ServiceService.updateService(id, {name, duration}));
+				await invokeApi(() => ServiceService.updateService(id, {name, duration, employees: selectedEmployeeIds}));
 			} else {
-				await invokeApi(() => ServiceService.addService({name, duration}));
+				await invokeApi(() => ServiceService.addService({name, duration, employees: selectedEmployeeIds}));
 			}
 			await goto('/admin/services');
 		} catch (err) {
@@ -57,9 +77,7 @@
 		goto('/admin/services');
 	}
 
-	onMount(() => {
-		loadService();
-	});
+	onMount(loadData);
 </script>
 
 <div>
@@ -107,6 +125,28 @@
 						placeholder="e.g., 01:00:00"
 					/>
 				</div>
+
+				<fieldset>
+					<legend class="block text-sm font-medium text-gray-700 mb-1">Employees</legend>
+					<div class="space-y-2">
+						{#each employees as emp}
+							<div class="flex items-center gap-2">
+								<input
+									type="checkbox"
+									id="emp-{emp.id}"
+									checked={isSelected(emp.id)}
+									onchange={() => toggleEmployee(emp.id)}
+									class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+								/>
+								<label for="emp-{emp.id}" class="text-sm text-gray-700">
+									{emp.name || emp.email}
+								</label>
+							</div>
+						{:else}
+							<p class="text-sm text-gray-500">No employees found.</p>
+						{/each}
+					</div>
+				</fieldset>
 			</Form>
 		</div>
 	{/if}

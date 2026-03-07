@@ -2,6 +2,7 @@
  * @typedef {object} Service
  * @property {string} name
  * @property {string} duration
+ * @property {Array<number | string>} employees
  * @property {number | string} [id]
  * @property {string} [created]
  * @property {string} [modified]
