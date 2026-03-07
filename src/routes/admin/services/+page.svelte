@@ -1,21 +1,40 @@
 <script>
-	import {ServiceService} from '$lib/api';
-	import {PaginatedTable} from '$lib';
+	import {ServiceService, UserService} from '$lib/api';
+	import {DataTable, invokeApi} from '$lib';
 	import {goto} from '$app/navigation';
+	import {onMount} from 'svelte';
 
 	const columns = [
 		{key: 'name', label: 'Name'},
-		{key: 'duration', label: 'Duration'}
+		{key: 'duration', label: 'Duration'},
+		{key: 'employeeNames', label: 'Employees'}
 	];
-	const fetchCommand = ServiceService.getServices;
 
-	function handleEdit(row) {
-		goto(`/admin/services/${row.id}`);
-	}
+	let rows = $state([]);
+	let loading = $state(true);
+	let error = $state(null);
 
-	function handleCreate() {
-		goto('/admin/services/new');
-	}
+	function handleEdit(row) { goto(`/admin/services/${row.id}`); }
+	function handleCreate() { goto('/admin/services/new'); }
+
+	onMount(async () => {
+		try {
+			const [servicesRes, empRes] = await Promise.all([
+				invokeApi(() => ServiceService.getServices()),
+				invokeApi(() => UserService.getUsers(undefined, 'Employee'))
+			]);
+			const empMap = Object.fromEntries(empRes.items.map(e => [e.id, e.name || e.email]));
+			rows = servicesRes.items.map(s => ({
+				...s,
+				employeeNames: (s.employees || []).map(id => empMap[id] ?? id).join(', ')
+			}));
+		} catch (err) {
+			if (import.meta.env.DEV) console.error('Failed to fetch services:', err);
+			error = 'Failed to load services. Please try again.';
+		} finally {
+			loading = false;
+		}
+	});
 </script>
 
 <div>
@@ -28,5 +47,13 @@
 		>Create Service
 		</button>
 	</div>
-	<PaginatedTable {columns} {fetchCommand} onedit={handleEdit}/>
+	{#if loading}
+		<div role="status" aria-live="polite"><p>Loading...</p></div>
+	{:else if error}
+		<div role="alert" aria-live="assertive"><p class="text-red-600">{error}</p></div>
+	{:else if rows.length === 0}
+		<p>No services found.</p>
+	{:else}
+		<DataTable {columns} {rows} onedit={handleEdit}/>
+	{/if}
 </div>
