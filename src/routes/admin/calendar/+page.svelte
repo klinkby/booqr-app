@@ -52,11 +52,11 @@
 	onMount(async () => {
 		try {
 			const [locationsRes, usersRes] = await Promise.all([
-				invokeApi(() => LocationService.getLocations(0, 100)),
-				invokeApi(() => UserService.getUsers(0, 100))
+				invokeApi(() => LocationService.getLocations()),
+				invokeApi(() => UserService.getUsers(undefined, 'Employee'))
 			]);
 			locations = locationsRes.items;
-			employees = usersRes.items.filter(user => user.role === 'Employee' || user.role === 'Admin');
+			employees = usersRes.items;
 		} catch (err) {
 			// Silently fail - form just won't have dropdown options
 		}
@@ -123,7 +123,7 @@
 				date: toLocalDate(startDate),
 				startTime: toLocalTime(startDate),
 				endTime: toLocalTime(endDate),
-				employeeId: vacancy.employeeId || '',
+				employeeId: vacancy.employeeId?.toString() || '',
 				locationId: vacancy.locationId?.toString() || ''
 			};
 		} catch (err) {
@@ -219,7 +219,12 @@
 			id: vacancy.id,
 			start: utcToLocalIso(vacancy.startTime),
 			end: utcToLocalIso(vacancy.endTime),
-			title: vacancy.bookingId ? 'Booked' : 'Available',
+			title: vacancy.bookingId
+			? 'Booked'
+			: [
+					employees.find(e => e.id === vacancy.employeeId)?.name,
+					locations.find(l => l.id === vacancy.locationId)?.name
+				].filter(Boolean).join(' @ ') || 'Available',
 			startEditable: false, // Saved events should not be draggable
 			durationEditable: false, // Saved events should not be resizable
 			classNames: vacancy.bookingId
@@ -276,7 +281,7 @@
 	function expandCalendar() {
 		const currentHour = parseInt(slotMaxTime.split(':')[0]);
 		const newHour = currentHour + 6;
-		
+
 		// Cap at midnight and only increment if we actually change the time
 		if (newHour < 24) {
 			slotMaxTime = `${newHour.toString().padStart(2, '0')}:00:00`;
