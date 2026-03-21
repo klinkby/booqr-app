@@ -42,7 +42,7 @@
 		error={timeError || error}
 		legend={isReadonly ? 'View vacancy' : 'Create vacancy'}
 		{loading}
-		{oncancel}
+		oncancel={isReadonly ? undefined : oncancel}
 		onsubmit={(e) => { 
 			if (isReadonly) {
 				// In readonly mode, submit button acts as close button
@@ -66,7 +66,7 @@
 				</label>
 				<input
 					bind:value={startTime}
-					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
 					id="startTime"
 					name="startTime"
 					required
@@ -82,7 +82,7 @@
 				</label>
 				<input
 					bind:value={endTime}
-					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
 					id="endTime"
 					name="endTime"
 					required
@@ -99,7 +99,7 @@
 			</label>
 			<select
 				bind:value={locationId}
-				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
 				id="locationId"
 				name="locationId"
 				required
@@ -107,7 +107,7 @@
 			>
 				<option value="" disabled selected>Select a location</option>
 				{#each locations as location}
-					<option value={location.id}>{location.name}</option>
+					<option value={String(location.id)}>{location.name}</option>
 				{/each}
 			</select>
 		</div>
@@ -118,7 +118,7 @@
 			</label>
 			<select
 				bind:value={employeeId}
-				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
 				id="employeeId"
 				name="employeeId"
 				required
@@ -126,7 +126,7 @@
 			>
 				<option value="" disabled selected>Select an employee</option>
 				{#each employees as employee}
-					<option value={employee.id}>{employee.name || employee.email}</option>
+					<option value={String(employee.id)}>{employee.name || employee.email}</option>
 				{/each}
 			</select>
 		</div>

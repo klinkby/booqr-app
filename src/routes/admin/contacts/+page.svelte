@@ -8,7 +8,8 @@
 		{key: 'email', label: 'Email'},
 		{key: 'role', label: 'Role'}
 	];
-	const fetchCommand = UserService.getUsers;
+
+	const fetchCommand = (start, num) => UserService.getUsers(null, null, num, start);
 
 	function handleEdit(row) {
 		goto(`/admin/contacts/${row.id}`);

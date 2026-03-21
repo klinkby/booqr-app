@@ -21,12 +21,12 @@
 		try {
 			const [servicesRes, empRes] = await Promise.all([
 				invokeApi(() => ServiceService.getServices()),
-				invokeApi(() => UserService.getUsers(undefined, 'Employee'))
+				invokeApi(() => UserService.getUsers(undefined, 'Employee', 1000, 0))
 			]);
 			const empMap = Object.fromEntries(empRes.items.map(e => [e.id, e.name || e.email]));
 			rows = servicesRes.items.map(s => ({
 				...s,
-				employeeNames: (s.employees || []).map(id => empMap[id] ?? id).join(', ')
+				employeeNames: (s.employees || []).map(id => empMap[id] ?? id).join(', ') || '-'
 			}));
 		} catch (err) {
 			if (import.meta.env.DEV) console.error('Failed to fetch services:', err);
