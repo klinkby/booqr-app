@@ -34,7 +34,10 @@ function proxyToH2(req, res) {
 export default defineConfig({
 	build: {
 		target: 'es2022',
-		minify: 'esbuild'
+		minify: 'oxc'
+	},
+	oxc: {
+		target: 'es2022'
 	},
 	plugins: [
 		{
