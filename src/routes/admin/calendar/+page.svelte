@@ -1,12 +1,15 @@
 <script>
-	import {LocationService, UserService, VacancyService} from '$lib/api';
+	import {VacancyService} from '$lib/api';
 	import {auth, Calendar, VacancyForm} from '$lib';
 	import {invokeApi} from '$lib/invokeApi';
-	import {onMount} from 'svelte';
+	import {goto, invalidate} from '$app/navigation';
+	import {page} from '$app/stores';
+	import {vacancyCache} from './vacancyCache.js';
+	import {DateUtils} from './dateUtils.js';
 
-	let calendarRef;
+	let {data} = $props();
 
-	// Form state for creating/viewing vacancies
+	// Form state
 	let showForm = $state(false);
 	let formMode = $state('create');
 	let selectedVacancyId = $state(null);
@@ -34,33 +37,39 @@
 		};
 	});
 
-	// Dropdowns data (shared between Calendar and VacancyForm)
-	let locations = $state([]);
-	let employees = $state([]);
-
-	onMount(async () => {
-		try {
-			const [locationsRes, usersRes] = await Promise.all([
-				invokeApi(() => LocationService.getLocations()),
-				invokeApi(() => UserService.getUsers(undefined, 'Employee'))
-			]);
-			locations = locationsRes.items;
-			employees = usersRes.items;
-		} catch {
-			// Silently fail — form just won't have dropdown options
-		}
+	// Transform API vacancies to event calendar format, reactively derived from loaded data
+	const calendarEvents = $derived.by(() => {
+		const vacancyEvents = data.vacancies.map(vacancy => ({
+			id: vacancy.id,
+			start: DateUtils.utcToLocalIso(vacancy.startTime),
+			end: DateUtils.utcToLocalIso(vacancy.endTime),
+			title: vacancy.bookingId
+				? 'Booked'
+				: [
+						data.employees.find(e => e.id === vacancy.employeeId)?.name,
+						data.locations.find(l => l.id === vacancy.locationId)?.name
+					].filter(Boolean).join(' @ ') || 'Available',
+			startEditable: false,
+			durationEditable: false,
+			classNames: vacancy.bookingId
+				? ['!bg-red-500', '!text-white', '!border-red-600']
+				: ['!bg-green-500', '!text-white', '!border-green-600'],
+			extendedProps: {
+				employeeId: vacancy.employeeId,
+				locationId: vacancy.locationId,
+				bookingId: vacancy.bookingId
+			}
+		}));
+		return previewEvent ? [...vacancyEvents, previewEvent] : vacancyEvents;
 	});
 
-	function pad(n) {
-		return String(n).padStart(2, '0');
-	}
-
-	function toLocalDate(d) {
-		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-	}
-
-	function toLocalTime(d) {
-		return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+	// Week navigation: update URL params so the load function re-fetches for the new range
+	function handleDatesChange(info) {
+		goto(`?from=${info.start.toISOString()}&to=${info.end.toISOString()}`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true
+		});
 	}
 
 	function handleDateClick(info) {
@@ -70,11 +79,11 @@
 		formMode = 'create';
 		selectedVacancyId = null;
 		formData = {
-			date: toLocalDate(startDate),
-			startTime: toLocalTime(startDate),
-			endTime: toLocalTime(endDate),
+			date: DateUtils.toLocalDate(startDate),
+			startTime: DateUtils.toLocalTime(startDate),
+			endTime: DateUtils.toLocalTime(endDate),
 			employeeId: auth.userId || '',
-			locationId: locations[0]?.id || ''
+			locationId: data.locations[0]?.id || ''
 		};
 		formError = null;
 		showForm = true;
@@ -95,9 +104,9 @@
 			const endDate = new Date(vacancy.endTime);
 
 			formData = {
-				date: toLocalDate(startDate),
-				startTime: toLocalTime(startDate),
-				endTime: toLocalTime(endDate),
+				date: DateUtils.toLocalDate(startDate),
+				startTime: DateUtils.toLocalTime(startDate),
+				endTime: DateUtils.toLocalTime(endDate),
 				employeeId: vacancy.employeeId?.toString() || '',
 				locationId: vacancy.locationId?.toString() || ''
 			};
@@ -122,7 +131,8 @@
 				})
 			);
 			showForm = false;
-			calendarRef.refresh();
+			vacancyCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));
+			await invalidate('app:vacancies');
 		} catch (err) {
 			formError = err.message || 'Failed to create vacancy';
 		} finally {
@@ -137,15 +147,15 @@
 
 	function handleEventResize(info) {
 		if (info.event.id === 'preview') {
-			formData.endTime = toLocalTime(info.event.end);
+			formData.endTime = DateUtils.toLocalTime(info.event.end);
 		}
 	}
 
 	function handleEventDrop(info) {
 		if (info.event.id === 'preview') {
-			formData.date = toLocalDate(info.event.start);
-			formData.startTime = toLocalTime(info.event.start);
-			formData.endTime = toLocalTime(info.event.end);
+			formData.date = DateUtils.toLocalDate(info.event.start);
+			formData.startTime = DateUtils.toLocalTime(info.event.start);
+			formData.endTime = DateUtils.toLocalTime(info.event.end);
 		}
 	}
 
@@ -158,7 +168,8 @@
 		try {
 			await invokeApi(() => VacancyService.deleteVacancy(selectedVacancyId));
 			showForm = false;
-			calendarRef.refresh();
+			vacancyCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));
+			await invalidate('app:vacancies');
 		} catch (err) {
 			formError = err.message || 'Failed to delete vacancy';
 		} finally {
@@ -173,14 +184,12 @@
 	<div class="flex gap-6">
 		<div class="flex-1 min-w-0">
 			<Calendar
-				bind:this={calendarRef}
-				{locations}
-				{employees}
-				{previewEvent}
-				ondateclick={handleDateClick}
-				oneventclick={handleEventClick}
-				oneventresize={handleEventResize}
-				oneventdrop={handleEventDrop}
+				events={calendarEvents}
+				onDatesChange={handleDatesChange}
+				onDateClick={handleDateClick}
+				onEventClick={handleEventClick}
+				onEventResize={handleEventResize}
+				onEventDrop={handleEventDrop}
 			/>
 		</div>
 
@@ -193,8 +202,8 @@
 					bind:endTime={formData.endTime}
 					bind:locationId={formData.locationId}
 					bind:employeeId={formData.employeeId}
-					{locations}
-					{employees}
+					locations={data.locations}
+					employees={data.employees}
 					error={formError}
 					loading={formLoading}
 					onsubmit={handleFormSubmit}

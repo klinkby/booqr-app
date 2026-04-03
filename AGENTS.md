@@ -14,8 +14,9 @@ It follows secure, accessible, and simply standards-first principles.
 - **Event Handling**: Use Svelte 5 event attributes (e.g., `onclick={handler}`, `onsubmit={handler}`) instead of Svelte
 	4 `on:click`.
 - **Styling**: Tailwind CSS with the official `forms` plugin ensures a minimal but extendable design system.
-- **Components**: Prefer small, composable components. Use snippets (`{#snippet name(args)}...{/snippet}`) for reusable
-	UI fragments within a component.
+- **Components**: Prefer small, composable, **presentational** components. Components in `src/lib/components/` MUST NOT
+	import or call API services directly. They receive data via props and emit events via callbacks. Use snippets
+	(`{#snippet name(args)}...{/snippet}`) for reusable UI fragments within a component.
 - **Tooling**: Keeps dependencies lean by relying on native ES2022 features and avoiding TypeScript tooling.
 - **Verification**: Playwright is installed for end-to-end verification of the UI when needed.
 
@@ -167,6 +168,75 @@ dependencies.
 - **Default page size**: Always use `Num=100` (maximum result set size)
 - **Pagination**: If a response returns exactly `Num` results, then next page can be fetched with `Start = Start + Num`.
 
+## Data Loading Architecture
+
+This project uses SvelteKit's `load` functions and `depends`/`invalidate` lifecycle to manage data fetching. Components
+are purely presentational — all API calls belong in `+page.js` or `+layout.js` load functions, not in components.
+
+### Principles
+
+- **Components are presentational**: Components in `src/lib/components/` receive data via props and emit events via
+	callbacks. They MUST NOT import or call API services. Presentation-only state (e.g., expanded/collapsed, scroll
+	position, view settings like calendar time range) belongs inside the component.
+- **Load functions own data fetching**: Use `+page.js` for page-specific data and `+layout.js` for data shared across
+	child routes. The page component receives loaded data via `let {data} = $props()`.
+- **Separate stable and dynamic data**: Put rarely-changing data (e.g., reference lists like locations, employees) in
+	`+layout.js` so it loads once when entering the route. Put frequently-changing data (e.g., vacancies filtered by date
+	range) in `+page.js` so it re-fetches when URL params change.
+- **URL params drive dynamic queries**: Encode filter/range parameters in URL search params (e.g., `?from=...&to=...`).
+	Use `goto('?...', { replaceState: true, keepFocus: true, noScroll: true })` to update params — this automatically
+	re-triggers the page's load function.
+- **Invalidate after mutations**: After creating, updating, or deleting a resource, call
+	`invalidate('app:<resource>')` to re-run the load function with the current URL params. Register the dependency in the
+	load function with `depends('app:<resource>')`.
+- **Client-side caching**: SvelteKit does NOT cache load results across different URLs. For data that benefits from
+	cross-navigation caching (e.g., calendar weeks), use a module-level cache (plain JS `Map`) alongside the load
+	function. The load checks the cache before fetching; mutations purge the relevant cache entry before calling
+	`invalidate()`.
+
+### Pattern: Load Function with Client-Side Cache
+
+```js
+// +page.js
+import { invokeApi } from '$lib/invokeApi';
+import { myCache } from './myCache.js';
+
+export async function load({ url, depends }) {
+  depends('app:myresource');
+
+  const from = url.searchParams.get('from');
+  const to = url.searchParams.get('to');
+  if (!from || !to) return { items: [] };
+
+  const cached = myCache.get(from, to);
+  if (cached) return { items: cached };
+
+  const items = (await invokeApi(() => MyService.getItems(from, to, 0, 100))).items;
+  myCache.set(from, to, items);
+  return { items };
+}
+```
+
+```js
+// myCache.js — module singleton, persists across navigations within the session
+const cache = new Map();
+export const myCache = {
+  get: (from, to) => cache.get(`${from}|${to}`),
+  set: (from, to, items) => cache.set(`${from}|${to}`, items),
+  purge: (from, to) => cache.delete(`${from}|${to}`)
+};
+```
+
+```js
+// In +page.svelte — after a mutation:
+import { page } from '$app/stores';
+import { invalidate } from '$app/navigation';
+import { myCache } from './myCache.js';
+
+myCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));
+await invalidate('app:myresource');
+```
+
 ## Application Structure
 
 - **Routes**: SvelteKit file-based routing in `src/routes/`
@@ -179,11 +249,13 @@ dependencies.
 		is expired.
 	- `/admin/` - Protected admin area (requires login + Employee role)
 	- `/admin/calendar` - Interactive calendar for managing vacancies:
-		- Weekly time grid view (6 AM - 10 PM)
+		- Weekly time grid view (6 AM - 6 PM, expandable)
 		- Click-to-create: Employees click time slots to create vacancies
-		- Side panel form: VacancyForm appears in right panel (384px width)
-		- Auto-refresh: Calendar updates after creating vacancies
-		- Uses Calendar component with Interaction plugin for click handling
+		- Side panel form: VacancyForm appears in right panel (320px width)
+		- Data loading: `+layout.js` loads locations/employees (stable); `+page.js` loads vacancies by date range from
+			URL params with client-side cache (`vacancyCache.js`); mutations purge the current week and call
+			`invalidate('app:vacancies')`
+		- Uses Calendar component for display; page owns form state and API interactions
 	- `/admin/services` - Service list page with Create button and Edit actions
 	- `/admin/services/new` - Create service form page
 	- `/admin/services/[id]` - Edit service form page (dynamic route)
@@ -365,30 +437,21 @@ consistent focus rings.
 ### Calendar (`src/lib/components/Calendar.svelte`)
 
 A weekly calendar view component that displays time-based events using the `@event-calendar/core` library. The component
-is purely presentational (no IO) and relies on parent components to provide event data.
+is purely presentational (no IO) — it receives event data via props and emits user interactions via callbacks.
+Presentation-only state like the visible time range and the "Extend Hours" button are managed internally.
 
 **Import**: `import { Calendar } from '$lib';`
-
-**Required Plugin**: To enable click interactions, the `Interaction` plugin from `@event-calendar/core` must be included
-in the Calendar component:
-
-```js
-import { Calendar, TimeGrid, Interaction } from '@event-calendar/core';
-
-<Calendar plugins={[TimeGrid, Interaction]} {options} />
-```
 
 **Props** (via `$props()`):
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `events` | `Array<object>` | `[]` | Array of event objects in Event Calendar format |
-| `slotMaxTime` | `string` | `'18:00:00'` | End time for the calendar view (can be dynamically adjusted) |
 | `onDatesChange` | `(info) => void` | `undefined` | Callback when user navigates to different week — receives
 `{start, end, startStr, endStr, view}` |
 | `onDateClick` | `(info) => void` | `undefined` | Callback when user clicks on a date/time slot — receives
-`{date, dateStr, allDay, resource, jsEvent, view}`. **Requires Interaction plugin**. |
+`{date, dateStr, allDay, resource, jsEvent, view}`. |
 | `onEventClick` | `(info) => void` | `undefined` | Callback when user clicks on an event — receives
-`{event, jsEvent, view}`. **Requires Interaction plugin**. |
+`{event, jsEvent, view}`. |
 | `onEventResize` | `(info) => void` | `undefined` | Callback when user resizes an event (requires event to have
 `durationEditable: true`) |
 | `onEventDrop` | `(info) => void` | `undefined` | Callback when user drags an event (requires event to have
@@ -413,11 +476,11 @@ Events must be provided in Event Calendar format:
 
 **Configuration**:
 
-- Weekly view with hourly time grid (6 AM - configurable end time, default 6 PM)
+- Weekly view with hourly time grid (6 AM - 6 PM default, expandable to midnight via built-in "Extend Hours" button)
 - Week starts on Monday
 - No all-day slot (optimized for time-specific events)
 - Navigation toolbar: Previous, Next, Today buttons
-- End time can be dynamically adjusted via `slotMaxTime` prop
+- Keyboard shortcuts: `p` (prev), `n` (next), `t` (today)
 
 **Timezone Handling**:
 
@@ -427,30 +490,21 @@ suffix or timezone offset. This means passing a UTC string like `"2026-02-09T08:
 regardless of the user's timezone.
 
 To display correct local times, UTC strings from the API **must be converted to local timezone-free ISO strings** before
-passing to the calendar. The `/admin/calendar` page uses a `utcToLocalIso()` helper for this:
+passing to the calendar. The `/admin/calendar` page uses `DateUtils` from `dateUtils.js` for this:
 
 ```js
-// Convert UTC ISO string to local timezone-free ISO string for @event-calendar
-function utcToLocalIso(utcString) {
-  const d = new Date(utcString);        // Parses UTC, d holds local representation
-  return `${toLocalDate(d)}T${toLocalTime(d)}`; // e.g. "2026-02-09T10:00" (local)
-}
+import { DateUtils } from './dateUtils.js';
+
+DateUtils.utcToLocalIso('2026-02-09T08:00:00Z'); // → "2026-02-09T10:00" (local, CET+2)
+DateUtils.toLocalDate(new Date());                // → "2026-02-09"
+DateUtils.toLocalTime(new Date());                // → "10:00"
 ```
 
 **Rules**:
-- **API → Calendar**: Always convert UTC strings to local via `utcToLocalIso()` in `transformVacancyToEvent()`
+- **API → Calendar**: Always convert UTC strings to local via `DateUtils.utcToLocalIso()` when transforming events
 - **Calendar → API**: Use `new Date(localString).toISOString()` to convert local back to UTC for API submission
-- **Form date/time extraction**: Use `Date.getFullYear()`, `getMonth()`, `getDate()`, `getHours()`, `getMinutes()` (local
-	getters) — never `.toISOString().slice()` which gives UTC
-
-**Important**: The Calendar component in `/src/lib/components/Calendar.svelte` must include the Interaction plugin for
-`onDateClick` to work:
-
-```js
-import { Calendar, TimeGrid, Interaction } from '@event-calendar/core';
-
-<Calendar plugins={[TimeGrid, Interaction]} {options} />
-```
+- **Form date/time extraction**: Use `DateUtils.toLocalDate()` and `DateUtils.toLocalTime()` with `Date` objects — never
+	`.toISOString().slice()` which gives UTC
 
 **Styling**:
 
