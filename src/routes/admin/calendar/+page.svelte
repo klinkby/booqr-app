@@ -5,7 +5,7 @@
 	import {goto, invalidate} from '$app/navigation';
 	import {page} from '$app/stores';
 	import {vacancyCache} from './vacancyCache.js';
-	import {DateUtils} from './dateUtils.js';
+	import {DateUtils} from '$lib/dateUtils.js';
 
 	let {data} = $props();
 

@@ -7,6 +7,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export { AuthenticationService } from './services/AuthenticationService';
 export { BookingService } from './services/BookingService';
+export { EmployeeService } from './services/EmployeeService';
 export { LocationService } from './services/LocationService';
 export { OpenApiService } from './services/OpenApiService';
 export { ServiceService } from './services/ServiceService';

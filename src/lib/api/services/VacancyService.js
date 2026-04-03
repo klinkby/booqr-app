@@ -6,20 +6,16 @@ export class VacancyService {
      * Vacancy
      * @param fromTime
      * @param toTime
-     * @param start
-     * @param num
      * @returns CollectionResponseOfCalendarEvent OK
      * @throws ApiError
      */
-    static getVacancies(fromTime, toTime, start, num) {
+    static getVacancies(fromTime, toTime) {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/vacancies',
             query: {
                 'FromTime': fromTime,
                 'ToTime': toTime,
-                'Start': start,
-                'Num': num,
             },
             errors: {
                 400: `Bad Request`,

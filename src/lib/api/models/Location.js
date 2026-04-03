@@ -7,8 +7,8 @@
  * @property {string | null} [city]
  * @property {number | string} [id]
  * @property {string} [created]
- * @property {string} [modified]
  * @property {string | null} [deleted]
+ * @property {string} [modified]
  * @property {string | null} [_etag]
  */
 

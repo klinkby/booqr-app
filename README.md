@@ -15,8 +15,7 @@ minimalist, composable architecture.
 	system (`$state`, `$derived`, `$effect`, `$props`) for efficient state management.
 * **[SvelteKit SPA Mode](https://svelte.dev/docs/kit/single-page-apps)**: Static site generation targeting static
 	deployments with client-side routing.
-* **[Tailwind CSS](https://tailwindcss.com/)**: Utility-first CSS framework with the official `@tailwindcss/forms`
-	plugin for consistent, minimal styling.
+* **[Tailwind CSS](https://tailwindcss.com/)**: Utility-first CSS framework for consistent, minimal styling.
 * **[OpenAPI Code Generation](https://github.com/ferdikoomen/openapi-typescript-codegen)**: Auto-generated API client
 	from OpenAPI specification.
 * **JWT Authentication**: Secure authentication flow
