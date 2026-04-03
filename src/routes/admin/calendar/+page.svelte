@@ -4,20 +4,11 @@
 	import {invokeApi} from '$lib/invokeApi';
 	import {onMount} from 'svelte';
 
-	let events = $state([]);
-	let loading = $state(false);
-	let error = $state(null);
+	let calendarRef;
 
-	// Calendar view settings
-	let slotMaxTime = $state('18:00:00'); // Default end time
-	let expandCount = $state(0); // Track number of expansions (max 2)
-
-	// Track current date range for refreshing
-	let currentDateRange = $state({start: null, end: null});
-
-	// Form state for creating vacancies
+	// Form state for creating/viewing vacancies
 	let showForm = $state(false);
-	let formMode = $state('create'); // 'create' or 'view'
+	let formMode = $state('create');
 	let selectedVacancyId = $state(null);
 	let formData = $state({
 		date: '',
@@ -29,7 +20,7 @@
 	let formLoading = $state(false);
 	let formError = $state(null);
 
-	// Live preview event shown on calendar while form is open
+	// Live preview event shown on calendar while create-form is open
 	const previewEvent = $derived.by(() => {
 		if (!showForm || formMode !== 'create' || !formData.date || !formData.startTime || !formData.endTime) return null;
 		return {
@@ -42,13 +33,11 @@
 			classNames: ['!bg-gray-300', '!text-gray-600', '!border-gray-400', '!border-dashed']
 		};
 	});
-	const calendarEvents = $derived(previewEvent ? [...events, previewEvent] : events);
 
-	// Dropdowns data
+	// Dropdowns data (shared between Calendar and VacancyForm)
 	let locations = $state([]);
 	let employees = $state([]);
 
-	// Load locations and employees on mount (for form dropdowns)
 	onMount(async () => {
 		try {
 			const [locationsRes, usersRes] = await Promise.all([
@@ -57,15 +46,11 @@
 			]);
 			locations = locationsRes.items;
 			employees = usersRes.items;
-		} catch (err) {
-			// Silently fail - form just won't have dropdown options
+		} catch {
+			// Silently fail — form just won't have dropdown options
 		}
 	});
 
-	/**
-	 * Handle date/time click on calendar
-	 * @param {object} info - Contains {date, dateStr, allDay, resource, jsEvent, view}
-	 */
 	function pad(n) {
 		return String(n).padStart(2, '0');
 	}
@@ -78,14 +63,9 @@
 		return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 	}
 
-	function utcToLocalIso(utcString) {
-		const d = new Date(utcString);
-		return `${toLocalDate(d)}T${toLocalTime(d)}`;
-	}
-
 	function handleDateClick(info) {
 		const startDate = new Date(info.date);
-		const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour
+		const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
 		formMode = 'create';
 		selectedVacancyId = null;
@@ -100,12 +80,7 @@
 		showForm = true;
 	}
 
-	/**
-	 * Handle event click on calendar - show details in read-only mode
-	 * @param {object} info - Contains {event, jsEvent, view}
-	 */
 	async function handleEventClick(info) {
-		// Ignore clicks on preview event
 		if (info.event.id === 'preview') return;
 
 		formMode = 'view';
@@ -133,9 +108,6 @@
 		}
 	}
 
-	/**
-	 * Handle form submission to create vacancy
-	 */
 	async function handleFormSubmit() {
 		formError = null;
 		formLoading = true;
@@ -149,13 +121,8 @@
 					endTime: new Date(formData.date + 'T' + formData.endTime).toISOString()
 				})
 			);
-
-			// Close form and refresh calendar events
 			showForm = false;
-			// Re-fetch vacancies for current date range
-			if (currentDateRange.start && currentDateRange.end) {
-				await fetchVacancies(currentDateRange.start, currentDateRange.end);
-			}
+			calendarRef.refresh();
 		} catch (err) {
 			formError = err.message || 'Failed to create vacancy';
 		} finally {
@@ -163,37 +130,9 @@
 		}
 	}
 
-	/**
-	 * Handle form cancel
-	 */
 	function handleFormCancel() {
 		showForm = false;
 		formError = null;
-	}
-
-	/**
-	 * Handle vacancy deletion
-	 */
-	async function handleDelete() {
-		if (!selectedVacancyId) return;
-
-		formError = null;
-		formLoading = true;
-
-		try {
-			await invokeApi(() => VacancyService.deleteVacancy(selectedVacancyId));
-
-			// Close form and refresh calendar events
-			showForm = false;
-			// Re-fetch vacancies for current date range
-			if (currentDateRange.start && currentDateRange.end) {
-				await fetchVacancies(currentDateRange.start, currentDateRange.end);
-			}
-		} catch (err) {
-			formError = err.message || 'Failed to delete vacancy';
-		} finally {
-			formLoading = false;
-		}
 	}
 
 	function handleEventResize(info) {
@@ -210,125 +149,41 @@
 		}
 	}
 
-	/**
-	 * Transform API CalendarEvent to Event Calendar format
-	 * @param {import('$lib/api').CalendarEvent} vacancy
-	 */
-	function transformVacancyToEvent(vacancy) {
-		return {
-			id: vacancy.id,
-			start: utcToLocalIso(vacancy.startTime),
-			end: utcToLocalIso(vacancy.endTime),
-			title: vacancy.bookingId
-			? 'Booked'
-			: [
-					employees.find(e => e.id === vacancy.employeeId)?.name,
-					locations.find(l => l.id === vacancy.locationId)?.name
-				].filter(Boolean).join(' @ ') || 'Available',
-			startEditable: false, // Saved events should not be draggable
-			durationEditable: false, // Saved events should not be resizable
-			classNames: vacancy.bookingId
-				? ['!bg-red-500', '!text-white', '!border-red-600']
-				: ['!bg-green-500', '!text-white', '!border-green-600'],
-			extendedProps: {
-				employeeId: vacancy.employeeId,
-				locationId: vacancy.locationId,
-				bookingId: vacancy.bookingId
-			}
-		};
-	}
+	async function handleDelete() {
+		if (!selectedVacancyId) return;
 
-	/**
-	 * Fetch vacancies for the given date range
-	 * @param {Date} startDate
-	 * @param {Date} endDate
-	 */
-	async function fetchVacancies(startDate, endDate) {
-		loading = true;
-		error = null;
+		formError = null;
+		formLoading = true;
 
 		try {
-			// Format dates as ISO strings for API
-			const fromTime = startDate.toISOString();
-			const toTime = endDate.toISOString();
-
-			// Fetch all vacancies in the date range (Start=0, Num=100 for max results)
-			const response = await invokeApi(() =>
-				VacancyService.getVacancies(fromTime, toTime, 0, 100)
-			);
-
-			// Transform API events to calendar format
-			events = response.items.map(transformVacancyToEvent);
+			await invokeApi(() => VacancyService.deleteVacancy(selectedVacancyId));
+			showForm = false;
+			calendarRef.refresh();
 		} catch (err) {
-			error = err.message || 'Failed to load vacancies';
+			formError = err.message || 'Failed to delete vacancy';
 		} finally {
-			loading = false;
+			formLoading = false;
 		}
-	}
-
-	/**
-	 * Handle date range changes from the calendar
-	 * @param {object} info - Contains {start, end, startStr, endStr, view}
-	 */
-	function handleDatesChange(info) {
-		currentDateRange = {start: info.start, end: info.end};
-		fetchVacancies(info.start, info.end);
-	}
-
-	/**
-	 * Expand calendar view by 6 hours (max 2 times, not beyond midnight)
-	 */
-	function expandCalendar() {
-		const currentHour = parseInt(slotMaxTime.split(':')[0]);
-		const newHour = currentHour + 6;
-
-		// Cap at midnight and only increment if we actually change the time
-		if (newHour < 24) {
-			slotMaxTime = `${newHour.toString().padStart(2, '0')}:00:00`;
-			expandCount++;
-		} else if (currentHour < 24) {
-			// If we're not already at midnight, go to midnight
-			slotMaxTime = '24:00:00';
-			expandCount++;
-		}
-		// If already at midnight (24:00:00), do nothing
 	}
 </script>
 
 <div class="container mx-auto px-4 py-8 max-w-7xl">
-	<div class="flex justify-between items-center mb-6">
-		<h1 class="text-3xl font-bold">Calendar</h1>
-		{#if slotMaxTime !== '24:00:00'}
-			<button
-				onclick={expandCalendar}
-				class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-			>
-				Extend Hours (+6h)
-			</button>
-		{/if}
-	</div>
-
-	{#if error}
-		<div role="alert" aria-live="assertive" class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-md">
-			{error}
-		</div>
-	{/if}
+	<h1 class="text-3xl font-bold mb-6">Calendar</h1>
 
 	<div class="flex gap-6">
-		<!-- Calendar section -->
 		<div class="flex-1 min-w-0">
 			<Calendar
-				events={calendarEvents}
-				{slotMaxTime}
-				onDateClick={handleDateClick}
-				onEventClick={handleEventClick}
-				onDatesChange={handleDatesChange}
-				onEventResize={handleEventResize}
-				onEventDrop={handleEventDrop}
+				bind:this={calendarRef}
+				{locations}
+				{employees}
+				{previewEvent}
+				ondateclick={handleDateClick}
+				oneventclick={handleEventClick}
+				oneventresize={handleEventResize}
+				oneventdrop={handleEventDrop}
 			/>
 		</div>
 
-		<!-- Form panel -->
 		{#if showForm}
 			<div class="w-80 shrink-0">
 				<VacancyForm
