@@ -8,7 +8,7 @@
 		onsubmit,
 		oncancel = undefined,
 		ondelete = undefined,
-		children
+		children,
 	} = $props();
 
 	function handleSubmit(event) {
@@ -48,7 +48,7 @@
 				disabled={loading}
 				class="mr-auto px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
 				onclick={ondelete}
-			>{deleteLabel}
+				>{deleteLabel}
 			</button>
 		{/if}
 		{#if oncancel}
@@ -57,13 +57,13 @@
 				disabled={loading}
 				class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
 				onclick={oncancel}
-			>Cancel
+				>Cancel
 			</button>
 		{/if}
 		<button
 			class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
 			disabled={loading}
-			type="submit"
-		>{loading ? 'Please wait\u2026' : submitLabel}</button>
+			type="submit">{loading ? 'Please wait\u2026' : submitLabel}</button
+		>
 	</div>
 </form>

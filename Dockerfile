@@ -2,8 +2,9 @@
 FROM node:24-alpine3.22 AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
+RUN npm run lint
 RUN npm run build
 
 # Runtime stage: serve build output with lighttpd on Alpine Linux

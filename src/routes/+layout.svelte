@@ -1,18 +1,19 @@
 <script>
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import {AuthenticationService} from '$lib/api';
-	import {auth} from '$lib';
-	import {goto, invalidate} from '$app/navigation';
+	import { AuthenticationService } from '$lib/api';
+	import { auth } from '$lib';
+	import { goto, invalidate } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
-	let {children} = $props();
+	let { children } = $props();
 
 	async function handleLogout(event) {
 		event.preventDefault();
 
 		try {
 			await AuthenticationService.logout();
-		} catch (err) {
+		} catch {
 			// Continue with logout even if API call fails
 			// Don't log error to console in production for security
 		} finally {
@@ -20,33 +21,35 @@
 			if (window.location.pathname === '/') {
 				await invalidate('app:bookings');
 			} else {
-				goto('/');
+				goto(resolve('/'));
 			}
 		}
 	}
 </script>
 
 <svelte:head>
-	<link href={favicon} rel="icon"/>
+	<link href={favicon} rel="icon" />
 </svelte:head>
 
 <!-- Skip link for keyboard users -->
-<a class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded"
-	 href="#main-content">
+<a
+	class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded"
+	href="#main-content"
+>
 	Skip to main content
 </a>
 <header class="bg-gray-800 text-white">
 	<nav aria-label="Main navigation" class="container mx-auto px-4 py-4 max-w-7xl">
 		<div class="flex gap-6">
-			<a class="hover:text-gray-300" href="/">Home</a>
+			<a class="hover:text-gray-300" href={resolve('/')}>Home</a>
 			{#if auth.isEmployee}
-				<a href="/admin/calendar" class="hover:text-gray-300">Admin</a>
+				<a href={resolve('/admin/calendar')} class="hover:text-gray-300">Admin</a>
 			{/if}
 			{#if auth.isLoggedIn}
-				<a href="/profile" class="hover:text-gray-300">My Profile</a>
+				<a href={resolve('/profile')} class="hover:text-gray-300">My Profile</a>
 				<button onclick={handleLogout} class="hover:text-gray-300">Logout</button>
 			{:else}
-				<a href="/login" class="hover:text-gray-300">Login</a>
+				<a href={resolve('/login')} class="hover:text-gray-300">Login</a>
 			{/if}
 		</div>
 	</nav>

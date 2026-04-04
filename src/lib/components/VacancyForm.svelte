@@ -1,5 +1,5 @@
 <script>
-	import {Form} from '$lib';
+	import { Form } from '$lib';
 
 	let {
 		mode = 'create', // 'create' or 'view'
@@ -14,14 +14,12 @@
 		loading = false,
 		onsubmit,
 		oncancel,
-		ondelete = undefined
+		ondelete = undefined,
 	} = $props();
 
 	const isReadonly = $derived(mode === 'view');
 
-	const timeError = $derived(
-		startTime && endTime && endTime <= startTime ? 'End time must be after start time' : null
-	);
+	const timeError = $derived(startTime && endTime && endTime <= startTime ? 'End time must be after start time' : null);
 
 	const formattedDate = $derived(
 		date
@@ -29,9 +27,9 @@
 					weekday: 'long',
 					year: 'numeric',
 					month: 'long',
-					day: 'numeric'
+					day: 'numeric',
 				})
-			: ''
+			: '',
 	);
 </script>
 
@@ -43,7 +41,7 @@
 		legend={isReadonly ? 'View vacancy' : 'Create vacancy'}
 		{loading}
 		oncancel={isReadonly ? undefined : oncancel}
-		onsubmit={(e) => { 
+		onsubmit={(e) => {
 			if (isReadonly) {
 				// In readonly mode, submit button acts as close button
 				oncancel();
@@ -53,7 +51,7 @@
 		}}
 		submitLabel={isReadonly ? 'Close' : 'Create Vacancy'}
 		deleteLabel={isReadonly ? 'Delete' : undefined}
-		ondelete={ondelete}
+		{ondelete}
 	>
 		{#if formattedDate}
 			<p class="text-sm font-medium text-gray-700">{formattedDate}</p>
@@ -61,9 +59,7 @@
 
 		<div class="flex gap-4">
 			<div class="flex-1">
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="startTime">
-					Start
-				</label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="startTime"> Start </label>
 				<input
 					bind:value={startTime}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -77,9 +73,7 @@
 			</div>
 
 			<div class="flex-1">
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="endTime">
-					End
-				</label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="endTime"> End </label>
 				<input
 					bind:value={endTime}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -94,9 +88,7 @@
 		</div>
 
 		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="locationId">
-				Location
-			</label>
+			<label class="block text-sm font-medium text-gray-700 mb-1" for="locationId"> Location </label>
 			<select
 				bind:value={locationId}
 				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -106,16 +98,14 @@
 				disabled={isReadonly}
 			>
 				<option value="" disabled selected>Select a location</option>
-				{#each locations as location}
+				{#each locations as location (location.id)}
 					<option value={String(location.id)}>{location.name}</option>
 				{/each}
 			</select>
 		</div>
 
 		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="employeeId">
-				Employee
-			</label>
+			<label class="block text-sm font-medium text-gray-700 mb-1" for="employeeId"> Employee </label>
 			<select
 				bind:value={employeeId}
 				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -125,7 +115,7 @@
 				disabled={isReadonly}
 			>
 				<option value="" disabled selected>Select an employee</option>
-				{#each employees as employee}
+				{#each employees as employee (employee.id)}
 					<option value={String(employee.id)}>{employee.name || employee.email}</option>
 				{/each}
 			</select>

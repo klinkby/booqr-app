@@ -1,5 +1,5 @@
-import {OpenAPI} from '$lib/api/index.js';
-import {browser} from '$app/environment';
+import { OpenAPI } from '$lib/api/index.js';
+import { browser } from '$app/environment';
 
 const tokenName = 'access_token';
 
@@ -42,12 +42,12 @@ if (browser) {
 	Object.defineProperty(OpenAPI, 'TOKEN', {
 		get: () => auth.accessToken,
 		enumerable: true,
-		configurable: true
+		configurable: true,
 	});
 	Object.defineProperty(OpenAPI, 'WITH_CREDENTIALS', {
 		get: () => auth.isLoggedIn,
 		enumerable: true,
-		configurable: true
+		configurable: true,
 	});
 	OpenAPI.CREDENTIALS = 'include';
 }

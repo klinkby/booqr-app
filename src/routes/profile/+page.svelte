@@ -2,6 +2,7 @@
 	import { UserService } from '$lib/api';
 	import { auth, Form, PasswordReset, invokeApi } from '$lib';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 
 	let name = $state('');
@@ -15,7 +16,7 @@
 	// Auth guard: redirect unauthenticated users
 	$effect(() => {
 		if (!auth.isLoggedIn) {
-			goto('/login?returnUrl=/profile');
+			goto(resolve('/login?returnUrl=/profile'));
 		}
 	});
 
@@ -80,18 +81,10 @@
 						</div>
 					{/if}
 
-					<Form
-						legend="Edit profile information"
-						{error}
-						{loading}
-						submitLabel="Save Changes"
-						onsubmit={handleSubmit}
-					>
+					<Form legend="Edit profile information" {error} {loading} submitLabel="Save Changes" onsubmit={handleSubmit}>
 						<!-- Email: read-only display -->
 						<div>
-							<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-								Email
-							</label>
+							<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
 							<input
 								id="email"
 								name="email"
@@ -105,9 +98,7 @@
 
 						<!-- Name: editable -->
 						<div>
-							<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-								Name
-							</label>
+							<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> Name </label>
 							<input
 								id="name"
 								name="name"
@@ -119,9 +110,7 @@
 
 						<!-- Phone: editable -->
 						<div>
-							<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-								Phone
-							</label>
+							<label for="phone" class="block text-sm font-medium text-gray-700 mb-1"> Phone </label>
 							<input
 								id="phone"
 								name="phone"
@@ -138,9 +127,7 @@
 			<section aria-labelledby="password-heading" class="mt-10">
 				<h2 id="password-heading" class="text-xl font-semibold mb-4">Password</h2>
 				<div class="max-w-2xl">
-					<p class="text-sm text-gray-600 mb-4">
-						Request a password reset link to be sent to your email address.
-					</p>
+					<p class="text-sm text-gray-600 mb-4">Request a password reset link to be sent to your email address.</p>
 					<PasswordReset {email} invoker={invokeApi} />
 				</div>
 			</section>

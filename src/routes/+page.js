@@ -1,11 +1,11 @@
-import {auth} from '$lib/auth.svelte.js';
-import {UserService, VacancyService} from '$lib/api';
-import {invokeApi} from '$lib/invokeApi';
-import {bookingCache} from './bookingCache.js';
+import { auth } from '$lib/auth.svelte.js';
+import { UserService, VacancyService } from '$lib/api';
+import { invokeApi } from '$lib/invokeApi';
+import { bookingCache } from './bookingCache.js';
 
 export const ssr = false;
 
-export async function load({url, depends}) {
+export async function load({ url, depends }) {
 	depends('app:vacancies');
 	depends('app:bookings');
 
@@ -13,7 +13,7 @@ export async function load({url, depends}) {
 	const to = url.searchParams.get('to');
 
 	if (!from || !to) {
-		return {vacancies: [], bookings: []};
+		return { vacancies: [], bookings: [] };
 	}
 
 	const cached = bookingCache.getVacancies(from, to);
@@ -29,13 +29,10 @@ export async function load({url, depends}) {
 		? invokeApi(() => UserService.getMyBookings(auth.userId, from, to, 0, 100)).then((r) => r.items)
 		: Promise.resolve([]);
 
-	const [vacancies, bookings] = await Promise.all([
-		vacanciesPromise,
-		bookingsPromise
-	]);
+	const [vacancies, bookings] = await Promise.all([vacanciesPromise, bookingsPromise]);
 
 	return {
 		vacancies,
-		bookings
+		bookings,
 	};
 }
