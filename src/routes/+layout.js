@@ -1,3 +1,5 @@
+export const ssr = false;
+
 import {EmployeeService, LocationService, ServiceService} from '$lib/api';
 
 export async function load() {

@@ -1,13 +1,19 @@
-import {defineConfig} from '@playwright/test';
+import {defineConfig, devices} from '@playwright/test';
 import dotenv from 'dotenv';
 
 // Load .env file for test credentials
-dotenv.config();
+dotenv.config({ quiet: true });
 
 export default defineConfig({
 	webServer: {command: 'npm run build && npm run preview', port: 4173},
 	testDir: 'e2e',
 	use: {
 		baseURL: 'http://localhost:4173'
-	}
+	},
+	projects: [
+		{
+			name: 'chromium',
+			use: {...devices['Desktop Chrome'], headless: true }
+		}
+	],
 });

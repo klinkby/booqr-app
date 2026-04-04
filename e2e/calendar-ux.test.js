@@ -1,66 +1,10 @@
 import {expect, test} from '@playwright/test';
+import {setupApiMocks, setupAuthToken} from './mocks.js';
 
 test.describe('Calendar UX Adjustments', () => {
 	test.beforeEach(async ({page}) => {
-		// Mock API responses to test UI behavior
-		await page.route('**/api/vacancies*', route => {
-			route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({
-					items: [
-						{
-							id: '1',
-							startTime: '2026-02-10T10:00:00Z',
-							endTime: '2026-02-10T11:00:00Z',
-							employeeId: 'emp1',
-							locationId: 1,
-							bookingId: null
-						},
-						{
-							id: '2',
-							startTime: '2026-02-11T14:00:00Z',
-							endTime: '2026-02-11T15:00:00Z',
-							employeeId: 'emp2',
-							locationId: 2,
-							bookingId: 'booking123'
-						}
-					]
-				})
-			});
-		});
-
-		await page.route('**/api/locations*', route => {
-			route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({
-					items: [
-						{id: 1, name: 'Location A'},
-						{id: 2, name: 'Location B'}
-					]
-				})
-			});
-		});
-
-		await page.route('**/api/users*', route => {
-			route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({
-					items: [
-						{id: 'emp1', name: 'Employee One', email: 'emp1@example.com', role: 'Employee'},
-						{id: 'emp2', name: 'Employee Two', email: 'emp2@example.com', role: 'Employee'}
-					]
-				})
-			});
-		});
-
-		// Set a fake token in sessionStorage to bypass auth
-		await page.addInitScript(() => {
-			const fakeToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6IkVtcGxveWVlIiwibmJmIjoxNzcwNDc1NjgwLCJleHAiOjI3NzA0NzkyODAsImlhdCI6MTc3MDQ3NTY4MCwiaXNzIjoiYm9vcXIiLCJhdWQiOiJodHRwczovL3d3dy5ib29xci5kayJ9.fake';
-			sessionStorage.setItem('access_token', fakeToken);
-		});
+		await setupApiMocks(page);
+		await setupAuthToken(page);
 	});
 
 	test('calendar page loads with extend hours button', async ({page}) => {
@@ -83,7 +27,7 @@ test.describe('Calendar UX Adjustments', () => {
 		// The calendar renders with time slots that we can click
 		const timeSlot = page.locator('.ec-time-grid').first();
 		await expect(timeSlot).toBeVisible({timeout: 5000});
-		
+
 		// Click to open the form
 		await timeSlot.click();
 
@@ -116,11 +60,11 @@ test.describe('Calendar UX Adjustments', () => {
 
 		// Wait for calendar to load
 		await expect(page.locator('h1:has-text("Calendar")')).toBeVisible();
-		
+
 		// Wait for events to be rendered (green/red event blocks)
 		const eventElement = page.locator('.ec-event').first();
 		await expect(eventElement).toBeVisible({timeout: 5000});
-		
+
 		// Click on the event to open view mode
 		await eventElement.click();
 
@@ -141,7 +85,7 @@ test.describe('Calendar UX Adjustments', () => {
 
 		// Wait for calendar to render with proper elements
 		await expect(page.locator('h1:has-text("Calendar")')).toBeVisible();
-		
+
 		// The Calendar component now has onEventClick prop
 		// Events should be clickable when rendered
 		const calendarContainer = page.locator('.ec');

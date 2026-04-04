@@ -19,7 +19,7 @@
 	let formLoading = $state(false);
 
 	const ownBookingClasses = ['!bg-green-700', '!text-white', '!border-green-500'];
-	const availableClasses = ['!bg-olive-600', '!text-white', '!border-emerald-500'];
+	const availableClasses = ['!bg-gray-800', '!text-white', '!border-gray-500'];
 
 	const vacancyMap = $derived(new Map(data.vacancies.map((v) => [String(v.id), v])));
 	const employeeMap = $derived(new Map(data.employees.map((e) => [String(e.id), e])));
