@@ -1,13 +1,13 @@
 <script>
-	import {VacancyService} from '$lib/api';
-	import {auth, Calendar, VacancyForm} from '$lib';
-	import {invokeApi} from '$lib/invokeApi';
-	import {goto, invalidate} from '$app/navigation';
-	import {page} from '$app/stores';
-	import {vacancyCache} from './vacancyCache.js';
-	import {DateUtils} from '$lib/dateUtils.js';
+	import { VacancyService } from '$lib/api';
+	import { auth, Calendar, VacancyForm } from '$lib';
+	import { invokeApi } from '$lib/invokeApi';
+	import { goto, invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { vacancyCache } from './vacancyCache.js';
+	import { DateUtils } from '$lib/dateUtils.js';
 
-	let {data} = $props();
+	let { data } = $props();
 
 	// Form state
 	let showForm = $state(false);
@@ -18,7 +18,7 @@
 		startTime: '',
 		endTime: '',
 		employeeId: '',
-		locationId: ''
+		locationId: '',
 	});
 	let formLoading = $state(false);
 	let formError = $state(null);
@@ -33,22 +33,24 @@
 			title: 'New Vacancy',
 			startEditable: true,
 			durationEditable: true,
-			classNames: ['!bg-gray-300', '!text-gray-600', '!border-gray-400', '!border-dashed']
+			classNames: ['!bg-gray-300', '!text-gray-600', '!border-gray-400', '!border-dashed'],
 		};
 	});
 
 	// Transform API vacancies to event calendar format, reactively derived from loaded data
 	const calendarEvents = $derived.by(() => {
-		const vacancyEvents = data.vacancies.map(vacancy => ({
+		const vacancyEvents = data.vacancies.map((vacancy) => ({
 			id: vacancy.id,
 			start: DateUtils.utcToLocalIso(vacancy.startTime),
 			end: DateUtils.utcToLocalIso(vacancy.endTime),
 			title: vacancy.bookingId
 				? 'Booked'
 				: [
-						data.employees.find(e => e.id === vacancy.employeeId)?.name,
-						data.locations.find(l => l.id === vacancy.locationId)?.name
-					].filter(Boolean).join(' @ ') || 'Available',
+						data.employees.find((e) => e.id === vacancy.employeeId)?.name,
+						data.locations.find((l) => l.id === vacancy.locationId)?.name,
+					]
+						.filter(Boolean)
+						.join(' @ ') || 'Available',
 			startEditable: false,
 			durationEditable: false,
 			classNames: vacancy.bookingId
@@ -57,18 +59,19 @@
 			extendedProps: {
 				employeeId: vacancy.employeeId,
 				locationId: vacancy.locationId,
-				bookingId: vacancy.bookingId
-			}
+				bookingId: vacancy.bookingId,
+			},
 		}));
 		return previewEvent ? [...vacancyEvents, previewEvent] : vacancyEvents;
 	});
 
 	// Week navigation: update URL params so the load function re-fetches for the new range
 	function handleDatesChange(info) {
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- Query params only; resolve() not needed for relative paths without route change
 		goto(`?from=${info.start.toISOString()}&to=${info.end.toISOString()}`, {
 			replaceState: true,
 			keepFocus: true,
-			noScroll: true
+			noScroll: true,
 		});
 	}
 
@@ -83,7 +86,7 @@
 			startTime: DateUtils.toLocalTime(startDate),
 			endTime: DateUtils.toLocalTime(endDate),
 			employeeId: auth.userId || '',
-			locationId: data.locations[0]?.id || ''
+			locationId: data.locations[0]?.id || '',
 		};
 		formError = null;
 		showForm = true;
@@ -108,7 +111,7 @@
 				startTime: DateUtils.toLocalTime(startDate),
 				endTime: DateUtils.toLocalTime(endDate),
 				employeeId: vacancy.employeeId?.toString() || '',
-				locationId: vacancy.locationId?.toString() || ''
+				locationId: vacancy.locationId?.toString() || '',
 			};
 		} catch (err) {
 			formError = err.message || 'Failed to load vacancy details';
@@ -127,8 +130,8 @@
 					employeeId: formData.employeeId || null,
 					locationId: Number(formData.locationId),
 					startTime: new Date(formData.date + 'T' + formData.startTime).toISOString(),
-					endTime: new Date(formData.date + 'T' + formData.endTime).toISOString()
-				})
+					endTime: new Date(formData.date + 'T' + formData.endTime).toISOString(),
+				}),
 			);
 			showForm = false;
 			vacancyCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));

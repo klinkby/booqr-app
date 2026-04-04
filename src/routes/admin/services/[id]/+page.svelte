@@ -1,9 +1,10 @@
 <script>
-	import {ServiceService, UserService} from '$lib/api';
-	import {Form, invokeApi} from '$lib';
-	import {goto} from '$app/navigation';
-	import {onMount} from 'svelte';
-	import {page} from '$app/stores';
+	import { ServiceService, UserService } from '$lib/api';
+	import { Form, invokeApi } from '$lib';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
@@ -23,7 +24,7 @@
 	function toggleEmployee(empId) {
 		const strId = String(empId);
 		if (isSelected(empId)) {
-			selectedEmployeeIds = selectedEmployeeIds.filter(x => x !== strId);
+			selectedEmployeeIds = selectedEmployeeIds.filter((x) => x !== strId);
 		} else {
 			selectedEmployeeIds = [...selectedEmployeeIds, strId];
 		}
@@ -34,7 +35,7 @@
 		try {
 			const [employeesRes, service] = await Promise.all([
 				invokeApi(() => UserService.getUsers(undefined, 'Employee')),
-				isEdit ? invokeApi(() => ServiceService.getServiceById(id)) : Promise.resolve(null)
+				isEdit ? invokeApi(() => ServiceService.getServiceById(id)) : Promise.resolve(null),
 			]);
 			employees = employeesRes.items;
 			if (service) {
@@ -58,11 +59,11 @@
 
 		try {
 			if (isEdit) {
-				await invokeApi(() => ServiceService.updateService(id, {name, duration, employees: selectedEmployeeIds}));
+				await invokeApi(() => ServiceService.updateService(id, { name, duration, employees: selectedEmployeeIds }));
 			} else {
-				await invokeApi(() => ServiceService.addService({name, duration, employees: selectedEmployeeIds}));
+				await invokeApi(() => ServiceService.addService({ name, duration, employees: selectedEmployeeIds }));
 			}
-			await goto('/admin/services');
+			await goto(resolve('/admin/services'));
 		} catch (err) {
 			if (import.meta.env.DEV) {
 				console.error('Failed to save service:', err);
@@ -74,7 +75,7 @@
 	}
 
 	function handleCancel() {
-		goto('/admin/services');
+		goto(resolve('/admin/services'));
 	}
 
 	onMount(loadData);
@@ -98,9 +99,7 @@
 				oncancel={handleCancel}
 			>
 				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-						Name
-					</label>
+					<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> Name </label>
 					<input
 						id="name"
 						name="name"
@@ -112,9 +111,7 @@
 				</div>
 
 				<div>
-					<label for="duration" class="block text-sm font-medium text-gray-700 mb-1">
-						Duration
-					</label>
+					<label for="duration" class="block text-sm font-medium text-gray-700 mb-1"> Duration </label>
 					<input
 						id="duration"
 						name="duration"
@@ -129,7 +126,7 @@
 				<fieldset>
 					<legend class="block text-sm font-medium text-gray-700 mb-1">Employees</legend>
 					<div class="space-y-2">
-						{#each employees as emp}
+						{#each employees as emp (emp.id)}
 							<div class="flex items-center gap-2">
 								<input
 									type="checkbox"

@@ -1,7 +1,7 @@
-import {connect} from 'node:http2';
+import { connect } from 'node:http2';
 import tailwindcss from '@tailwindcss/vite';
-import {sveltekit} from '@sveltejs/kit/vite';
-import {defineConfig} from 'vite';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
 
 const API_TARGET = 'https://www.booqr.dk';
 const H1_HEADERS = new Set(['host', 'connection', 'transfer-encoding', 'keep-alive', 'upgrade']);
@@ -9,7 +9,7 @@ const H1_HEADERS = new Set(['host', 'connection', 'transfer-encoding', 'keep-ali
 /** Proxies an incoming HTTP/1.1 request to the upstream over HTTP/2. */
 function proxyToH2(req, res) {
 	const client = connect(API_TARGET);
-	const headers = {':path': req.originalUrl, ':method': req.method};
+	const headers = { ':path': req.originalUrl, ':method': req.method };
 	for (const [k, v] of Object.entries(req.headers)) {
 		if (!H1_HEADERS.has(k)) headers[k] = v;
 	}
@@ -34,19 +34,19 @@ function proxyToH2(req, res) {
 export default defineConfig({
 	build: {
 		target: 'es2022',
-		minify: 'oxc'
+		minify: 'oxc',
 	},
 	oxc: {
-		target: 'es2022'
+		target: 'es2022',
 	},
 	plugins: [
 		{
 			name: 'h2-proxy',
 			configureServer(server) {
 				server.middlewares.use('/api', proxyToH2);
-			}
+			},
 		},
 		tailwindcss(),
-		sveltekit()
-	]
+		sveltekit(),
+	],
 });

@@ -10,13 +10,13 @@ export const FAKE_TOKEN =
 	'.fake';
 
 const LOCATIONS = [
-	{id: 1, name: 'Location A'},
-	{id: 2, name: 'Location B'}
+	{ id: 1, name: 'Location A' },
+	{ id: 2, name: 'Location B' },
 ];
 
 const EMPLOYEES = [
-	{id: 'emp1', name: 'Employee One', email: 'emp1@example.com', role: 'Employee'},
-	{id: 'emp2', name: 'Employee Two', email: 'emp2@example.com', role: 'Employee'}
+	{ id: 'emp1', name: 'Employee One', email: 'emp1@example.com', role: 'Employee' },
+	{ id: 'emp2', name: 'Employee Two', email: 'emp2@example.com', role: 'Employee' },
 ];
 
 /** Returns ISO strings for vacancies that fall in the current calendar week. */
@@ -37,8 +37,22 @@ function currentWeekVacancies() {
 	}
 
 	return [
-		{id: '1', startTime: makeTime(1, 10), endTime: makeTime(1, 11), employeeId: 'emp1', locationId: 1, bookingId: null},
-		{id: '2', startTime: makeTime(2, 14), endTime: makeTime(2, 15), employeeId: 'emp2', locationId: 2, bookingId: 'booking123'}
+		{
+			id: '1',
+			startTime: makeTime(1, 10),
+			endTime: makeTime(1, 11),
+			employeeId: 'emp1',
+			locationId: 1,
+			bookingId: null,
+		},
+		{
+			id: '2',
+			startTime: makeTime(2, 14),
+			endTime: makeTime(2, 15),
+			employeeId: 'emp2',
+			locationId: 2,
+			bookingId: 'booking123',
+		},
 	];
 }
 
@@ -47,23 +61,27 @@ function currentWeekVacancies() {
  * admin calendar page. Safe to call multiple times; later registrations win.
  */
 export async function setupApiMocks(page) {
-	await page.route('**/api/vacancies*', route =>
-		route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({items: currentWeekVacancies()})})
+	await page.route('**/api/vacancies*', (route) =>
+		route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({ items: currentWeekVacancies() }),
+		}),
 	);
-	await page.route('**/api/locations*', route =>
-		route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({items: LOCATIONS})})
+	await page.route('**/api/locations*', (route) =>
+		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: LOCATIONS }) }),
 	);
-	await page.route('**/api/services*', route =>
-		route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({items: []})})
+	await page.route('**/api/services*', (route) =>
+		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }),
 	);
-	await page.route('**/api/employees*', route =>
-		route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({items: EMPLOYEES})})
+	await page.route('**/api/employees*', (route) =>
+		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
 	);
-	await page.route('**/api/users/*/my-bookings*', route =>
-		route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({items: []})})
+	await page.route('**/api/users/*/my-bookings*', (route) =>
+		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }),
 	);
-	await page.route('**/api/users*', route =>
-		route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({items: EMPLOYEES})})
+	await page.route('**/api/users*', (route) =>
+		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
 	);
 }
 
@@ -72,7 +90,7 @@ export async function setupApiMocks(page) {
  * bypassing the login flow for tests that need an authenticated session.
  */
 export async function setupAuthToken(page) {
-	await page.addInitScript(token => {
+	await page.addInitScript((token) => {
 		sessionStorage.setItem('access_token', token);
 	}, FAKE_TOKEN);
 }

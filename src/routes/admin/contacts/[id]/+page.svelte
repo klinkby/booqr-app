@@ -1,9 +1,10 @@
 <script>
-	import {UserService} from '$lib/api';
-	import {Form, invokeApi} from '$lib';
-	import {goto} from '$app/navigation';
-	import {onMount} from 'svelte';
-	import {page} from '$app/stores';
+	import { UserService } from '$lib/api';
+	import { Form, invokeApi } from '$lib';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
@@ -42,11 +43,11 @@
 
 		try {
 			if (isEdit) {
-				await invokeApi(() => UserService.updateUser(id, {name, phone}));
+				await invokeApi(() => UserService.updateUser(id, { name, phone }));
 			} else {
-				await invokeApi(() => UserService.addUser({email}));
+				await invokeApi(() => UserService.addUser({ email }));
 			}
-			await goto('/admin/contacts');
+			await goto(resolve('/admin/contacts'));
 		} catch (err) {
 			if (import.meta.env.DEV) {
 				console.error('Failed to save user:', err);
@@ -58,7 +59,7 @@
 	}
 
 	function handleCancel() {
-		goto('/admin/contacts');
+		goto(resolve('/admin/contacts'));
 	}
 
 	onMount(() => {
@@ -84,9 +85,7 @@
 				oncancel={handleCancel}
 			>
 				<div>
-					<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-						Email
-					</label>
+					<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
 					<input
 						id="email"
 						name="email"
@@ -101,9 +100,7 @@
 
 				{#if isEdit}
 					<div>
-						<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-							Name
-						</label>
+						<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> Name </label>
 						<input
 							id="name"
 							name="name"
@@ -114,9 +111,7 @@
 					</div>
 
 					<div>
-						<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-							Phone
-						</label>
+						<label for="phone" class="block text-sm font-medium text-gray-700 mb-1"> Phone </label>
 						<input
 							id="phone"
 							name="phone"
@@ -127,9 +122,7 @@
 					</div>
 
 					<div>
-						<label for="role" class="block text-sm font-medium text-gray-700 mb-1">
-							Role
-						</label>
+						<label for="role" class="block text-sm font-medium text-gray-700 mb-1"> Role </label>
 						<input
 							id="role"
 							name="role"

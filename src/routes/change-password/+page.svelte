@@ -1,6 +1,7 @@
 <script>
 	import { OpenAPI } from '$lib/api/core/OpenAPI';
 	import { request } from '$lib/api/core/request';
+	import { resolve } from '$app/paths';
 	import { Form, PasswordReset } from '$lib';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -10,7 +11,7 @@
 	let error = $state(null);
 	let loading = $state(false);
 
-	const passwordPattern = /^(?=(.*[0-9]))(?=.*[!@#$%^&*()\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z])).{8,}$/;
+	const passwordPattern = /^(?=(.*[0-9]))(?=.*[!@#$%^&*()[{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z])).{8,}$/;
 
 	let expires = $derived($page.url.searchParams.get('expires'));
 
@@ -28,7 +29,8 @@
 		}
 
 		if (!passwordPattern.test(password)) {
-			error = 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.';
+			error =
+				'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.';
 			return;
 		}
 
@@ -47,7 +49,7 @@
 
 			password = '';
 			confirmPassword = '';
-			await goto('/login');
+			await goto(resolve('/login'));
 		} catch (err) {
 			if (import.meta.env.DEV) {
 				console.error('Failed to change password:', err);
@@ -69,17 +71,9 @@
 			</div>
 			<PasswordReset />
 		{:else}
-			<Form
-				legend="Change your password"
-				{error}
-				{loading}
-				submitLabel="Change Password"
-				onsubmit={handleSubmit}
-			>
+			<Form legend="Change your password" {error} {loading} submitLabel="Change Password" onsubmit={handleSubmit}>
 				<div>
-					<label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-						New password
-					</label>
+					<label for="password" class="block text-sm font-medium text-gray-700 mb-1"> New password </label>
 					<input
 						id="password"
 						name="password"

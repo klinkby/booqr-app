@@ -1,24 +1,24 @@
-import {expect, test} from '@playwright/test';
-import {setupApiMocks, FAKE_TOKEN} from './mocks.js';
+import { expect, test } from '@playwright/test';
+import { setupApiMocks, FAKE_TOKEN } from './mocks.js';
 
 test.describe('Login flow with token validation', () => {
-	test.beforeEach(async ({page, context}) => {
+	test.beforeEach(async ({ page, context }) => {
 		await setupApiMocks(page);
 		await context.clearCookies();
 	});
 
-	test('full login flow stores token and updates nav', async ({page}) => {
+	test('full login flow stores token and updates nav', async ({ page }) => {
 		const email = process.env.TEST_EMAIL ?? 'test@example.com';
 		const password = process.env.TEST_PASSWORD ?? 'TestPassword1!';
 
 		// Mock the login endpoint and capture the request for later assertions
 		let loginRequest = null;
-		await page.route('**/api/auth/login', async route => {
+		await page.route('**/api/auth/login', async (route) => {
 			loginRequest = route.request();
 			await route.fulfill({
 				status: 200,
 				contentType: 'application/json',
-				body: JSON.stringify({access_token: FAKE_TOKEN})
+				body: JSON.stringify({ access_token: FAKE_TOKEN }),
 			});
 		});
 

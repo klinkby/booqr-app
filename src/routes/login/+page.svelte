@@ -1,8 +1,8 @@
 <script>
-	import {AuthenticationService} from '$lib/api';
-	import {auth, Form, PasswordReset} from '$lib';
-	import {goto} from '$app/navigation';
-	import {page} from '$app/stores';
+	import { AuthenticationService } from '$lib/api';
+	import { auth, Form, PasswordReset } from '$lib';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	let showPasswordReset = $state(false);
 
@@ -39,7 +39,7 @@
 		try {
 			const response = await AuthenticationService.login({
 				email,
-				password
+				password,
 			});
 			// Clear password from memory
 			password = '';
@@ -47,6 +47,7 @@
 			// Store access token (response should contain token)
 			if (auth.isLoggedIn) {
 				// Redirect to the page that triggered login, or home if none
+				// eslint-disable-next-line svelte/no-navigation-without-resolve -- returnUrl comes from URL query param and is already a fully-resolved path
 				await goto(returnUrl);
 			} else {
 				error = 'Authentication failed. Please try again.';
@@ -62,7 +63,6 @@
 			loading = false;
 		}
 	}
-
 </script>
 
 <div>
@@ -71,9 +71,7 @@
 	<div class="max-w-2xl">
 		<Form {error} legend="Sign in" {loading} onsubmit={handleSubmit} submitLabel="Sign in">
 			<div>
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="email">
-					Email address
-				</label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="email"> Email address </label>
 				<input
 					autocomplete="email"
 					bind:value={email}
@@ -87,9 +85,7 @@
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="password">
-					Password
-				</label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="password"> Password </label>
 				<input
 					autocomplete="current-password"
 					bind:value={password}
@@ -106,7 +102,7 @@
 		<p class="mt-4 text-sm text-gray-600">
 			<button
 				type="button"
-				onclick={() => showPasswordReset = !showPasswordReset}
+				onclick={() => (showPasswordReset = !showPasswordReset)}
 				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 			>
 				{showPasswordReset ? 'Back to sign in' : 'Forgot your password?'}
@@ -116,7 +112,7 @@
 		{#if showPasswordReset}
 			<section aria-labelledby="reset-heading" class="mt-4">
 				<h2 id="reset-heading" class="text-lg font-semibold mb-3">Reset Password</h2>
-				<PasswordReset bind:email={email} />
+				<PasswordReset bind:email />
 			</section>
 		{/if}
 	</div>

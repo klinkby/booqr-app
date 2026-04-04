@@ -1,5 +1,5 @@
 <script>
-	import {Calendar, Interaction, TimeGrid} from '@event-calendar/core';
+	import { Calendar, Interaction, TimeGrid } from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
 
 	let {
@@ -8,7 +8,7 @@
 		onDateClick = undefined,
 		onEventClick = undefined,
 		onEventResize = undefined,
-		onEventDrop = undefined
+		onEventDrop = undefined,
 	} = $props();
 
 	let cal;
@@ -50,20 +50,20 @@
 		headerToolbar: {
 			start: 'prev,next today',
 			center: 'title',
-			end: ''
+			end: '',
 		},
-		buttonText: {prev: 'Previous week', next: 'Next week', today: 'Today'},
+		buttonText: { prev: 'Previous week', next: 'Next week', today: 'Today' },
 		datesSet: (info) => onDatesChange?.(info),
 		dateClick: (info) => onDateClick?.(info),
 		eventClick: (info) => onEventClick?.(info),
 		eventResize: (info) => onEventResize?.(info),
-		eventDrop: (info) => onEventDrop?.(info)
+		eventDrop: (info) => onEventDrop?.(info),
 	};
 </script>
 
-<svelte:window onkeydown={handleKeydown}/>
+<svelte:window onkeydown={handleKeydown} />
 
-<Calendar bind:this={cal} {options} plugins={[TimeGrid, Interaction]}/>
+<Calendar bind:this={cal} {options} plugins={[TimeGrid, Interaction]} />
 
 {#if slotMaxTime !== '24:00:00'}
 	<div class="flex justify-end mt-4 mb-2">

@@ -1,13 +1,13 @@
 <script>
-	import {auth, BookingForm, Calendar} from '$lib';
-	import {BookingService} from '$lib/api';
-	import {invokeApi} from '$lib/invokeApi';
-	import {goto, invalidate} from '$app/navigation';
-	import {page} from '$app/stores';
-	import {DateUtils} from '$lib/dateUtils.js';
-	import {bookingCache} from './bookingCache.js';
+	import { auth, BookingForm, Calendar } from '$lib';
+	import { BookingService } from '$lib/api';
+	import { invokeApi } from '$lib/invokeApi';
+	import { goto, invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { DateUtils } from '$lib/dateUtils.js';
+	import { bookingCache } from './bookingCache.js';
 
-	let {data} = $props();
+	let { data } = $props();
 
 	let showForm = $state(false);
 	let formMode = $state('book');
@@ -30,9 +30,10 @@
 
 	const selectedEmployeeIdStr = $derived(selectedVacancy ? String(selectedVacancy.employeeId) : null);
 	const servicesByEmployeeMap = $derived.by(() => {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Map is ephemeral and reconstructed on each derivation; not shared mutable state
 		const map = new Map();
 		for (const service of data.services) {
-			for (const empId of (service.employees || [])) {
+			for (const empId of service.employees || []) {
 				const key = String(empId);
 				if (!map.has(key)) map.set(key, []);
 				map.get(key).push(service);
@@ -42,7 +43,7 @@
 	});
 
 	const filteredServices = $derived(
-		selectedEmployeeIdStr ? servicesByEmployeeMap.get(selectedEmployeeIdStr) ?? [] : []
+		selectedEmployeeIdStr ? (servicesByEmployeeMap.get(selectedEmployeeIdStr) ?? []) : [],
 	);
 
 	const calendarEvents = $derived.by(() => {
@@ -60,7 +61,7 @@
 				title,
 				startEditable: false,
 				durationEditable: false,
-				classNames: availableClasses
+				classNames: availableClasses,
 			};
 		});
 		const bookingEvents = data.bookings.map((b) => ({
@@ -70,7 +71,7 @@
 			title: 'My Booking',
 			startEditable: false,
 			durationEditable: false,
-			classNames: ownBookingClasses
+			classNames: ownBookingClasses,
 		}));
 		return [...vacancyEvents, ...bookingEvents];
 	});
@@ -79,7 +80,8 @@
 		const from = info.start.toISOString();
 		const to = info.end.toISOString();
 		if (urlFrom === from && urlTo === to) return;
-		goto(`?from=${from}&to=${to}`, {replaceState: true, keepFocus: true, noScroll: true});
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- Query params only; resolve() not needed for relative paths without route change
+		goto(`?from=${from}&to=${to}`, { replaceState: true, keepFocus: true, noScroll: true });
 	}
 
 	function handleEventClick(info) {
@@ -104,6 +106,7 @@
 
 		if (!auth.isLoggedIn) {
 			const returnUrl = $page.url.pathname + $page.url.search;
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- Dynamic URL already fully resolved from query params; wrapping in resolve() would be redundant
 			goto(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
 			return;
 		}
@@ -126,9 +129,9 @@
 					vacancyId: selectedVacancy.id,
 					serviceId: formServiceId,
 					startTime: new Date(
-						DateUtils.toLocalDate(new Date(selectedVacancy.startTime)) + 'T' + formStartTime
-					).toISOString()
-				})
+						DateUtils.toLocalDate(new Date(selectedVacancy.startTime)) + 'T' + formStartTime,
+					).toISOString(),
+				}),
 			);
 			await refreshBookingData();
 		} catch (err) {
@@ -170,11 +173,7 @@
 
 	<div class="flex gap-6">
 		<div class="flex-1 min-w-0">
-			<Calendar
-				events={calendarEvents}
-				onDatesChange={handleDatesChange}
-				onEventClick={handleEventClick}
-			/>
+			<Calendar events={calendarEvents} onDatesChange={handleDatesChange} onEventClick={handleEventClick} />
 		</div>
 
 		{#if showForm}
