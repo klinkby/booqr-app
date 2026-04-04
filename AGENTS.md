@@ -774,6 +774,19 @@ Notes & enforcement
 - **End-to-End Verification**: Playwright tests in `e2e/` verify UI behavior and API responses.
 - **Unit tests**: This project does NOT include unit tests.
 
+## Code Quality & Linting
+
+**Before committing, always run:**
+
+- `npm run lint` — Checks for ESLint errors (accessibility, Svelte best practices, unused variables, navigation patterns) and Prettier formatting. Fix errors before committing.
+- `npm run format` — Auto-formats code with Prettier for consistency.
+
+Key linting rules enforced:
+- **Each blocks must have keys**: `#each items as item (item.id)}` — required for correct Svelte reactivity
+- **Navigation requires resolve()**: `goto()` and `href` links must be called within proper SvelteKit load context (fix with Svelte ESLint warnings)
+- **No useless mustaches**: String literals should not use interpolation (e.g., `{text}` instead of `{'text'}`)
+- **Use SvelteMap for reactivity**: Use `SvelteMap` instead of `new Map()` for reactive state
+
 ## Playwright Testing Principles
 
 - **Environment Variables**: ALWAYS store test credentials and secrets in `.env` file (gitignored), NEVER hardcode in
