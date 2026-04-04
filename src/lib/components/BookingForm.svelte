@@ -39,14 +39,12 @@
 	const vacancyEndTime = $derived(vacancy ? DateUtils.toLocalTime(new Date(vacancy.endTime)) : '');
 
 	const employeeName = $derived(
-		vacancy
-			? (employees.find((e) => e.id === vacancy.employeeId)?.name ?? '')
-			: (booking?.employeeName ?? '')
+		employees.find((e) => String(e.id) === String(vacancy?.employeeId ?? booking?.employeeId))
+			?.name ?? ''
 	);
 	const locationName = $derived(
-		vacancy
-			? (locations.find((l) => l.id === vacancy.locationId)?.name ?? '')
-			: (booking?.locationName ?? '')
+		locations.find((l) => String(l.id) === String(vacancy?.locationId ?? booking?.locationId))
+			?.name ?? ''
 	);
 
 	const formattedDate = $derived.by(() => {
@@ -76,12 +74,7 @@
 		return null;
 	});
 
-	const canDelete = $derived(
-		isReadonly &&
-			!!ondelete &&
-			!!booking?.startTime &&
-			new Date(booking.startTime) > new Date(Date.now() + 24 * 60 * 60 * 1000)
-	);
+	const canDelete = $derived(isReadonly && !!ondelete && !!booking?.startTime);
 
 	const bookingTimeDisplay = $derived.by(() => {
 		if (!booking?.startTime) return '';
@@ -93,12 +86,12 @@
 
 <div class="sticky top-4 p-6 bg-gray-50 border border-gray-200 rounded-lg">
 	<h2 class="text-xl font-semibold mb-4">
-		{isReadonly ? 'My Booking' : 'Book Appointment'}
+		{isReadonly ? 'My Appointment' : 'Book Appointment'}
 	</h2>
 
 	<Form
 		error={timeError || error}
-		legend={isReadonly ? 'View booking' : 'Book appointment'}
+		legend={isReadonly ? 'View appointment' : 'Book appointment'}
 		{loading}
 		onsubmit={(e) => {
 			if (isReadonly) {
@@ -109,7 +102,7 @@
 		}}
 		oncancel={isReadonly ? undefined : oncancel}
 		submitLabel={isReadonly ? 'Close' : 'Book'}
-		deleteLabel={canDelete ? 'Cancel Booking' : undefined}
+		deleteLabel={canDelete ? 'Cancel Appointment' : undefined}
 		ondelete={canDelete ? ondelete : undefined}
 	>
 		{#if formattedDate}

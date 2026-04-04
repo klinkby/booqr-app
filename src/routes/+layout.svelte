@@ -3,7 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import {AuthenticationService} from '$lib/api';
 	import {auth} from '$lib';
-	import {goto} from '$app/navigation';
+	import {goto, invalidate} from '$app/navigation';
 
 	let {children} = $props();
 
@@ -17,7 +17,11 @@
 			// Don't log error to console in production for security
 		} finally {
 			auth.clear();
-			goto('/');
+			if (window.location.pathname === '/') {
+				await invalidate('app:bookings');
+			} else {
+				goto('/');
+			}
 		}
 	}
 </script>
