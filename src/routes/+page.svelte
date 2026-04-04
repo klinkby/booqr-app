@@ -18,12 +18,10 @@
 	let formError = $state(null);
 	let formLoading = $state(false);
 
-	const ownBookingClasses = ['!bg-indigo-500', '!text-white', '!border-indigo-600'];
-	const availableClasses = ['!bg-green-500', '!text-white', '!border-green-600'];
+	const ownBookingClasses = ['!bg-green-700', '!text-white', '!border-green-500'];
+	const availableClasses = ['!bg-olive-600', '!text-white', '!border-emerald-500'];
 
-	const ownBookingVacancyIds = $derived(new Set(data.bookings.map((b) => String(b.vacancyId))));
 	const vacancyMap = $derived(new Map(data.vacancies.map((v) => [String(v.id), v])));
-	const bookingMap = $derived(new Map(data.bookings.map((b) => [String(b.vacancyId), b])));
 	const employeeMap = $derived(new Map(data.employees.map((e) => [String(e.id), e])));
 	const locationMap = $derived(new Map(data.locations.map((l) => [String(l.id), l])));
 
@@ -47,21 +45,14 @@
 		selectedEmployeeIdStr ? servicesByEmployeeMap.get(selectedEmployeeIdStr) ?? [] : []
 	);
 
-	const calendarEvents = $derived.by(() =>
-		data.vacancies.map((v) => {
-			const isOwnBooking = ownBookingVacancyIds.has(String(v.id));
-			const employee = employeeMap.get(String(v.employeeId));
-			const location = locationMap.get(String(v.locationId));
-			const employeeName = employee?.name;
-			const locationName = location?.name;
-			let title;
-			if (isOwnBooking) {
-				title = 'My Booking';
-			} else if (employeeName && locationName) {
-				title = `${employeeName} @ ${locationName}`;
-			} else {
-				title = employeeName || locationName || 'Available';
-			}
+	const calendarEvents = $derived.by(() => {
+		const vacancyEvents = data.vacancies.map((v) => {
+			const employeeName = employeeMap.get(String(v.employeeId))?.name;
+			const locationName = locationMap.get(String(v.locationId))?.name;
+			const title =
+				employeeName && locationName
+					? `${employeeName} @ ${locationName}`
+					: employeeName || locationName || 'Available';
 			return {
 				id: v.id,
 				start: DateUtils.utcToLocalIso(v.startTime),
@@ -69,11 +60,20 @@
 				title,
 				startEditable: false,
 				durationEditable: false,
-				classNames: isOwnBooking ? ownBookingClasses : availableClasses,
-				extendedProps: {vacancyId: v.id, employeeId: v.employeeId}
+				classNames: availableClasses
 			};
-		})
-	);
+		});
+		const bookingEvents = data.bookings.map((b) => ({
+			id: `booking-${b.id}`,
+			start: DateUtils.utcToLocalIso(b.startTime),
+			end: DateUtils.utcToLocalIso(b.endTime),
+			title: 'My Booking',
+			startEditable: false,
+			durationEditable: false,
+			classNames: ownBookingClasses
+		}));
+		return [...vacancyEvents, ...bookingEvents];
+	});
 
 	function handleDatesChange(info) {
 		const from = info.start.toISOString();
@@ -82,30 +82,39 @@
 		goto(`?from=${from}&to=${to}`, {replaceState: true, keepFocus: true, noScroll: true});
 	}
 
-	function openForm(vacancy, isOwnBooking) {
-		selectedVacancy = vacancy;
-		selectedBooking = isOwnBooking ? bookingMap.get(String(vacancy.id)) ?? null : null;
-		formMode = isOwnBooking ? 'view' : 'book';
-		formServiceId = '';
-		formStartTime = DateUtils.toLocalTime(new Date(vacancy.startTime));
-		formError = null;
-		showForm = true;
-	}
-
 	function handleEventClick(info) {
-		const vacancyId = String(info.event.id);
-		const vacancy = vacancyMap.get(vacancyId);
+		const eventId = String(info.event.id);
+
+		if (eventId.startsWith('booking-')) {
+			const bookingId = eventId.slice('booking-'.length);
+			const booking = data.bookings.find((b) => String(b.id) === bookingId);
+			if (!booking) return;
+			selectedVacancy = null;
+			selectedBooking = booking;
+			formMode = 'view';
+			formServiceId = '';
+			formStartTime = DateUtils.toLocalTime(new Date(booking.startTime));
+			formError = null;
+			showForm = true;
+			return;
+		}
+
+		const vacancy = vacancyMap.get(eventId);
 		if (!vacancy) return;
 
-		const isOwnBooking = ownBookingVacancyIds.has(vacancyId);
-
-		if (!isOwnBooking && !auth.isLoggedIn) {
+		if (!auth.isLoggedIn) {
 			const returnUrl = $page.url.pathname + $page.url.search;
 			goto(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
 			return;
 		}
 
-		openForm(vacancy, isOwnBooking);
+		selectedVacancy = vacancy;
+		selectedBooking = null;
+		formMode = 'book';
+		formServiceId = '';
+		formStartTime = DateUtils.toLocalTime(new Date(vacancy.startTime));
+		formError = null;
+		showForm = true;
 	}
 
 	async function handleSubmit() {
@@ -157,7 +166,7 @@
 </script>
 
 <div class="container mx-auto px-4 py-8 max-w-7xl">
-	<h1 class="text-3xl font-bold mb-6">Booking Calendar</h1>
+	<h1 class="text-3xl font-bold mb-6">Booqr</h1>
 
 	<div class="flex gap-6">
 		<div class="flex-1 min-w-0">
