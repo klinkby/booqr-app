@@ -57,15 +57,22 @@
 			: '';
 	});
 
-	const timeError = $derived.by(() => {
-		if (isReadonly || !serviceId || !startTime || !vacancy) return null;
-		const start = new Date(vacancyDate + 'T' + startTime);
-		const vacStart = new Date(vacancyDate + 'T' + vacancyStartTime);
-		if (start < vacStart) return 'Start time must be within the vacancy time slot';
-		const end = new Date(start.getTime() + serviceDurationMinutes * 60000);
-		const vacEnd = new Date(vacancyDate + 'T' + vacancyEndTime);
-		if (end > vacEnd) return 'Service does not fit within the vacancy time slot';
-		return null;
+	const timeSlots = $derived.by(() => {
+		if (!vacancy || !selectedService || serviceDurationMinutes === 0) return [];
+		const slots = [];
+		let cur = new Date(vacancyDate + 'T' + vacancyStartTime);
+		const latest = new Date(vacancyDate + 'T' + vacancyEndTime).getTime() - serviceDurationMinutes * 60000;
+		while (cur.getTime() <= latest) {
+			slots.push(DateUtils.toLocalTime(cur));
+			cur = new Date(cur.getTime() + 15 * 60000);
+		}
+		return slots;
+	});
+
+	$effect(() => {
+		if (!timeSlots.includes(startTime)) {
+			startTime = timeSlots[0] ?? '';
+		}
 	});
 
 	const canDelete = $derived(isReadonly && !!ondelete && !!booking?.startTime);
@@ -84,13 +91,13 @@
 	</h2>
 
 	<Form
-		error={timeError || error}
+		{error}
 		legend={isReadonly ? 'View appointment' : 'Book appointment'}
 		{loading}
 		onsubmit={(e) => {
 			if (isReadonly) {
 				oncancel();
-			} else if (!timeError) {
+			} else {
 				onsubmit(e);
 			}
 		}}
@@ -105,9 +112,9 @@
 
 		{#if !isReadonly && vacancy}
 			<p class="text-sm text-gray-600">
-				Available: {vacancyStartTime} – {vacancyEndTime}{#if employeeName}
-					with {employeeName}{/if}{#if locationName}
-					at {locationName}{/if}
+				Available: {vacancyStartTime} – {vacancyEndTime}
+				with {employeeName}
+				at {locationName}
 			</p>
 
 			<div>
@@ -128,17 +135,17 @@
 
 			<div>
 				<label class="block text-sm font-medium text-gray-700 mb-1" for="bookingStartTime"> Start Time </label>
-				<input
+				<select
 					bind:value={startTime}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 					id="bookingStartTime"
 					name="startTime"
 					required
-					step="300"
-					type="time"
-					min={vacancyStartTime}
-					max={vacancyEndTime}
-				/>
+				>
+					{#each timeSlots as slot (slot)}
+						<option value={slot}>{slot}</option>
+					{/each}
+				</select>
 			</div>
 		{:else if isReadonly && booking}
 			<dl class="space-y-2 text-sm">

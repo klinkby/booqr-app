@@ -1,6 +1,6 @@
 <script>
 	import { LocationService } from '$lib/api';
-	import { Form, invokeApi } from '$lib';
+	import { Form, invokeApi, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -33,7 +33,7 @@
 			if (import.meta.env.DEV) {
 				console.error('Failed to load location:', err);
 			}
-			error = 'Failed to load location. Please try again.';
+			error = apiErrorMessage(err);
 		} finally {
 			loadingData = false;
 		}
@@ -55,7 +55,7 @@
 			if (import.meta.env.DEV) {
 				console.error('Failed to save location:', err);
 			}
-			error = err.message || 'Failed to save location. Please try again.';
+			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
 		}

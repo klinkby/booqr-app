@@ -1,5 +1,5 @@
 <script>
-	import { auth, BookingForm, Calendar } from '$lib';
+	import { auth, BookingForm, Calendar, apiErrorMessage } from '$lib';
 	import { BookingService } from '$lib/api';
 	import { invokeApi } from '$lib/invokeApi';
 	import { goto, invalidate } from '$app/navigation';
@@ -135,7 +135,14 @@
 			);
 			await refreshBookingData();
 		} catch (err) {
-			formError = err.message || 'Failed to create booking. Please try again.';
+			if (err.status === 409) {
+				formError = 'That appointment has already been taken. Please choose another time.';
+				formStartTime = '';
+				bookingCache.purgeVacancies(urlFrom, urlTo);
+				await invalidate('app:vacancies');
+			} else {
+				formError = apiErrorMessage(err);
+			}
 		} finally {
 			formLoading = false;
 		}
@@ -149,7 +156,7 @@
 			await invokeApi(() => BookingService.deleteBooking(selectedBooking.id));
 			await refreshBookingData();
 		} catch (err) {
-			formError = err.message || 'Failed to cancel booking. Please try again.';
+			formError = apiErrorMessage(err);
 		} finally {
 			formLoading = false;
 		}

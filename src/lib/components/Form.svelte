@@ -11,8 +11,20 @@
 		children,
 	} = $props();
 
+	const trimTypes = new Set(['text', 'tel', 'email', 'search', 'url']);
+
 	function handleSubmit(event) {
 		event.preventDefault();
+		for (const el of event.target.elements) {
+			if ((el.tagName === 'INPUT' && trimTypes.has(el.type)) || el.tagName === 'TEXTAREA') {
+				el.value = el.value.trim();
+				el.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+		}
+		if (!event.target.checkValidity()) {
+			event.target.reportValidity();
+			return;
+		}
 		onsubmit(event);
 	}
 
