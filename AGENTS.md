@@ -158,7 +158,9 @@ dependencies.
   where possible.
 - **Token Validation**: All tokens validated for JWT structure before use or storage.
 - **Error Handling**: Generic error messages displayed to users to prevent information disclosure (e.g., "Authentication
-  failed" instead of "User not found").
+  failed" instead of "User not found"). When displaying API errors to users, MUST use `apiErrorMessage(err, fallback)`
+  from `$lib` to extract human-readable messages. This handles 400 ProblemDetails validation errors and falls back
+  safely.
 - **No Console Logging**: Sensitive data (tokens, passwords, PII) MUST NOT be logged to the console.
 - **Duplicate Interceptors**: Protected against multiple interceptor registrations.
 - **Credentials Scope**: `withCredentials: true` only set for `/api/` paths to limit cookie exposure.
@@ -246,12 +248,12 @@ await invalidate('app:myresource');
 
 - **Routes**: SvelteKit file-based routing in `src/routes/`
   - `/` - Home page
-    - `/profile` - My Profile page (any logged-in user) - edit name/phone, request password reset
-  - `/login` - Login form with email/password fields, uses Form component. Includes "Forgot your password?" toggle that
-    shows the PasswordReset component.
-  - `/change-password` - Anonymous page for setting a new password via email reset link. Validates `expires` query param
-    client-side; forwards all query params to `POST /api/users/change-password`. Shows PasswordReset component when link
-    is expired.
+    - `/profile` - My Profile page (any logged-in user) - edit name/phone
+  - `/login` - Login form with email/password fields, uses Form component. Includes "Forgot your password?" link to
+    `/change-password`.
+  - `/change-password` - Anonymous page for password reset and change. Without an `action` query param, shows
+    PasswordReset component for requesting a reset email. With `action`, validates `expires` query param client-side;
+    forwards all query params to `POST /api/users/change-password`. Shows PasswordReset component when link is expired.
   - `/admin/` - Protected admin area (requires login + Employee role)
   - `/admin/calendar` - Interactive calendar for managing vacancies:
     - Weekly time grid view (6 AM - 6 PM, expandable)
@@ -381,7 +383,6 @@ buttons. Consumers inject their own form fields as children.
 - Submit button shows "Please wait…" during loading
 - All buttons disabled during loading
 - Delete button appears on the left (with `mr-auto`) in red styling
-- Uses `novalidate` on form for custom validation handling
 
 **Styling**: Uses app's gray/indigo Tailwind palette — red error alerts, gray Cancel button, indigo Submit button,
 consistent focus rings.
@@ -594,37 +595,36 @@ read-only view modes. Uses the Form component internally and is displayed as a s
 
 ### PasswordReset (`src/lib/components/PasswordReset.svelte`)
 
-A self-contained component for requesting a password reset email. Manages its own loading, error, and success states
-internally. Used on the profile page (authenticated), login page (anonymous), and change-password page (expired link).
+A presentational component for requesting a password reset email. All state and API logic are owned by the parent page.
+Used on the change-password page.
 
 **Import**: `import { PasswordReset } from '$lib';`
 
 **Props** (via `$props()` with `$bindable`):
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `email` | `string` (bindable) | `''` | Email address for the reset request. Pre-filled when known (profile), editable
-when not (login). |
-| `invoker` | `(fn) => Promise` | `undefined` | Optional wrapper for the API call (e.g., `invokeApi` for authenticated
-contexts with token refresh). When omitted, calls the API directly. |
+| `email` | `string` (bindable) | `''` | Email address for the reset request |
+| `error` | `string \| null` | `null` | Error message to display |
+| `message` | `string \| null` | `null` | Success message to display |
+| `loading` | `boolean` | `false` | Loading state for the submit button |
+| `onsubmit` | `() => void` | required | Callback when the user clicks the reset button |
 
 **Behavior**:
 
-- When `invoker` is provided: hides the email input (email is already known), wraps API call for token refresh
-- When `invoker` is omitted: shows an email input field so the user can enter their address
-- Calls `UserService.resetPassword({ email })` on button click
-- Success/error messages use `aria-live` regions, kept in DOM with `class:hidden` toggle
+- Shows an email input field and a submit button
+- Displays success/error messages via `aria-live` regions, kept in DOM with `class:hidden` toggle
+- The parent page is responsible for calling the API and setting `error`/`message`/`loading` state
 
-**Usage examples**:
+**Usage example**:
 
 ```svelte
-<!-- Profile page: email known, authenticated -->
-<PasswordReset {email} invoker={invokeApi} />
-
-<!-- Login page: email bindable, anonymous -->
-<PasswordReset bind:email />
-
-<!-- Change-password page: fully anonymous -->
-<PasswordReset />
+<PasswordReset
+	bind:email={resetEmail}
+	error={resetError}
+	message={resetMessage}
+	loading={resetLoading}
+	onsubmit={handleReset}
+/>
 ```
 
 ### Password Validation
@@ -727,7 +727,7 @@ Svelte-specific guidelines
   	}
   </script>
 
-  <form onsubmit="{handleSubmit}" novalidate>
+  <form onsubmit="{handleSubmit}">
   	<fieldset disabled="{loading}">
   		<legend>Sign in</legend>
 

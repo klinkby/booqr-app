@@ -1,10 +1,9 @@
 <script>
 	import { AuthenticationService } from '$lib/api';
-	import { auth, Form, PasswordReset } from '$lib';
+	import { auth, Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
-
-	let showPasswordReset = $state(false);
 
 	let email = $state('');
 	let password = $state('');
@@ -58,7 +57,7 @@
 				console.error('Login error:', err);
 			}
 			// Try to use the error message from API if available
-			error = err.message || 'Authentication failed. Please check your credentials.';
+			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
 		}
@@ -100,20 +99,12 @@
 		</Form>
 
 		<p class="mt-4 text-sm text-gray-600">
-			<button
-				type="button"
-				onclick={() => (showPasswordReset = !showPasswordReset)}
+			<a
+				href={resolve('/change-password')}
 				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 			>
-				{showPasswordReset ? 'Back to sign in' : 'Forgot your password?'}
-			</button>
+				Forgot your password?
+			</a>
 		</p>
-
-		{#if showPasswordReset}
-			<section aria-labelledby="reset-heading" class="mt-4">
-				<h2 id="reset-heading" class="text-lg font-semibold mb-3">Reset Password</h2>
-				<PasswordReset bind:email />
-			</section>
-		{/if}
 	</div>
 </div>

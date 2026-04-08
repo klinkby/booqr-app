@@ -1,6 +1,6 @@
 <script>
 	import { VacancyService } from '$lib/api';
-	import { auth, Calendar, VacancyForm } from '$lib';
+	import { auth, Calendar, VacancyForm, apiErrorMessage } from '$lib';
 	import { invokeApi } from '$lib/invokeApi';
 	import { goto, invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -114,7 +114,7 @@
 				locationId: vacancy.locationId?.toString() || '',
 			};
 		} catch (err) {
-			formError = err.message || 'Failed to load vacancy details';
+			formError = apiErrorMessage(err);
 		} finally {
 			formLoading = false;
 		}
@@ -137,7 +137,7 @@
 			vacancyCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));
 			await invalidate('app:vacancies');
 		} catch (err) {
-			formError = err.message || 'Failed to create vacancy';
+			formError = apiErrorMessage(err);
 		} finally {
 			formLoading = false;
 		}
@@ -174,7 +174,7 @@
 			vacancyCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));
 			await invalidate('app:vacancies');
 		} catch (err) {
-			formError = err.message || 'Failed to delete vacancy';
+			formError = apiErrorMessage(err);
 		} finally {
 			formLoading = false;
 		}
