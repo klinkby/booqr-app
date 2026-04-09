@@ -175,9 +175,7 @@
 	}
 </script>
 
-<div class="container mx-auto px-4 py-8 max-w-7xl">
-	<h1 class="text-3xl font-bold mb-6">Booqr</h1>
-
+<div class="container mx-auto max-w-7xl">
 	<div class="flex gap-6">
 		<div class="flex-1 min-w-0">
 			<Calendar events={calendarEvents} onDatesChange={handleDatesChange} onEventClick={handleEventClick} />

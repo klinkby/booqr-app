@@ -1,6 +1,6 @@
 <script>
 	import { ServiceService, UserService } from '$lib/api';
-	import { DataTable, invokeApi } from '$lib';
+	import { DataTable, invokeApi, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -35,7 +35,7 @@
 			}));
 		} catch (err) {
 			if (import.meta.env.DEV) console.error('Failed to fetch services:', err);
-			error = 'Failed to load services. Please try again.';
+			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
 		}
