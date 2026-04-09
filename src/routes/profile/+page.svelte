@@ -72,7 +72,6 @@
 		{:else}
 			<!-- Section 1: Profile Information Form -->
 			<section aria-labelledby="profile-heading">
-				<h2 id="profile-heading" class="text-xl font-semibold mb-4">Profile Information</h2>
 				<div class="max-w-2xl">
 					<!-- Success message -->
 					{#if successMessage}

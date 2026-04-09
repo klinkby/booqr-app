@@ -2,20 +2,30 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { AuthenticationService } from '$lib/api';
-	import { auth } from '$lib';
+	import { auth, NavBar } from '$lib';
 	import { goto, invalidate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
 	let { children } = $props();
 
-	async function handleLogout(event) {
-		event.preventDefault();
+	let links = $derived([
+		...(auth.isEmployee
+			? [
+					{ name: 'Bookings', href: '/admin/bookings' },
+					{ name: 'Contacts', href: '/admin/contacts' },
+					{ name: 'Services', href: '/admin/services' },
+					{ name: 'Locations', href: '/admin/locations' },
+				]
+			: []),
+		...(auth.isLoggedIn ? [{ name: 'My Profile', href: '/profile' }] : []),
+		...(auth.isLoggedIn ? [] : [{ name: 'Sign in', href: '/login' }]),
+	]);
 
+	async function handleLogout() {
 		try {
 			await AuthenticationService.logout();
 		} catch {
 			// Continue with logout even if API call fails
-			// Don't log error to console in production for security
 		} finally {
 			auth.clear();
 			if (window.location.pathname === '/') {
@@ -38,29 +48,15 @@
 >
 	Skip to main content
 </a>
-<header class="bg-gray-800 text-white">
-	<nav aria-label="Main navigation" class="container mx-auto px-4 py-4 max-w-7xl">
-		<div class="flex gap-6">
-			<a class="hover:text-gray-300" href={resolve('/')}>Home</a>
-			{#if auth.isEmployee}
-				<a href={resolve('/admin/calendar')} class="hover:text-gray-300">Admin</a>
-			{/if}
-			{#if auth.isLoggedIn}
-				<a href={resolve('/profile')} class="hover:text-gray-300">My Profile</a>
-				<button onclick={handleLogout} class="hover:text-gray-300">Logout</button>
-			{:else}
-				<a href={resolve('/login')} class="hover:text-gray-300">Login</a>
-			{/if}
-		</div>
-	</nav>
-</header>
+
+<NavBar brandName="Booqr" {links} onlogout={auth.isLoggedIn ? handleLogout : undefined} />
 
 <main class="container mx-auto px-4 py-8 max-w-7xl" id="main-content">
 	{@render children()}
 </main>
 
 <footer class="bg-gray-100 text-gray-600 mt-8">
-	<div class="container mx-auto px-4 py-4 max-w-7xl text-sm">
+	<div class="container mx-auto px-4 max-w-7xl text-sm">
 		<small>&copy; {new Date().getFullYear()} Booqr</small>
 	</div>
 </footer>

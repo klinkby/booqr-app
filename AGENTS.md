@@ -266,12 +266,15 @@ await invalidate('app:myresource');
   - `/admin/services` - Service list page with Create button and Edit actions
   - `/admin/services/new` - Create service form page
   - `/admin/services/[id]` - Edit service form page (dynamic route)
-- **Layout**: Top-level navigation in `src/routes/+layout.svelte` with Home and Login/Logout links. Admin link shown
-  only to employees (`auth.isEmployee`).
-  - **Responsive Layout**: Main content constrained with `container mx-auto px-4 py-8 max-w-7xl` for consistent
+- **Layout**: `src/routes/+layout.svelte` renders `<NavBar>` with a reactive `links` array derived from `auth.isEmployee`
+  and `auth.isLoggedIn`. Admin links (Calendar, Services, Locations, Contacts) are merged into the main nav for
+  employees — there is no secondary sub-nav.
+  - **Responsive Layout**: Main content constrained with `container mx-auto max-w-7xl` for consistent
     centering and max-width (1280px) across all pages
   - **Header/Footer**: Use same responsive constraints for visual alignment
-- **Navigation**: Login/Logout toggle based on `sessionStorage.access_token` presence
+- **Navigation**: `NavBar` component (`src/lib/components/NavBar.svelte`) — responsive sticky header with left-aligned
+  brand + links, hamburger menu on mobile, active link highlighting, and optional Logout button via `onlogout` callback.
+  Login/Logout visibility is driven by `auth.isLoggedIn`.
 - **Shared Utilities**: Place reusable functions in `src/lib/` and export via `src/lib/index.js`
 - **Reusable Components**: Place shared Svelte components in `src/lib/components/` and export via `src/lib/index.js`
 
@@ -279,7 +282,7 @@ await invalidate('app:myresource');
 
 - **Auth Guard**: `src/routes/admin/+layout.svelte` redirects unauthenticated users to `/login` via `$effect` and only
   renders children for logged-in employees. Non-employee users see "Access denied".
-- **Nav Link**: The top-level layout conditionally shows the Admin link when `auth.isEmployee` is true.
+- **Nav Links**: Admin links are rendered in the main `NavBar` when `auth.isEmployee` is true — no separate admin sub-nav exists.
 - **Adding Admin Pages**: Create new routes under `src/routes/admin/` — they automatically inherit the auth guard from
   the admin layout.
 
@@ -592,6 +595,38 @@ read-only view modes. Uses the Form component internally and is displayed as a s
 ```
 
 **Styling**: Includes sticky positioning (`sticky top-4`) and gray panel background for side panel display.
+
+### NavBar (`src/lib/components/NavBar.svelte`)
+
+A responsive, presentational navigation bar rendered in `src/routes/+layout.svelte`. Sticky top header with brand name
+on the left, nav links beside it, and an optional Logout button. Collapses to a hamburger menu on mobile.
+
+**Import**: `import { NavBar } from '$lib';`
+
+**Props** (via `$props()`):
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `links` | `Array<{ name: string, href: string }>` | `[]` | Navigation links to render |
+| `brandName` | `string` | `'App'` | Brand name displayed on the left |
+| `onlogout` | `() => void` | `undefined` | If provided, a Logout button is rendered |
+
+**Features**:
+
+- Active link detection: exact match for `/`, `startsWith` for all other routes — uses `page` from `$app/state`
+- Hamburger menu on `< md` breakpoint; closes automatically on link click
+- Logout is a `<button>` (action), not a link — pass handler via `onlogout`
+
+**Usage** (from `+layout.svelte`):
+
+```svelte
+let links = $derived([
+  { name: 'Home', href: '/' },
+  ...(auth.isEmployee ? [{ name: 'Calendar', href: '/admin/calendar' }, ...] : []),
+  ...(auth.isLoggedIn ? [{ name: 'My Profile', href: '/profile' }] : [{ name: 'Login', href: '/login' }]),
+]);
+
+<NavBar brandName="Booqr" {links} onlogout={auth.isLoggedIn ? handleLogout : undefined} />
+```
 
 ### PasswordReset (`src/lib/components/PasswordReset.svelte`)
 
