@@ -32,7 +32,10 @@
 					</a>
 				{/each}
 				{#if onlogout}
-					<button onclick={onlogout} class="font-medium text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer">
+					<button
+						onclick={onlogout}
+						class="font-medium text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
+					>
 						Sign out
 					</button>
 				{/if}
