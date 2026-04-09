@@ -9,17 +9,16 @@
 	let { children } = $props();
 
 	let links = $derived([
-		{ name: 'Home', href: '/' },
 		...(auth.isEmployee
 			? [
-					{ name: 'Calendar', href: '/admin/calendar' },
+					{ name: 'Bookings', href: '/admin/bookings' },
+					{ name: 'Contacts', href: '/admin/contacts' },
 					{ name: 'Services', href: '/admin/services' },
 					{ name: 'Locations', href: '/admin/locations' },
-					{ name: 'Contacts', href: '/admin/contacts' },
 				]
 			: []),
 		...(auth.isLoggedIn ? [{ name: 'My Profile', href: '/profile' }] : []),
-		...(auth.isLoggedIn ? [] : [{ name: 'Login', href: '/login' }]),
+		...(auth.isLoggedIn ? [] : [{ name: 'Sign in', href: '/login' }]),
 	]);
 
 	async function handleLogout() {

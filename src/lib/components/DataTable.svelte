@@ -15,7 +15,7 @@
 </script>
 
 <div>
-	<table class="w-full text-left">
+	<table class="w-full text-left border border-gray-200">
 		<thead class="divide-y divide-gray-200">
 			<tr>
 				{#each columns as column (column.key)}

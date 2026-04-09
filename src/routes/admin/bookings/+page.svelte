@@ -182,7 +182,7 @@
 </script>
 
 <div class="container mx-auto max-w-7xl">
-	<h1 class="text-3xl font-bold mb-6">Calendar</h1>
+	<h1 class="text-3xl font-bold mb-6">Bookings</h1>
 
 	<div class="flex gap-6">
 		<div class="flex-1 min-w-0">

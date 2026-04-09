@@ -611,11 +611,13 @@ on the left, nav links beside it, and an optional Logout button. Collapses to a 
 | `onlogout` | `() => void` | `undefined` | If provided, a Logout button is rendered |
 
 **Features**:
+
 - Active link detection: exact match for `/`, `startsWith` for all other routes — uses `page` from `$app/state`
 - Hamburger menu on `< md` breakpoint; closes automatically on link click
 - Logout is a `<button>` (action), not a link — pass handler via `onlogout`
 
 **Usage** (from `+layout.svelte`):
+
 ```svelte
 let links = $derived([
   { name: 'Home', href: '/' },
