@@ -178,7 +178,7 @@ export const sendRequest = async (config, options, url, body, formData, headers,
         request.credentials = config.CREDENTIALS;
     }
     onCancel(() => controller.abort());
-    return await fetch(url, request);
+    return await (config.FETCH ?? fetch)(url, request);
 };
 export const getResponseHeader = (response, responseHeader) => {
     if (responseHeader) {
