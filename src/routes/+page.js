@@ -1,11 +1,13 @@
 import { auth } from '$lib/auth.svelte.js';
 import { UserService, VacancyService } from '$lib/api';
+import { OpenAPI } from '$lib/api/core/OpenAPI';
 import { invokeApi } from '$lib/invokeApi';
 import { bookingCache } from './bookingCache.js';
 
 export const ssr = false;
 
-export async function load({ url, depends }) {
+export async function load({ fetch, url, depends }) {
+	OpenAPI.FETCH = fetch;
 	depends('app:vacancies');
 	depends('app:bookings');
 
