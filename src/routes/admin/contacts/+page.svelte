@@ -1,12 +1,11 @@
 <script>
 	import { UserService } from '$lib/api';
-	import { PaginatedTable } from '$lib';
+	import { PaginatedTable, UserName } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
 	const columns = [
 		{ key: 'name', label: 'Name' },
-		{ key: 'email', label: 'Email' },
 		{ key: 'role', label: 'Role' },
 	];
 
@@ -31,5 +30,12 @@
 			>Create Contact
 		</button>
 	</div>
-	<PaginatedTable {columns} {fetchCommand} onedit={handleEdit} />
+	{#snippet cellContent(column, row)}
+		{#if column.key === 'name'}
+			<UserName name={row.name} email={row.email} />
+		{:else}
+			{row[column.key]}
+		{/if}
+	{/snippet}
+	<PaginatedTable {columns} {fetchCommand} onedit={handleEdit} {cellContent} />
 </div>

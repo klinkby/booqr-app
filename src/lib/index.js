@@ -10,3 +10,5 @@ export { default as VacancyForm } from './components/VacancyForm.svelte';
 export { default as PasswordReset } from './components/PasswordReset.svelte';
 export { default as BookingForm } from './components/BookingForm.svelte';
 export { default as NavBar } from './components/NavBar.svelte';
+export { default as Avatar } from './components/Avatar.svelte';
+export { default as UserName } from './components/UserName.svelte';

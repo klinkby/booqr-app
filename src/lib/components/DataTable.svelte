@@ -8,6 +8,7 @@
 		ondelete = undefined,
 		onnextpage = undefined,
 		onpreviouspage = undefined,
+		cellContent = undefined,
 	} = $props();
 
 	const hasActions = $derived(onedit || ondelete);
@@ -30,7 +31,13 @@
 			{#each rows as row, i (i)}
 				<tr class="hover:bg-gray-50">
 					{#each columns as column (column.key)}
-						<td class="px-4 py-3 text-sm text-gray-900">{row[column.key]}</td>
+						<td class="px-4 py-3 text-sm text-gray-900">
+							{#if cellContent}
+								{@render cellContent(column, row)}
+							{:else}
+								{row[column.key]}
+							{/if}
+						</td>
 					{/each}
 					{#if hasActions}
 						<td class="px-4 py-3 text-sm">

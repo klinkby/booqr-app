@@ -1,6 +1,6 @@
 <script>
 	import { ServiceService, UserService } from '$lib/api';
-	import { DataTable, invokeApi, apiErrorMessage } from '$lib';
+	import { DataTable, UserName, invokeApi, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -8,7 +8,7 @@
 	const columns = [
 		{ key: 'name', label: 'Name' },
 		{ key: 'duration', label: 'Duration' },
-		{ key: 'employeeNames', label: 'Employees' },
+		{ key: 'employeeUsers', label: 'Employees' },
 	];
 
 	let rows = $state([]);
@@ -28,10 +28,10 @@
 				invokeApi(() => ServiceService.getServices()),
 				invokeApi(() => UserService.getUsers(undefined, 'Employee', 1000, 0)),
 			]);
-			const empMap = Object.fromEntries(empRes.items.map((e) => [e.id, e.name || e.email]));
+			const empMap = Object.fromEntries(empRes.items.map((e) => [e.id, e]));
 			rows = servicesRes.items.map((s) => ({
 				...s,
-				employeeNames: (s.employees || []).map((id) => empMap[id] ?? id).join(', ') || '-',
+				employeeUsers: (s.employees || []).map((id) => empMap[id]).filter(Boolean),
 			}));
 		} catch (err) {
 			if (import.meta.env.DEV) console.error('Failed to fetch services:', err);
@@ -59,6 +59,17 @@
 	{:else if rows.length === 0}
 		<p>No services found.</p>
 	{:else}
-		<DataTable {columns} {rows} onedit={handleEdit} />
+		{#snippet cellContent(column, row)}
+			{#if column.key === 'employeeUsers'}
+				<span class="flex flex-col gap-1">
+					{#each row.employeeUsers as emp (emp.id)}
+						<UserName name={emp.name || emp.email} email={emp.email} />
+					{/each}
+				</span>
+			{:else}
+				{row[column.key]}
+			{/if}
+		{/snippet}
+		<DataTable {columns} {rows} onedit={handleEdit} {cellContent} />
 	{/if}
 </div>
