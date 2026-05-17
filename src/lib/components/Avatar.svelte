@@ -7,4 +7,4 @@
 	let src = $derived(`data:image/svg+xml;utf8,${encodeURIComponent(svg)}`);
 </script>
 
-<img {src} alt="" width={size} height={size} style="width:{size};height:{size}" />
+<img {src} alt="" style="width:{size};height:{size}" />
