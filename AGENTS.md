@@ -317,8 +317,7 @@ A generic, accessible data table component for listing and paging through record
 **Props** (via `$props()`):
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `columns` | `Array<{ key: string, label: string }>` | required | Column definitions — `key` maps to row property,
-`label` is header text |
+| `columns` | `Array<{ key: string, label: string, hideOnMobile?: boolean }>` | required | Column definitions — `key` maps to row property, `label` is header text, `hideOnMobile` hides the column below the `md` breakpoint |
 | `rows` | `Array<object>` | required | Data rows to display |
 | `hasPreviousPage` | `boolean` | `false` | Enables Previous button |
 | `hasNextPage` | `boolean` | `false` | Enables Next button |

@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 
-	let { links = [], brandName = 'App', onlogout = undefined } = $props();
+	let { links = [], brandName = 'App', pageTitle = undefined, onlogout = undefined } = $props();
 	let isOpen = $state(false);
 
 	const isActive = (href) => {
@@ -10,30 +10,6 @@
 		const current = page.url.pathname;
 		return href === '/' || href === '' ? current === resolved : current.startsWith(resolved);
 	};
-
-	function titleFromPath(pathname) {
-		const seg = pathname.split('/').filter(Boolean);
-		if (!seg.length) return null;
-
-		if (seg.length === 3 && seg[0] === 'admin') {
-			const label = { contacts: 'Contact', services: 'Service', locations: 'Location' }[seg[1]];
-			if (label) return seg[2] === 'new' ? `Create ${label}` : `Edit ${label}`;
-		}
-
-		return (
-			{
-				login: 'Sign in',
-				profile: 'My Profile',
-				'change-password': 'Change Password',
-				plan: 'Plan',
-				contacts: 'Contacts',
-				services: 'Services',
-				locations: 'Locations',
-			}[seg.at(-1)] ?? null
-		);
-	}
-
-	let pageTitle = $derived(titleFromPath(page.url.pathname));
 </script>
 
 <nav aria-label="Main navigation" class="bg-white border-b border-gray-200 sticky top-0 z-50">
