@@ -3,7 +3,7 @@
 	import { invokeApi } from '$lib/invokeApi';
 	import { onMount } from 'svelte';
 
-	let { columns, fetchCommand, onedit = undefined, ondelete = undefined } = $props();
+	let { columns, fetchCommand, onedit = undefined, ondelete = undefined, cellContent = undefined } = $props();
 
 	const PAGE_SIZE = 100;
 	let rows = $state([]);
@@ -64,5 +64,6 @@
 		onpreviouspage={previousPage}
 		{onedit}
 		{ondelete}
+		{cellContent}
 	/>
 {/if}
