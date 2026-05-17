@@ -63,8 +63,6 @@
 
 {#if auth.isLoggedIn}
 	<div>
-		<h1 class="text-3xl font-bold mb-6">My Profile</h1>
-
 		{#if loadingData}
 			<div role="status" aria-live="polite">
 				<p>Loading...</p>

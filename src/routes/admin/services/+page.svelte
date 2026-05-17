@@ -7,8 +7,8 @@
 
 	const columns = [
 		{ key: 'name', label: 'Name' },
-		{ key: 'duration', label: 'Duration' },
-		{ key: 'employeeUsers', label: 'Employees' },
+		{ key: 'duration', label: 'Duration', hideOnMobile: true },
+		{ key: 'employeeUsers', label: 'Employees', hideOnMobile: true },
 	];
 
 	let rows = $state([]);
@@ -43,15 +43,6 @@
 </script>
 
 <div>
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-3xl font-bold">Services</h1>
-		<button
-			class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-			onclick={handleCreate}
-			type="button"
-			>Create Service
-		</button>
-	</div>
 	{#if loading}
 		<div role="status" aria-live="polite"><p>Loading...</p></div>
 	{:else if error}
@@ -72,4 +63,12 @@
 		{/snippet}
 		<DataTable {columns} {rows} onedit={handleEdit} {cellContent} />
 	{/if}
+	<div class="mt-6 flex justify-center">
+		<button
+			class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+			onclick={handleCreate}
+			type="button"
+			>Create Service
+		</button>
+	</div>
 </div>

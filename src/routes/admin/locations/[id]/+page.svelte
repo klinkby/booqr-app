@@ -71,8 +71,6 @@
 </script>
 
 <div>
-	<h1 class="text-3xl font-bold mb-6">{isEdit ? 'Edit Location' : 'Create Location'}</h1>
-
 	{#if loadingData}
 		<div role="status" aria-live="polite">
 			<p>Loading...</p>

@@ -6,7 +6,7 @@
 
 	const columns = [
 		{ key: 'name', label: 'Name' },
-		{ key: 'role', label: 'Role' },
+		{ key: 'role', label: 'Role', hideOnMobile: true },
 	];
 
 	const fetchCommand = (start, num) => UserService.getUsers(null, null, num, start);
@@ -21,15 +21,6 @@
 </script>
 
 <div>
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-3xl font-bold">Contacts</h1>
-		<button
-			class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-			onclick={handleCreate}
-			type="button"
-			>Create Contact
-		</button>
-	</div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
 			<UserName name={row.name} email={row.email} />
@@ -38,4 +29,12 @@
 		{/if}
 	{/snippet}
 	<PaginatedTable {columns} {fetchCommand} onedit={handleEdit} {cellContent} />
+	<div class="mt-6 flex justify-center">
+		<button
+			class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+			onclick={handleCreate}
+			type="button"
+			>Create Contact
+		</button>
+	</div>
 </div>

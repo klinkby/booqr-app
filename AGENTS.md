@@ -813,6 +813,7 @@ Notes & enforcement
 
 - **End-to-End Verification**: Playwright tests in `e2e/` verify UI behavior and API responses.
 - **Unit tests**: This project does NOT include unit tests.
+- **Running E2E tests**: Always use `npm run test:e2e` to run Playwright/e2e/browser tests — never `npx playwright test` or `npm test` directly.
 
 ## Code Quality & Linting
 

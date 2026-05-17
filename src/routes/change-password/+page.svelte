@@ -92,8 +92,6 @@
 </script>
 
 <div>
-	<h1 class="text-3xl font-bold mb-6">Change Password</h1>
-
 	<div class="max-w-2xl">
 		{#if !action}
 			<p class="text-sm text-gray-600 mb-4">

@@ -11,7 +11,7 @@
 	let links = $derived([
 		...(auth.isEmployee
 			? [
-					{ name: 'Bookings', href: '/admin/bookings' },
+					{ name: 'Plan', href: '/admin/plan' },
 					{ name: 'Contacts', href: '/admin/contacts' },
 					{ name: 'Services', href: '/admin/services' },
 					{ name: 'Locations', href: '/admin/locations' },
