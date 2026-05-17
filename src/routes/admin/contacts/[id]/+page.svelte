@@ -1,6 +1,6 @@
 <script>
 	import { UserService } from '$lib/api';
-	import { Form, Avatar, invokeApi, apiErrorMessage } from '$lib';
+	import { Form, invokeApi, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -68,13 +68,6 @@
 </script>
 
 <div>
-	<h1 class="text-3xl font-bold mb-6 flex items-center gap-2">
-		{isEdit ? 'Edit Contact' : 'Create Contact'}
-		{#if isEdit && email}
-			<Avatar {email} size="1.875rem" />
-		{/if}
-	</h1>
-
 	{#if loadingData}
 		<div role="status" aria-live="polite">
 			<p>Loading...</p>

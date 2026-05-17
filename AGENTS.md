@@ -317,8 +317,7 @@ A generic, accessible data table component for listing and paging through record
 **Props** (via `$props()`):
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `columns` | `Array<{ key: string, label: string }>` | required | Column definitions — `key` maps to row property,
-`label` is header text |
+| `columns` | `Array<{ key: string, label: string, hideOnMobile?: boolean }>` | required | Column definitions — `key` maps to row property, `label` is header text, `hideOnMobile` hides the column below the `md` breakpoint |
 | `rows` | `Array<object>` | required | Data rows to display |
 | `hasPreviousPage` | `boolean` | `false` | Enables Previous button |
 | `hasNextPage` | `boolean` | `false` | Enables Next button |
@@ -813,6 +812,7 @@ Notes & enforcement
 
 - **End-to-End Verification**: Playwright tests in `e2e/` verify UI behavior and API responses.
 - **Unit tests**: This project does NOT include unit tests.
+- **Running E2E tests**: Always use `npm run test:e2e` to run Playwright/e2e/browser tests — never `npx playwright test` or `npm test` directly.
 
 ## Code Quality & Linting
 

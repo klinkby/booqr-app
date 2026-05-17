@@ -20,7 +20,11 @@
 		<thead class="divide-y divide-gray-200">
 			<tr>
 				{#each columns as column (column.key)}
-					<th class="text-sm font-medium text-gray-700 px-4 py-3 bg-gray-50">{column.label}</th>
+					<th
+						class="text-sm font-medium text-gray-700 px-4 py-3 bg-gray-50 {column.hideOnMobile
+							? 'hidden md:table-cell'
+							: ''}">{column.label}</th
+					>
 				{/each}
 				{#if hasActions}
 					<th class="text-sm font-medium text-gray-700 px-4 py-3 bg-gray-50">Actions</th>
@@ -31,7 +35,7 @@
 			{#each rows as row, i (i)}
 				<tr class="hover:bg-gray-50">
 					{#each columns as column (column.key)}
-						<td class="px-4 py-3 text-sm text-gray-900">
+						<td class="px-4 py-3 text-sm text-gray-900 {column.hideOnMobile ? 'hidden md:table-cell' : ''}">
 							{#if cellContent}
 								{@render cellContent(column, row)}
 							{:else}

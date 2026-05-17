@@ -2,10 +2,9 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 
-	let { links = [], brandName = 'App', onlogout = undefined } = $props();
+	let { links = [], brandName = 'App', pageTitle = undefined, onlogout = undefined } = $props();
 	let isOpen = $state(false);
 
-	// Enhanced check: matches exact for home, startsWith for sub-routes
 	const isActive = (href) => {
 		const resolved = resolve(href);
 		const current = page.url.pathname;
@@ -16,9 +15,15 @@
 <nav aria-label="Main navigation" class="bg-white border-b border-gray-200 sticky top-0 z-50">
 	<div class="container mx-auto px-4 max-w-7xl">
 		<div class="flex justify-between h-16 items-center">
-			<a href={resolve('/')} class="font-bold text-xl hover:opacity-80 transition-opacity">
-				{brandName}
-			</a>
+			<div class="flex items-center gap-1">
+				<a href={resolve('/')} class="font-bold text-xl hover:opacity-80 transition-opacity">
+					{brandName}
+				</a>
+				{#if pageTitle}
+					<span class="text-gray-400 mx-1" aria-hidden="true">›</span>
+					<h1 class="text-xl font-bold m-0">{pageTitle}</h1>
+				{/if}
+			</div>
 
 			<div class="hidden md:flex items-center space-x-6">
 				{#each links as { name, href } (href)}

@@ -65,8 +65,6 @@
 </script>
 
 <div>
-	<h1 class="text-3xl font-bold mb-6">Sign in to your account</h1>
-
 	<div class="max-w-2xl">
 		<Form {error} legend="Sign in" {loading} onsubmit={handleSubmit} submitLabel="Sign in">
 			<div>

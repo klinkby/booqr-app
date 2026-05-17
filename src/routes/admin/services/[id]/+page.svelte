@@ -82,8 +82,6 @@
 </script>
 
 <div>
-	<h1 class="text-3xl font-bold mb-6">{isEdit ? 'Edit Service' : 'Create Service'}</h1>
-
 	{#if loadingData}
 		<div role="status" aria-live="polite">
 			<p>Loading...</p>

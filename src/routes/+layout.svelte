@@ -5,13 +5,38 @@
 	import { auth, NavBar } from '$lib';
 	import { goto, invalidate } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 
 	let { children } = $props();
+
+	function titleFromPath(pathname) {
+		const seg = pathname.split('/').filter(Boolean);
+		if (!seg.length) return null;
+
+		if (seg.length === 3 && seg[0] === 'admin') {
+			const label = { contacts: 'Contact', services: 'Service', locations: 'Location' }[seg[1]];
+			if (label) return seg[2] === 'new' ? `Create ${label}` : `Edit ${label}`;
+		}
+
+		return (
+			{
+				login: 'Sign in',
+				profile: 'My Profile',
+				'change-password': 'Change Password',
+				plan: 'Plan',
+				contacts: 'Contacts',
+				services: 'Services',
+				locations: 'Locations',
+			}[seg.at(-1)] ?? null
+		);
+	}
+
+	let pageTitle = $derived(titleFromPath(page.url.pathname));
 
 	let links = $derived([
 		...(auth.isEmployee
 			? [
-					{ name: 'Bookings', href: '/admin/bookings' },
+					{ name: 'Plan', href: '/admin/plan' },
 					{ name: 'Contacts', href: '/admin/contacts' },
 					{ name: 'Services', href: '/admin/services' },
 					{ name: 'Locations', href: '/admin/locations' },
@@ -49,7 +74,7 @@
 	Skip to main content
 </a>
 
-<NavBar brandName="Booqr" {links} onlogout={auth.isLoggedIn ? handleLogout : undefined} />
+<NavBar brandName="Booqr" {links} {pageTitle} onlogout={auth.isLoggedIn ? handleLogout : undefined} />
 
 <main class="container mx-auto px-4 py-8 max-w-7xl" id="main-content">
 	{@render children()}
