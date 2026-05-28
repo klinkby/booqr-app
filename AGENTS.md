@@ -180,6 +180,14 @@ dependencies.
 This project uses SvelteKit's `load` functions and `depends`/`invalidate` lifecycle to manage data fetching. Components
 are purely presentational — all API calls belong in `+page.js` or `+layout.js` load functions, not in components.
 
+> **Experimental (svelte-query POC):** The `/admin/plan` route is a scoped proof-of-concept that fetches **vacancy**
+> data with `@tanstack/svelte-query` (v6, runes) instead of a `load` function + module `Map` cache. The QueryClient and
+> the auth-aware `authedQueryFn` (401 refresh-and-retry) live in `src/lib/queryClient.js`; the provider is mounted in
+> `src/routes/admin/plan/+layout.svelte`; query/mutation wiring is in `src/routes/admin/plan/planData.svelte.js`. The
+> reusable presentational components (`Calendar`, `VacancyForm`) are unchanged and still receive data via props. The
+> rest of the app continues to use the `load`/`invalidate` pattern described below. Do not expand svelte-query to other
+> routes without rewriting this section.
+
 ### Principles
 
 - **Components are presentational**: Components in `src/lib/components/` receive data via props and emit events via

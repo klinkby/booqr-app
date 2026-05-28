@@ -1,13 +1,18 @@
 <script>
-	import { VacancyService } from '$lib/api';
 	import { auth, Calendar, VacancyForm, apiErrorMessage } from '$lib';
-	import { invokeApi } from '$lib/invokeApi';
-	import { goto, invalidate } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { vacancyCache } from './vacancyCache.js';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { DateUtils } from '$lib/dateUtils.js';
+	import { usePlanVacancies } from './planData.svelte.js';
 
 	let { data } = $props();
+
+	// Vacancy data + mutations are owned by the svelte-query hook. The range is
+	// read live from the URL inside the thunk so week navigation refetches.
+	const plan = usePlanVacancies(() => ({
+		from: page.url.searchParams.get('from'),
+		to: page.url.searchParams.get('to'),
+	}));
 
 	// Form state
 	let showForm = $state(false);
@@ -39,7 +44,7 @@
 
 	// Transform API vacancies to event calendar format, reactively derived from loaded data
 	const calendarEvents = $derived.by(() => {
-		const vacancyEvents = data.vacancies.map((vacancy) => ({
+		const vacancyEvents = plan.vacancies.map((vacancy) => ({
 			id: vacancy.id,
 			start: DateUtils.utcToLocalIso(vacancy.startTime),
 			end: DateUtils.utcToLocalIso(vacancy.endTime),
@@ -102,7 +107,7 @@
 		showForm = true;
 
 		try {
-			const vacancy = await invokeApi(() => VacancyService.getVacancyById(info.event.id));
+			const vacancy = await plan.getVacancy(info.event.id);
 			const startDate = new Date(vacancy.startTime);
 			const endDate = new Date(vacancy.endTime);
 
@@ -125,17 +130,13 @@
 		formLoading = true;
 
 		try {
-			await invokeApi(() =>
-				VacancyService.addVacancy({
-					employeeId: formData.employeeId || null,
-					locationId: Number(formData.locationId),
-					startTime: new Date(formData.date + 'T' + formData.startTime).toISOString(),
-					endTime: new Date(formData.date + 'T' + formData.endTime).toISOString(),
-				}),
-			);
+			await plan.addVacancy({
+				employeeId: formData.employeeId || null,
+				locationId: Number(formData.locationId),
+				startTime: new Date(formData.date + 'T' + formData.startTime).toISOString(),
+				endTime: new Date(formData.date + 'T' + formData.endTime).toISOString(),
+			});
 			showForm = false;
-			vacancyCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));
-			await invalidate('app:vacancies');
 		} catch (err) {
 			formError = apiErrorMessage(err);
 		} finally {
@@ -169,10 +170,8 @@
 		formLoading = true;
 
 		try {
-			await invokeApi(() => VacancyService.deleteVacancy(selectedVacancyId));
+			await plan.deleteVacancy(selectedVacancyId);
 			showForm = false;
-			vacancyCache.purge($page.url.searchParams.get('from'), $page.url.searchParams.get('to'));
-			await invalidate('app:vacancies');
 		} catch (err) {
 			formError = apiErrorMessage(err);
 		} finally {

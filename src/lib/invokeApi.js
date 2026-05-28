@@ -21,7 +21,13 @@ export async function invokeApi(operation) {
 	}
 }
 
-async function refreshToken() {
+/**
+ * Performs a coalesced token refresh. Concurrent callers share a single
+ * in-flight refresh promise. Exported so the svelte-query layer
+ * (`authedQueryFn` in `queryClient.js`) reuses the same coalescing as
+ * `invokeApi`, avoiding duplicate refresh calls while both coexist.
+ */
+export async function refreshToken() {
 	if (refreshPromise) {
 		await refreshPromise;
 		return;
