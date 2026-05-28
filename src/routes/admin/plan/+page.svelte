@@ -181,8 +181,14 @@
 </script>
 
 <div class="container mx-auto max-w-7xl">
+	{#if plan.error}
+		<div role="alert" class="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+			{apiErrorMessage(plan.error, 'Failed to load vacancies. Please try again.')}
+		</div>
+	{/if}
+
 	<div class="flex gap-6">
-		<div class="flex-1 min-w-0">
+		<div class="flex-1 min-w-0" aria-busy={plan.isLoading}>
 			<Calendar
 				events={calendarEvents}
 				onDatesChange={handleDatesChange}
