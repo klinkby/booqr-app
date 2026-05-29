@@ -1,9 +1,11 @@
 <script>
-	import { AuthenticationService } from '$lib/api';
 	import { auth, Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
+	import { useLoginData } from './loginData.svelte.js';
+
+	const loginData = useLoginData();
 
 	let email = $state('');
 	let password = $state('');
@@ -36,10 +38,7 @@
 		loading = true;
 
 		try {
-			const response = await AuthenticationService.login({
-				email,
-				password,
-			});
+			const response = await loginData.login({ email, password });
 			// Clear password from memory
 			password = '';
 			auth.accessToken = response.access_token;

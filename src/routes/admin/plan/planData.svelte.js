@@ -1,4 +1,4 @@
-import { VacancyService } from '$lib/api';
+import { LocationService, UserService, VacancyService } from '$lib/api';
 import { queryKeys } from '$lib/queryKeys';
 import { useResourceQuery, useResourceMutation, fetchResource } from '$lib/resourceQuery.svelte.js';
 
@@ -16,17 +16,8 @@ import { useResourceQuery, useResourceMutation, fetchResource } from '$lib/resou
  *
  * @param {() => { from: string|null, to: string|null }} getRange thunk
  *   returning the current week range read live from the URL.
- * @returns {{
- *   readonly vacancies: Array<object>,
- *   readonly isLoading: boolean,
- *   readonly error: unknown,
- *   addVacancy: (requestBody: object) => Promise<unknown>,
- *   deleteVacancy: (id: string|number) => Promise<unknown>,
- *   getVacancy: (id: string|number) => Promise<object>,
- * }}
  */
-export function usePlanVacancies(getRange) {
-	// Read the reactive range inside the thunk so week navigation refetches.
+export function usePlanData(getRange) {
 	const query = useResourceQuery(() => {
 		const { from, to } = getRange();
 		return {
@@ -36,6 +27,18 @@ export function usePlanVacancies(getRange) {
 		};
 	});
 
+	const locations = useResourceQuery(() => ({
+		queryKey: queryKeys.locations.all,
+		fetcher: () => LocationService.getLocations(0, 100),
+	}));
+
+	// Use UserService (not EmployeeService) so IDs match vacancy.employeeId and
+	// VacancyForm's employee selector which initialises from auth.userId (a User ID).
+	const employees = useResourceQuery(() => ({
+		queryKey: queryKeys.users.employees,
+		fetcher: () => UserService.getUsers(undefined, 'Employee'),
+	}));
+
 	const addVacancy = useResourceMutation(queryKeys.vacancies.all, (requestBody) =>
 		VacancyService.addVacancy(requestBody),
 	);
@@ -44,6 +47,12 @@ export function usePlanVacancies(getRange) {
 	return {
 		get vacancies() {
 			return query.items;
+		},
+		get locations() {
+			return locations.items;
+		},
+		get employees() {
+			return employees.items;
 		},
 		get isLoading() {
 			return query.isLoading;

@@ -1,9 +1,8 @@
 <script>
-	import { ServiceService, UserService } from '$lib/api';
-	import { DataTable, UserName, invokeApi, apiErrorMessage } from '$lib';
+	import { DataTable, UserName, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { onMount } from 'svelte';
+	import { useServicesData } from './servicesData.svelte.js';
 
 	const columns = [
 		{ key: 'name', label: 'Name' },
@@ -11,9 +10,7 @@
 		{ key: 'employeeUsers', label: 'Employees', hideOnMobile: true },
 	];
 
-	let rows = $state([]);
-	let loading = $state(true);
-	let error = $state(null);
+	const services = useServicesData();
 
 	function handleEdit(row) {
 		goto(resolve(`/admin/services/${row.id}`));
@@ -21,33 +18,14 @@
 	function handleCreate() {
 		goto(resolve('/admin/services/new'));
 	}
-
-	onMount(async () => {
-		try {
-			const [servicesRes, empRes] = await Promise.all([
-				invokeApi(() => ServiceService.getServices()),
-				invokeApi(() => UserService.getUsers(undefined, 'Employee', 1000, 0)),
-			]);
-			const empMap = Object.fromEntries(empRes.items.map((e) => [e.id, e]));
-			rows = servicesRes.items.map((s) => ({
-				...s,
-				employeeUsers: (s.employees || []).map((id) => empMap[id]).filter(Boolean),
-			}));
-		} catch (err) {
-			if (import.meta.env.DEV) console.error('Failed to fetch services:', err);
-			error = apiErrorMessage(err);
-		} finally {
-			loading = false;
-		}
-	});
 </script>
 
 <div>
-	{#if loading}
+	{#if services.isLoading}
 		<div role="status" aria-live="polite"><p>Loading...</p></div>
-	{:else if error}
-		<div role="alert" aria-live="assertive"><p class="text-red-600">{error}</p></div>
-	{:else if rows.length === 0}
+	{:else if services.error}
+		<div role="alert" aria-live="assertive"><p class="text-red-600">{apiErrorMessage(services.error)}</p></div>
+	{:else if services.rows.length === 0}
 		<p>No services found.</p>
 	{:else}
 		{#snippet cellContent(column, row)}
@@ -61,7 +39,7 @@
 				{row[column.key]}
 			{/if}
 		{/snippet}
-		<DataTable {columns} {rows} onedit={handleEdit} {cellContent} />
+		<DataTable {columns} rows={services.rows} onedit={handleEdit} {cellContent} />
 	{/if}
 	<div class="mt-6 flex justify-center">
 		<button

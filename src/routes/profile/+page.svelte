@@ -1,16 +1,17 @@
 <script>
-	import { UserService } from '$lib/api';
-	import { auth, Form, invokeApi, apiErrorMessage } from '$lib';
+	import { auth, Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { onMount } from 'svelte';
+	import { useProfileData } from './profileData.svelte.js';
+
+	const profile = useProfileData();
 
 	let name = $state('');
 	let phone = $state('');
 	let email = $state('');
 	let error = $state(null);
 	let loading = $state(false);
-	let loadingData = $state(true);
+	let initialized = $state(false);
 	let successMessage = $state(null);
 
 	// Auth guard: redirect unauthenticated users
@@ -20,52 +21,41 @@
 		}
 	});
 
-	async function loadProfile() {
-		if (!auth.userId) return;
-
-		loadingData = true;
-		try {
-			const user = await invokeApi(() => UserService.getUserById(auth.userId));
-			name = user.name || '';
-			phone = user.phone || '';
-			email = user.email;
-		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to load profile:', err);
-			}
-			error = apiErrorMessage(err);
-		} finally {
-			loadingData = false;
+	// Populate form fields once when cached (or freshly fetched) data arrives.
+	// Guard prevents re-initialising if the mutation triggers a background refetch.
+	$effect(() => {
+		if (profile.user && !initialized) {
+			name = profile.user.name || '';
+			phone = profile.user.phone || '';
+			email = profile.user.email;
+			initialized = true;
 		}
-	}
+	});
 
 	async function handleSubmit() {
 		error = null;
 		successMessage = null;
 		loading = true;
 		try {
-			await invokeApi(() => UserService.updateUser(auth.userId, { name, phone }));
+			await profile.saveProfile({ name, phone });
 			successMessage = 'Profile updated successfully.';
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to update profile:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
 		}
 	}
-
-	onMount(() => {
-		loadProfile();
-	});
 </script>
 
 {#if auth.isLoggedIn}
 	<div>
-		{#if loadingData}
+		{#if profile.isLoading}
 			<div role="status" aria-live="polite">
 				<p>Loading...</p>
+			</div>
+		{:else if profile.error}
+			<div role="alert" aria-live="assertive">
+				<p class="text-red-600">{apiErrorMessage(profile.error)}</p>
 			</div>
 		{:else}
 			<!-- Section 1: Profile Information Form -->

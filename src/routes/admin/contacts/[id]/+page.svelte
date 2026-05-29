@@ -1,13 +1,15 @@
 <script>
-	import { UserService } from '$lib/api';
-	import { Form, invokeApi, apiErrorMessage } from '$lib';
+	import { Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { useContactData } from './contactData.svelte.js';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
+
+	const contact = useContactData();
 
 	let email = $state('');
 	let name = $state('');
@@ -17,41 +19,33 @@
 	let loading = $state(false);
 	let loadingData = $state(false);
 
-	async function loadUser() {
+	onMount(async () => {
 		if (!isEdit) return;
-
 		loadingData = true;
 		try {
-			const user = await invokeApi(() => UserService.getUserById(id));
-			email = user.email;
-			name = user.name || '';
-			phone = user.phone || '';
-			role = user.role;
+			const existing = await contact.getContact(id);
+			email = existing.email;
+			name = existing.name || '';
+			phone = existing.phone || '';
+			role = existing.role;
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to load user:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loadingData = false;
 		}
-	}
+	});
 
 	async function handleSubmit() {
 		error = null;
 		loading = true;
-
 		try {
-			if (isEdit) {
-				await invokeApi(() => UserService.updateUser(id, { name, phone }));
-			} else {
-				await invokeApi(() => UserService.addUser({ email }));
-			}
+			await contact.saveContact({
+				id,
+				isEdit,
+				payload: isEdit ? { name, phone } : { email },
+			});
 			await goto(resolve('/admin/contacts'));
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to save user:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
@@ -61,10 +55,6 @@
 	function handleCancel() {
 		goto(resolve('/admin/contacts'));
 	}
-
-	onMount(() => {
-		loadUser();
-	});
 </script>
 
 <div>

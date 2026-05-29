@@ -1,11 +1,12 @@
 import { QueryClient } from '@tanstack/svelte-query';
-import { ApiError } from '$lib/api';
-import { refreshToken } from '$lib/invokeApi';
+import { ApiError, AuthenticationService } from '$lib/api';
+import { auth } from './auth.svelte.js';
+import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 
+let refreshPromise = null;
 /**
- * Runs an API operation with automatic 401 refresh-and-retry, mirroring the
- * semantics of `invokeApi` but owned by the query layer so components don't
- * call `invokeApi` directly. On a 401 it awaits the shared coalesced refresh
+ * Runs an API operation with automatic 401 refresh-and-retry, and awaits the shared coalesced refresh
  * (see `refreshToken`) and retries once.
  *
  * TanStack Query's `retry` option is a synchronous predicate and cannot perform
@@ -49,3 +50,33 @@ export const queryClient = new QueryClient({
 		},
 	},
 });
+
+/**
+ * Performs a coalesced token refresh. Concurrent callers share a single
+ * in-flight refresh promise.
+ */
+async function refreshToken() {
+	if (refreshPromise) {
+		await refreshPromise;
+		return;
+	}
+	refreshPromise = doRefresh();
+	try {
+		await refreshPromise;
+	} finally {
+		refreshPromise = null;
+	}
+}
+
+async function doRefresh() {
+	try {
+		const response = await AuthenticationService.refresh();
+		auth.accessToken = response.access_token;
+	} catch (error) {
+		auth.clear();
+		// Capture current URL to return after re-authentication
+		const returnUrl = globalThis.location.pathname + globalThis.location.search;
+		await goto(resolve(`/login?returnUrl=${encodeURIComponent(returnUrl)}`));
+		throw error;
+	}
+}

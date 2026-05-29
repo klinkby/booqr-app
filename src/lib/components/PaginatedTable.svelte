@@ -1,50 +1,22 @@
 <script>
 	import DataTable from './DataTable.svelte';
-	import { invokeApi } from '$lib/invokeApi';
-	import { onMount } from 'svelte';
 
-	let { columns, fetchCommand, onedit = undefined, ondelete = undefined, cellContent = undefined } = $props();
-
-	const PAGE_SIZE = 100;
-	let rows = $state([]);
-	let loading = $state(true);
-	let error = $state(null);
-	let start = $state(0);
-	let hasNextPage = $state(false);
-
-	async function fetchBatch() {
-		loading = true;
-		error = null;
-		try {
-			const response = await invokeApi(() => fetchCommand(start, PAGE_SIZE));
-			rows = response.items;
-			hasNextPage = response.items.length === PAGE_SIZE;
-		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to fetch items:', err);
-			}
-			error = 'Failed to load items. Please try again.';
-		} finally {
-			loading = false;
-		}
-	}
-
-	function nextPage() {
-		start += PAGE_SIZE;
-		fetchBatch();
-	}
-
-	function previousPage() {
-		start = Math.max(0, start - PAGE_SIZE);
-		fetchBatch();
-	}
-
-	onMount(() => {
-		fetchBatch();
-	});
+	let {
+		columns,
+		rows = [],
+		isLoading = false,
+		error = null,
+		hasPreviousPage = false,
+		hasNextPage = false,
+		onnextpage = undefined,
+		onpreviouspage = undefined,
+		onedit = undefined,
+		ondelete = undefined,
+		cellContent = undefined,
+	} = $props();
 </script>
 
-{#if loading}
+{#if isLoading}
 	<div role="status" aria-live="polite">
 		<p>Loading...</p>
 	</div>
@@ -58,10 +30,10 @@
 	<DataTable
 		{columns}
 		{rows}
-		hasPreviousPage={start > 0}
+		{hasPreviousPage}
 		{hasNextPage}
-		onnextpage={nextPage}
-		onpreviouspage={previousPage}
+		{onnextpage}
+		{onpreviouspage}
 		{onedit}
 		{ondelete}
 		{cellContent}

@@ -3,13 +3,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { DateUtils } from '$lib/dateUtils.js';
-	import { usePlanVacancies } from './planData.svelte.js';
+	import { usePlanData } from './planData.svelte.js';
 
-	let { data } = $props();
-
-	// Vacancy data + mutations are owned by the svelte-query hook. The range is
-	// read live from the URL inside the thunk so week navigation refetches.
-	const plan = usePlanVacancies(() => ({
+	// Vacancy/location/employee data + mutations owned by the svelte-query hook.
+	// The range is read live from the URL inside the thunk so week navigation refetches.
+	const plan = usePlanData(() => ({
 		from: page.url.searchParams.get('from'),
 		to: page.url.searchParams.get('to'),
 	}));
@@ -51,8 +49,8 @@
 			title: vacancy.bookingId
 				? 'Booked'
 				: [
-						data.employees.find((e) => e.id === vacancy.employeeId)?.name,
-						data.locations.find((l) => l.id === vacancy.locationId)?.name,
+						plan.employees.find((e) => e.id === vacancy.employeeId)?.name,
+						plan.locations.find((l) => l.id === vacancy.locationId)?.name,
 					]
 						.filter(Boolean)
 						.join(' @ ') || 'Available',
@@ -91,7 +89,7 @@
 			startTime: DateUtils.toLocalTime(startDate),
 			endTime: DateUtils.toLocalTime(endDate),
 			employeeId: auth.userId || '',
-			locationId: data.locations[0]?.id || '',
+			locationId: plan.locations[0]?.id || '',
 		};
 		formError = null;
 		showForm = true;
@@ -208,8 +206,8 @@
 					bind:endTime={formData.endTime}
 					bind:locationId={formData.locationId}
 					bind:employeeId={formData.employeeId}
-					locations={data.locations}
-					employees={data.employees}
+					locations={plan.locations}
+					employees={plan.employees}
 					error={formError}
 					loading={formLoading}
 					onsubmit={handleFormSubmit}
