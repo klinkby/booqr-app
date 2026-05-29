@@ -56,10 +56,9 @@ It follows secure, accessible, and simply standards-first principles.
 - **Token Management**: `auth.accessToken = token` to store; `auth.clear()` to remove. `auth.isLoggedIn` is derived
   from token presence.
 - **401 refresh-and-retry**: `authedQueryFn` in `src/lib/queryClient.js` wraps any API operation with automatic
-  token refresh. Concurrent refreshes are coalesced via `refreshToken` in `src/lib/invokeApi.js`. Use
+  token refresh. Concurrent refreshes are coalesced via `refreshToken`. Use
   `authedQueryFn` directly only when writing data-hook infrastructure; ordinary API calls go through
   `useResourceQuery` / `useResourceMutation` / `fetchResource`, which delegate to `authedQueryFn` internally.
-  **Do not** use the old `invokeApi()` wrapper — it is no longer exported.
 - **On refresh failure**: `auth.clear()`, then redirect to
   `` `/login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}` ``.
 - **Login page returnUrl**: Read with `let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/');`.
@@ -88,9 +87,8 @@ It follows secure, accessible, and simply standards-first principles.
 ## Data Loading Architecture
 
 All API calls go through route-local `*Data.svelte.js` hooks → `useResource*` helpers → `authedQueryFn`. No load
-functions, no module-level Map caches, no `invokeApi()`, no `depends`/`invalidate`. Auth-only endpoints (login,
-password reset) are the only deliberate exception — they call generated services directly because no refresh token
-exists during those flows.
+functions, no module-level Map caches. Auth-only endpoints (login, password reset) are the only deliberate exception —
+they call generated services directly because no refresh token exists during those flows.
 
 ### svelte-query Infrastructure
 
