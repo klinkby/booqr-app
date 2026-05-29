@@ -10,7 +10,7 @@ minimalist, composable architecture.
 
 ## Features
 
-- **Minimal Runtime Dependencies**: No "vendor" bundle.
+- **Lean Dependency Tree**: Tree-shaken, code-split chunks — no monolithic "vendor" bundle.
 - **[Svelte 5 with Runes](https://svelte.dev/docs/svelte/overview)**: Modern reactive programming using Svelte 5's runes
   system (`$state`, `$derived`, `$effect`, `$props`) for efficient state management.
 - **[SvelteKit SPA Mode](https://svelte.dev/docs/kit/single-page-apps)**: Static site generation targeting static
@@ -18,11 +18,13 @@ minimalist, composable architecture.
 - **[Tailwind CSS](https://tailwindcss.com/)**: Utility-first CSS framework for consistent, minimal styling.
 - **[OpenAPI Code Generation](https://github.com/ferdikoomen/openapi-typescript-codegen)**: Auto-generated API client
   from OpenAPI specification.
-- **JWT Authentication**: Secure authentication flow
+- **[TanStack Query](https://tanstack.com/query/latest/docs/framework/svelte/overview)**: Declarative data fetching and
+  caching via route-local `*Data.svelte.js` hooks, with automatic 401 refresh-and-retry and coarse cache invalidation.
+- **JWT Authentication**: Secure authentication flow.
 - **ES2022 Target**: Modern JavaScript features for optimal performance.
 - **[Semantic HTML5](https://html.spec.whatwg.org/)**: Strict adherence to semantic markup and WCAG AA accessibility
-  standards:
-- **Security-First Design**: OWASP-aligned security practices:
+  standards.
+- **Security-First Design**: OWASP-aligned security practices.
 - **[Playwright E2E Testing](https://playwright.dev/)**: End-to-end testing with semantic selectors and accessibility
   assertions.
 - **Container Security**: Runs rootless in minimal [Alpine Linux](https://alpinelinux.org/) images (~20MB) with
