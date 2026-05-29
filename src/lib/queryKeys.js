@@ -17,4 +17,28 @@ export const queryKeys = {
 		all: ['vacancies'],
 		range: (from, to) => [...queryKeys.vacancies.all, from, to],
 	},
+	bookings: {
+		all: ['bookings'],
+		range: (userId, from, to) => [...queryKeys.bookings.all, userId, from, to],
+	},
+	locations: {
+		all: ['locations'],
+		detail: (id) => [...queryKeys.locations.all, id],
+		paged: ['locations', 'paged'],
+	},
+	services: {
+		all: ['services'],
+		detail: (id) => [...queryKeys.services.all, id],
+	},
+	employees: {
+		all: ['employees'],
+	},
+	users: {
+		all: ['users'],
+		detail: (id) => [...queryKeys.users.all, id],
+		paged: ['users', 'paged'],
+	},
+	profile: {
+		detail: (userId) => ['profile', userId],
+	},
 };
