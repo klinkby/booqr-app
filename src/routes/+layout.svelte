@@ -3,7 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { AuthenticationService } from '$lib/api';
 	import { auth, NavBar } from '$lib';
-	import { goto, invalidate } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
@@ -55,11 +55,8 @@
 			// Continue with logout even if API call fails
 		} finally {
 			auth.clear();
-			if (window.location.pathname === '/') {
-				await invalidate('app:bookings');
-			} else {
-				goto(resolve('/'));
-			}
+			queryClient.clear();
+			goto(resolve('/'));
 		}
 	}
 </script>

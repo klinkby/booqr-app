@@ -1,13 +1,14 @@
 <script>
 	import { auth, BookingForm, Calendar, apiErrorMessage } from '$lib';
-	import { BookingService } from '$lib/api';
-	import { invokeApi } from '$lib/invokeApi';
-	import { goto, invalidate } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { DateUtils } from '$lib/dateUtils.js';
-	import { bookingCache } from './bookingCache.js';
+	import { useHomeData } from './homeData.svelte.js';
 
-	let { data } = $props();
+	const home = useHomeData(() => ({
+		from: $page.url.searchParams.get('from'),
+		to: $page.url.searchParams.get('to'),
+	}));
 
 	let showForm = $state(false);
 	let formMode = $state('book');
@@ -21,9 +22,9 @@
 	const ownBookingClasses = ['!bg-green-700', '!text-white', '!border-green-500'];
 	const availableClasses = ['!bg-gray-800', '!text-white', '!border-gray-500'];
 
-	const vacancyMap = $derived(new Map(data.vacancies.map((v) => [String(v.id), v])));
-	const employeeMap = $derived(new Map(data.employees.map((e) => [String(e.id), e])));
-	const locationMap = $derived(new Map(data.locations.map((l) => [String(l.id), l])));
+	const vacancyMap = $derived(new Map(home.vacancies.map((v) => [String(v.id), v])));
+	const employeeMap = $derived(new Map(home.employees.map((e) => [String(e.id), e])));
+	const locationMap = $derived(new Map(home.locations.map((l) => [String(l.id), l])));
 
 	const urlFrom = $derived($page.url.searchParams.get('from'));
 	const urlTo = $derived($page.url.searchParams.get('to'));
@@ -32,7 +33,7 @@
 	const servicesByEmployeeMap = $derived.by(() => {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Map is ephemeral and reconstructed on each derivation; not shared mutable state
 		const map = new Map();
-		for (const service of data.services) {
+		for (const service of home.services) {
 			for (const empId of service.employees || []) {
 				const key = String(empId);
 				if (!map.has(key)) map.set(key, []);
@@ -47,7 +48,7 @@
 	);
 
 	const calendarEvents = $derived.by(() => {
-		const vacancyEvents = data.vacancies.map((v) => {
+		const vacancyEvents = home.vacancies.map((v) => {
 			const employeeName = employeeMap.get(String(v.employeeId))?.name;
 			const locationName = locationMap.get(String(v.locationId))?.name;
 			const title =
@@ -64,7 +65,7 @@
 				classNames: availableClasses,
 			};
 		});
-		const bookingEvents = data.bookings.map((b) => ({
+		const bookingEvents = home.bookings.map((b) => ({
 			id: `booking-${b.id}`,
 			start: DateUtils.utcToLocalIso(b.startTime),
 			end: DateUtils.utcToLocalIso(b.endTime),
@@ -89,7 +90,7 @@
 
 		if (eventId.startsWith('booking-')) {
 			const bookingId = eventId.slice('booking-'.length);
-			const booking = data.bookings.find((b) => String(b.id) === bookingId);
+			const booking = home.bookings.find((b) => String(b.id) === bookingId);
 			if (!booking) return;
 			selectedVacancy = null;
 			selectedBooking = booking;
@@ -124,22 +125,18 @@
 		formError = null;
 		formLoading = true;
 		try {
-			await invokeApi(() =>
-				BookingService.addBooking({
-					vacancyId: selectedVacancy.id,
-					serviceId: formServiceId,
-					startTime: new Date(
-						DateUtils.toLocalDate(new Date(selectedVacancy.startTime)) + 'T' + formStartTime,
-					).toISOString(),
-				}),
-			);
-			await refreshBookingData();
+			await home.addBooking({
+				vacancyId: selectedVacancy.id,
+				serviceId: formServiceId,
+				startTime: new Date(
+					DateUtils.toLocalDate(new Date(selectedVacancy.startTime)) + 'T' + formStartTime,
+				).toISOString(),
+			});
+			showForm = false;
 		} catch (err) {
 			if (err.status === 409) {
 				formError = 'That appointment has already been taken. Please choose another time.';
 				formStartTime = '';
-				bookingCache.purgeVacancies(urlFrom, urlTo);
-				await invalidate('app:vacancies');
 			} else {
 				formError = apiErrorMessage(err);
 			}
@@ -153,8 +150,8 @@
 		formError = null;
 		formLoading = true;
 		try {
-			await invokeApi(() => BookingService.deleteBooking(selectedBooking.id));
-			await refreshBookingData();
+			await home.deleteBooking(selectedBooking.id);
+			showForm = false;
 		} catch (err) {
 			formError = apiErrorMessage(err);
 		} finally {
@@ -165,13 +162,6 @@
 	function handleCancel() {
 		showForm = false;
 		formError = null;
-	}
-
-	async function refreshBookingData() {
-		showForm = false;
-		bookingCache.purgeVacancies(urlFrom, urlTo);
-		await invalidate('app:vacancies');
-		await invalidate('app:bookings');
 	}
 </script>
 
@@ -188,8 +178,8 @@
 					vacancy={selectedVacancy}
 					booking={selectedBooking}
 					services={filteredServices}
-					employees={data.employees}
-					locations={data.locations}
+					employees={home.employees}
+					locations={home.locations}
 					bind:serviceId={formServiceId}
 					bind:startTime={formStartTime}
 					error={formError}
