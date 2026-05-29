@@ -1,4 +1,4 @@
-import { EmployeeService, ServiceService } from '$lib/api';
+import { ServiceService, UserService } from '$lib/api';
 import { queryKeys } from '$lib/queryKeys';
 import { useResourceQuery } from '$lib/resourceQuery.svelte.js';
 
@@ -12,9 +12,10 @@ export function useServicesData() {
 		fetcher: () => ServiceService.getServices(0, 100),
 	}));
 
+	// Use UserService so employee IDs match service.employees (stored as User IDs).
 	const employees = useResourceQuery(() => ({
-		queryKey: queryKeys.employees.all,
-		fetcher: () => EmployeeService.getEmployees(0, 100),
+		queryKey: queryKeys.employeeUsers.all,
+		fetcher: () => UserService.getUsers(undefined, 'Employee'),
 	}));
 
 	const rows = $derived.by(() => {

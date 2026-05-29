@@ -1,4 +1,4 @@
-import { EmployeeService, ServiceService } from '$lib/api';
+import { ServiceService, UserService } from '$lib/api';
 import { queryKeys } from '$lib/queryKeys';
 import { fetchResource, useResourceMutation, useResourceQuery } from '$lib/resourceQuery.svelte.js';
 
@@ -8,9 +8,10 @@ import { fetchResource, useResourceMutation, useResourceQuery } from '$lib/resou
  *
  */
 export function useServiceData() {
+	// Use UserService so employee IDs match service.employees (stored as User IDs).
 	const employees = useResourceQuery(() => ({
-		queryKey: queryKeys.employees.all,
-		fetcher: () => EmployeeService.getEmployees(0, 100),
+		queryKey: queryKeys.employeeUsers.all,
+		fetcher: () => UserService.getUsers(undefined, 'Employee'),
 	}));
 
 	const saveService = useResourceMutation(queryKeys.services.all, (variables) => {

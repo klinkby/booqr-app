@@ -1,4 +1,4 @@
-import { EmployeeService, LocationService, VacancyService } from '$lib/api';
+import { LocationService, UserService, VacancyService } from '$lib/api';
 import { queryKeys } from '$lib/queryKeys';
 import { useResourceQuery, useResourceMutation, fetchResource } from '$lib/resourceQuery.svelte.js';
 
@@ -32,9 +32,11 @@ export function usePlanData(getRange) {
 		fetcher: () => LocationService.getLocations(0, 100),
 	}));
 
+	// Use UserService (not EmployeeService) so IDs match vacancy.employeeId and
+	// VacancyForm's employee selector which initialises from auth.userId (a User ID).
 	const employees = useResourceQuery(() => ({
-		queryKey: queryKeys.employees.all,
-		fetcher: () => EmployeeService.getEmployees(0, 100),
+		queryKey: queryKeys.employeeUsers.all,
+		fetcher: () => UserService.getUsers(undefined, 'Employee'),
 	}));
 
 	const addVacancy = useResourceMutation(queryKeys.vacancies.all, (requestBody) =>

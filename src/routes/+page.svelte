@@ -1,13 +1,13 @@
 <script>
 	import { auth, BookingForm, Calendar, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { DateUtils } from '$lib/dateUtils.js';
 	import { useHomeData } from './homeData.svelte.js';
 
 	const home = useHomeData(() => ({
-		from: $page.url.searchParams.get('from'),
-		to: $page.url.searchParams.get('to'),
+		from: page.url.searchParams.get('from'),
+		to: page.url.searchParams.get('to'),
 	}));
 
 	let showForm = $state(false);
@@ -26,8 +26,8 @@
 	const employeeMap = $derived(new Map(home.employees.map((e) => [String(e.id), e])));
 	const locationMap = $derived(new Map(home.locations.map((l) => [String(l.id), l])));
 
-	const urlFrom = $derived($page.url.searchParams.get('from'));
-	const urlTo = $derived($page.url.searchParams.get('to'));
+	const urlFrom = $derived(page.url.searchParams.get('from'));
+	const urlTo = $derived(page.url.searchParams.get('to'));
 
 	const selectedEmployeeIdStr = $derived(selectedVacancy ? String(selectedVacancy.employeeId) : null);
 	const servicesByEmployeeMap = $derived.by(() => {
@@ -106,7 +106,7 @@
 		if (!vacancy) return;
 
 		if (!auth.isLoggedIn) {
-			const returnUrl = $page.url.pathname + $page.url.search;
+			const returnUrl = page.url.pathname + page.url.search;
 			// eslint-disable-next-line svelte/no-navigation-without-resolve -- Dynamic URL already fully resolved from query params; wrapping in resolve() would be redundant
 			goto(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
 			return;
@@ -166,8 +166,14 @@
 </script>
 
 <div class="container mx-auto max-w-7xl">
+	{#if home.error}
+		<div role="alert" class="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+			{apiErrorMessage(home.error, 'Failed to load availability. Please try again.')}
+		</div>
+	{/if}
+
 	<div class="flex gap-6">
-		<div class="flex-1 min-w-0">
+		<div class="flex-1 min-w-0" aria-busy={home.isLoading}>
 			<Calendar events={calendarEvents} onDatesChange={handleDatesChange} onEventClick={handleEventClick} />
 		</div>
 

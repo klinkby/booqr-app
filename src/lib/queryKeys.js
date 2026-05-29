@@ -31,7 +31,13 @@ export const queryKeys = {
 		detail: (id) => [...queryKeys.services.all, id],
 	},
 	employees: {
+		// EmployeeService.getEmployees() → /api/employees — use for booking calendar display
 		all: ['employees'],
+	},
+	employeeUsers: {
+		// UserService.getUsers(role='Employee') → /api/users?Role=Employee
+		// Use wherever the IDs must match user IDs stored in services.employees or vacancy.employeeId
+		all: ['employee-users'],
 	},
 	users: {
 		all: ['users'],
