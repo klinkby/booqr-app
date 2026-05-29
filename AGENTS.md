@@ -42,8 +42,9 @@ It follows secure, accessible, and simply standards-first principles.
 ## API Client Configuration
 
 - **Auth Setup**: `src/lib/auth.svelte.js` — `AuthState` class with Svelte 5 runes; singleton exported as `auth`.
-- **Initialization**: `src/routes/+layout.js` configures `OpenAPI.TOKEN`, `WITH_CREDENTIALS`, and `CREDENTIALS` via
-  `Object.defineProperty` getters bound to `auth` state.
+- **Initialization**: `src/lib/auth.svelte.js` configures `OpenAPI.TOKEN`, `WITH_CREDENTIALS`, and `CREDENTIALS` via
+  `Object.defineProperty` getters bound to `auth` state (runs at module-init in the browser; `ssr = false` prevents
+  server execution).
 - **Generated services**: `src/lib/api/services/` use `src/lib/api/core/request.js`.
 
 ## Authentication
@@ -54,10 +55,11 @@ It follows secure, accessible, and simply standards-first principles.
 - **Token Validation**: JWT structure (3 dot-separated parts) and `exp` claim validated before storage.
 - **Token Management**: `auth.accessToken = token` to store; `auth.clear()` to remove. `auth.isLoggedIn` is derived
   from token presence.
-- **invokeApi()**: Wrapper in `src/lib/invokeApi.js` for automatic 401 refresh-and-retry. Always use
-  `await invokeApi(() => SomeService.someMethod(...))` for API calls. On 401 it calls
-  `AuthenticationService.refresh()`, stores new token, and retries. Concurrent refreshes are coalesced via a shared
-  `refreshPromise`.
+- **401 refresh-and-retry**: `authedQueryFn` in `src/lib/queryClient.js` wraps any API operation with automatic
+  token refresh. Concurrent refreshes are coalesced via `refreshToken` in `src/lib/invokeApi.js`. Use
+  `authedQueryFn` directly only when writing data-hook infrastructure; ordinary API calls go through
+  `useResourceQuery` / `useResourceMutation` / `fetchResource`, which delegate to `authedQueryFn` internally.
+  **Do not** use the old `invokeApi()` wrapper — it is no longer exported.
 - **On refresh failure**: `auth.clear()`, then redirect to
   `` `/login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}` ``.
 - **Login page returnUrl**: Read with `let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/');`.
@@ -85,57 +87,46 @@ It follows secure, accessible, and simply standards-first principles.
 
 ## Data Loading Architecture
 
-All API calls belong in `+page.js` or `+layout.js` load functions — never in components.
+All API calls go through route-local `*Data.svelte.js` hooks → `useResource*` helpers → `authedQueryFn`. No load
+functions, no module-level Map caches, no `invokeApi()`, no `depends`/`invalidate`. Auth-only endpoints (login,
+password reset) are the only deliberate exception — they call generated services directly because no refresh token
+exists during those flows.
 
-> **svelte-query (v6, runes):** `/admin/plan` fetches data with `@tanstack/svelte-query` instead of load functions.
-> The pattern is templated for reuse on other query-backed routes — see **svelte-query Template** below. Routes still
-> using load functions + `Map` cache (per **Principles**) are unchanged; pick one approach per route, don't mix.
+### svelte-query Infrastructure
 
-### svelte-query Template
-
-Shared infrastructure (do not duplicate per route):
+Shared (do not duplicate per route):
 
 - `src/lib/queryClient.js` — singleton `QueryClient` (`staleTime: Infinity`, `gcTime: 15min`, no-retry-on-4xx) and
-  `authedQueryFn` (401 refresh-and-retry, reusing `invokeApi`'s coalesced `refreshToken`).
+  `authedQueryFn` (401 refresh-and-retry via coalesced `refreshToken`). Root `+layout.svelte` mounts
+  `<QueryClientProvider client={queryClient}>` once for the entire app.
 - `src/lib/queryKeys.js` — central `queryKeys` registry; one block per resource (`all` prefix + factory fns). Single
   source of truth so a query and its invalidation can't drift.
-- `src/lib/resourceQuery.svelte.js` — generic primitives: `useResourceQuery` (reactive collection fetch, unwraps
-  `{ items }`, exposes `items`/`isLoading`/`isFetching`/`error`), `useResourceMutation` (mutate + coarse
-  `invalidateQueries` on the resource's `.all` key; returns `mutateAsync` so it settles after refetch), and
-  `fetchResource` (imperative one-off authed fetch, no caching — for always-fresh detail reads).
-- Mount `<QueryClientProvider client={queryClient}>` in the route's `+layout.svelte`.
+- `src/lib/resourceQuery.svelte.js` — generic primitives:
+  - `useResourceQuery(options)` — reactive collection fetch, unwraps `{ items }`, exposes `items`/`isLoading`/`isFetching`/`error`.
+  - `usePagedResourceQuery(options)` — same as above but with internal `start` offset; also exposes `hasPreviousPage`/`hasNextPage`/`nextPage()`/`previousPage()` for use with `PaginatedTable`.
+  - `useResourceMutation(invalidateKey, mutator)` — mutate + coarse `invalidateQueries` on the resource's `.all` key; returns `mutateAsync` so callers settle after refetch.
+  - `fetchResource(operation)` — imperative one-off authed fetch, no caching — for always-fresh detail reads.
 
-To add a query-backed route:
+### Adding a Query-backed Route
 
 1. Add the resource's key block to `queryKeys.js`.
-2. Create a route-local `<name>Data.svelte.js` hook that composes the `useResource*` helpers (see
-   `src/routes/admin/plan/planData.svelte.js` as the reference). Read reactive URL params **inside** the query thunk
-   so navigation refetches. Keep `+page.svelte` thin and components presentational.
-3. Ensure the route layout provides the QueryClient.
+2. Create `<routeDir>/<name>Data.svelte.js` that composes the `useResource*` helpers. Reference implementation:
+   `src/routes/admin/plan/planData.svelte.js`. Read reactive URL params **inside** the query thunk so navigation
+   refetches. Return a single object so `+page.svelte` makes one call.
+3. Call the hook in `+page.svelte`; keep the page thin — form state and event handlers only.
 
 ### Principles
 
 - **Components are presentational**: props in, callbacks out. Presentation-only state (expand/collapse, scroll)
-  belongs inside the component.
-- **Load functions own data fetching**: `+layout.js` for stable reference data (locations, employees); `+page.js` for
-  dynamic data filtered by URL params.
+  belongs inside the component. `PaginatedTable` accepts `rows`/`isLoading`/`error` + paging callbacks as props.
 - **URL params drive dynamic queries**: encode filter params in URL search params; use
-  `goto('?...', { replaceState: true, keepFocus: true, noScroll: true })` to update — re-triggers load automatically.
-- **Invalidate after mutations**: call `invalidate('app:<resource>')` after create/update/delete; register with
-  `depends('app:<resource>')` in the load function.
-- **Client-side caching**: SvelteKit does NOT cache across URLs. Use a module-level `Map` cache alongside load
-  functions. The load function checks cache before fetching; mutations call `purge` then `invalidate`. Cache module
-  pattern:
-
-  ```js
-  // myCache.js
-  const cache = new Map();
-  export const myCache = {
-  	get: (from, to) => cache.get(`${from}|${to}`),
-  	set: (from, to, items) => cache.set(`${from}|${to}`, items),
-  	purge: (from, to) => cache.delete(`${from}|${to}`),
-  };
-  ```
+  `goto('?...', { replaceState: true, keepFocus: true, noScroll: true })` to update — read them **inside** the thunk.
+- **Coarse invalidation is intentional**: `invalidateQueries({ queryKey: resource.all })` matches every cached
+  variant by prefix. Prefer this over fine-grained key construction.
+- **Detail fetches skip the cache**: use `fetchResource` in `onMount` for edit forms so a reopened panel never shows
+  stale data.
+- **Logout clears the cache**: `queryClient.clear()` in the logout handler resets the entire QueryClient so a new
+  session always starts fresh.
 
 ## Application Structure
 
@@ -145,9 +136,8 @@ To add a query-backed route:
   - `/change-password` — Password reset/change. Without `action` param shows PasswordReset component; with `action`
     validates `expires` and forwards all params to `POST /api/users/change-password`
   - `/admin/` — Protected (login + Employee role)
-  - `/admin/calendar` — Weekly vacancy calendar. `+layout.js` loads locations/employees (stable); `+page.js` loads
-    vacancies by date range from URL params with client-side cache (`vacancyCache.js`); mutations purge cache and call
-    `invalidate('app:vacancies')`
+  - `/admin/plan` — Weekly vacancy calendar. `planData.svelte.js` / `usePlanData()` fetches vacancies (range),
+    locations and employees via svelte-query; mutations coarsely invalidate `vacancies.all`
   - `/admin/services`, `/admin/services/new`, `/admin/services/[id]` — Service CRUD
 - **Layout**: `src/routes/+layout.svelte` — `<NavBar>` with `links` array derived from `auth.isEmployee` /
   `auth.isLoggedIn`. Admin links merged into main nav; no secondary sub-nav. Content constrained with
