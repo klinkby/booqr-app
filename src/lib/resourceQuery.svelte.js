@@ -128,6 +128,27 @@ export function usePagedResourceQuery(options) {
 }
 
 /**
+ * Mutation for pre-auth / auth-flow endpoints (login, password reset,
+ * change-password). Deliberately does NOT route through `authedQueryFn`: a 401
+ * here is a legitimate failure (bad credentials / expired link), not a trigger
+ * for token refresh, and no refresh token exists during these flows. Takes no
+ * invalidateKey because there is no cached resource to invalidate.
+ *
+ * Returns `mutateAsync`, so callers `await` the result and catch failures.
+ *
+ * Must be called once during component/hook setup.
+ *
+ * @param {(variables: any) => Promise<unknown>} mutator
+ * @returns {(variables: any) => Promise<unknown>}
+ */
+export function usePublicMutation(mutator) {
+	const mutation = createMutation(() => ({
+		mutationFn: (variables) => mutator(variables),
+	}));
+	return (variables) => mutation.mutateAsync(variables);
+}
+
+/**
  * Imperative one-off authed fetch with no caching — for detail fetches that
  * must be fresh on every call (e.g. opening a view panel). Still gets 401
  * refresh-and-retry; deliberately skips the query cache so a reopened panel

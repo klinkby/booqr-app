@@ -87,8 +87,9 @@ It follows secure, accessible, and simply standards-first principles.
 ## Data Loading Architecture
 
 All API calls go through route-local `*Data.svelte.js` hooks → `useResource*` helpers → `authedQueryFn`. No load
-functions, no module-level Map caches. Auth-only endpoints (login, password reset) are the only deliberate exception —
-they call generated services directly because no refresh token exists during those flows.
+functions, no module-level Map caches. Auth-flow endpoints (login, password reset, change-password) use
+`usePublicMutation` instead — it intentionally bypasses `authedQueryFn` (a 401 there is a legitimate failure, not a
+refresh trigger, and no refresh token exists during those flows) and touches no cache.
 
 ### svelte-query Infrastructure
 
@@ -103,6 +104,7 @@ Shared (do not duplicate per route):
   - `useResourceQuery(options)` — reactive collection fetch, unwraps `{ items }`, exposes `items`/`isLoading`/`isFetching`/`error`.
   - `usePagedResourceQuery(options)` — same as above but with internal `start` offset; also exposes `hasPreviousPage`/`hasNextPage`/`nextPage()`/`previousPage()` for use with `PaginatedTable`.
   - `useResourceMutation(invalidateKey, mutator)` — mutate + coarse `invalidateQueries` on the resource's `.all` key; returns `mutateAsync` so callers settle after refetch.
+  - `usePublicMutation(mutator)` — mutation for auth-flow / pre-auth endpoints; no `authedQueryFn`, no invalidation. Returns `mutateAsync`.
   - `fetchResource(operation)` — imperative one-off authed fetch, no caching — for always-fresh detail reads.
 
 ### Adding a Query-backed Route

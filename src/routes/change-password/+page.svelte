@@ -1,11 +1,11 @@
 <script>
-	import { OpenAPI } from '$lib/api/core/OpenAPI';
-	import { request } from '$lib/api/core/request';
-	import { UserService } from '$lib/api';
 	import { resolve } from '$app/paths';
 	import { Form, PasswordReset, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { useChangePasswordData } from './changePasswordData.svelte.js';
+
+	const cp = useChangePasswordData();
 
 	let password = $state('');
 	let confirmPassword = $state('');
@@ -38,7 +38,7 @@
 
 		resetLoading = true;
 		try {
-			await UserService.resetPassword({ email: resetEmail });
+			await cp.requestReset(resetEmail);
 			resetMessage = 'A password reset link has been sent to your email.';
 		} catch (err) {
 			if (import.meta.env.DEV) {
@@ -66,16 +66,7 @@
 
 		loading = true;
 		try {
-			await request(OpenAPI, {
-				method: 'POST',
-				url: '/api/users/change-password',
-				query: Object.fromEntries($page.url.searchParams),
-				body: { password },
-				mediaType: 'application/json',
-				errors: {
-					400: 'Bad Request',
-				},
-			});
+			await cp.changePassword({ password, query: Object.fromEntries($page.url.searchParams) });
 
 			password = '';
 			confirmPassword = '';
