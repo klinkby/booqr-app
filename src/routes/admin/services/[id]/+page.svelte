@@ -1,18 +1,19 @@
 <script>
-	import { ServiceService, UserService } from '$lib/api';
-	import { Form, UserName, invokeApi, apiErrorMessage } from '$lib';
+	import { Form, UserName, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { useServiceData } from './serviceData.svelte.js';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
 
+	const service = useServiceData();
+
 	let name = $state('');
 	let duration = $state('');
 	let selectedEmployeeIds = $state([]);
-	let employees = $state([]);
 	let error = $state(null);
 	let loading = $state(false);
 	let loadingData = $state(false);
@@ -30,44 +31,28 @@
 		}
 	}
 
-	async function loadData() {
+	onMount(async () => {
+		if (!isEdit) return;
 		loadingData = true;
 		try {
-			const [employeesRes, service] = await Promise.all([
-				invokeApi(() => UserService.getUsers(undefined, 'Employee')),
-				isEdit ? invokeApi(() => ServiceService.getServiceById(id)) : Promise.resolve(null),
-			]);
-			employees = employeesRes.items;
-			if (service) {
-				name = service.name;
-				duration = service.duration;
-				selectedEmployeeIds = (service.employees || []).map(String);
-			}
+			const existing = await service.getService(id);
+			name = existing.name;
+			duration = existing.duration;
+			selectedEmployeeIds = (existing.employees || []).map(String);
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to load data:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loadingData = false;
 		}
-	}
+	});
 
 	async function handleSubmit() {
 		error = null;
 		loading = true;
-
 		try {
-			if (isEdit) {
-				await invokeApi(() => ServiceService.updateService(id, { name, duration, employees: selectedEmployeeIds }));
-			} else {
-				await invokeApi(() => ServiceService.addService({ name, duration, employees: selectedEmployeeIds }));
-			}
+			await service.saveService({ id, isEdit, payload: { name, duration, employees: selectedEmployeeIds } });
 			await goto(resolve('/admin/services'));
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to save service:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
@@ -77,12 +62,10 @@
 	function handleCancel() {
 		goto(resolve('/admin/services'));
 	}
-
-	onMount(loadData);
 </script>
 
 <div>
-	{#if loadingData}
+	{#if service.isLoading || loadingData}
 		<div role="status" aria-live="polite">
 			<p>Loading...</p>
 		</div>
@@ -124,7 +107,7 @@
 				<fieldset>
 					<legend class="block text-sm font-medium text-gray-700 mb-1">Employees</legend>
 					<div class="space-y-2">
-						{#each employees as emp (emp.id)}
+						{#each service.employees as emp (emp.id)}
 							<div class="flex items-center gap-2">
 								<input
 									type="checkbox"
