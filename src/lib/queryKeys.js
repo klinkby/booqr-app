@@ -31,20 +31,20 @@ export const queryKeys = {
 		detail: (id) => [...queryKeys.services.all, id],
 	},
 	employees: {
-		// EmployeeService.getEmployees() → /api/employees — use for booking calendar display
+		// EmployeeService.getEmployees() → /api/employees — distinct endpoint and
+		// id-space from UserService; used only for booking-calendar display on `/`.
+		// NOT invalidated by user mutations (separate resource).
 		all: ['employees'],
 	},
-	employeeUsers: {
-		// UserService.getUsers(role='Employee') → /api/users?Role=Employee
-		// Use wherever the IDs must match user IDs stored in services.employees or vacancy.employeeId
-		all: ['employee-users'],
-	},
 	users: {
+		// Every UserService.getUsers / getUserById-derived view lives under this
+		// prefix so a single coarse invalidate(`users.all`) refreshes them all:
+		// the contacts list, the employee-filtered roster, and the profile.
 		all: ['users'],
 		detail: (id) => [...queryKeys.users.all, id],
 		paged: ['users', 'paged'],
-	},
-	profile: {
-		detail: (userId) => ['profile', userId],
+		// UserService.getUsers(role='Employee') → /api/users?Role=Employee.
+		// IDs match user IDs stored in services.employees / vacancy.employeeId.
+		employees: ['users', 'employees'],
 	},
 };

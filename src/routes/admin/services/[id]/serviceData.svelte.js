@@ -10,7 +10,7 @@ import { fetchResource, useResourceMutation, useResourceQuery } from '$lib/resou
 export function useServiceData() {
 	// Use UserService so employee IDs match service.employees (stored as User IDs).
 	const employees = useResourceQuery(() => ({
-		queryKey: queryKeys.employeeUsers.all,
+		queryKey: queryKeys.users.employees,
 		fetcher: () => UserService.getUsers(undefined, 'Employee'),
 	}));
 

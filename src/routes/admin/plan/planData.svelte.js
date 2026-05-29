@@ -35,7 +35,7 @@ export function usePlanData(getRange) {
 	// Use UserService (not EmployeeService) so IDs match vacancy.employeeId and
 	// VacancyForm's employee selector which initialises from auth.userId (a User ID).
 	const employees = useResourceQuery(() => ({
-		queryKey: queryKeys.employeeUsers.all,
+		queryKey: queryKeys.users.employees,
 		fetcher: () => UserService.getUsers(undefined, 'Employee'),
 	}));
 
