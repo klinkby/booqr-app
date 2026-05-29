@@ -1,13 +1,15 @@
 <script>
-	import { LocationService } from '$lib/api';
-	import { Form, invokeApi, apiErrorMessage } from '$lib';
+	import { Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { useLocationData } from './locationData.svelte.js';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
+
+	const location = useLocationData();
 
 	let name = $state('');
 	let address1 = $state('');
@@ -18,43 +20,30 @@
 	let loading = $state(false);
 	let loadingData = $state(false);
 
-	async function loadLocation() {
+	onMount(async () => {
 		if (!isEdit) return;
-
 		loadingData = true;
 		try {
-			const location = await invokeApi(() => LocationService.getLocationById(id));
-			name = location.name;
-			address1 = location.address1 || '';
-			address2 = location.address2 || '';
-			zip = location.zip || '';
-			city = location.city || '';
+			const existing = await location.getLocation(id);
+			name = existing.name;
+			address1 = existing.address1 || '';
+			address2 = existing.address2 || '';
+			zip = existing.zip || '';
+			city = existing.city || '';
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to load location:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loadingData = false;
 		}
-	}
+	});
 
 	async function handleSubmit() {
 		error = null;
 		loading = true;
-
 		try {
-			const payload = { name, address1, address2, zip, city };
-			if (isEdit) {
-				await invokeApi(() => LocationService.updateLocation(id, payload));
-			} else {
-				await invokeApi(() => LocationService.addLocation(payload));
-			}
+			await location.saveLocation({ id, isEdit, payload: { name, address1, address2, zip, city } });
 			await goto(resolve('/admin/locations'));
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to save location:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
@@ -64,10 +53,6 @@
 	function handleCancel() {
 		goto(resolve('/admin/locations'));
 	}
-
-	onMount(() => {
-		loadLocation();
-	});
 </script>
 
 <div>
