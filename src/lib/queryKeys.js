@@ -23,12 +23,10 @@ export const queryKeys = {
 	},
 	locations: {
 		all: ['locations'],
-		detail: (id) => [...queryKeys.locations.all, id],
 		paged: ['locations', 'paged'],
 	},
 	services: {
 		all: ['services'],
-		detail: (id) => [...queryKeys.services.all, id],
 	},
 	employees: {
 		// EmployeeService.getEmployees() → /api/employees — distinct endpoint and
