@@ -2,7 +2,6 @@
 	import { auth, Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { onMount } from 'svelte';
 	import { useProfileData } from './profileData.svelte.js';
 
 	const profile = useProfileData();
@@ -12,7 +11,7 @@
 	let email = $state('');
 	let error = $state(null);
 	let loading = $state(false);
-	let loadingData = $state(true);
+	let initialized = $state(false);
 	let successMessage = $state(null);
 
 	// Auth guard: redirect unauthenticated users
@@ -22,18 +21,14 @@
 		}
 	});
 
-	onMount(async () => {
-		if (!auth.userId) return;
-		loadingData = true;
-		try {
-			const user = await profile.getProfile();
-			name = user.name || '';
-			phone = user.phone || '';
-			email = user.email;
-		} catch (err) {
-			error = apiErrorMessage(err);
-		} finally {
-			loadingData = false;
+	// Populate form fields once when cached (or freshly fetched) data arrives.
+	// Guard prevents re-initialising if the mutation triggers a background refetch.
+	$effect(() => {
+		if (profile.user && !initialized) {
+			name = profile.user.name || '';
+			phone = profile.user.phone || '';
+			email = profile.user.email;
+			initialized = true;
 		}
 	});
 
@@ -54,9 +49,13 @@
 
 {#if auth.isLoggedIn}
 	<div>
-		{#if loadingData}
+		{#if profile.isLoading}
 			<div role="status" aria-live="polite">
 				<p>Loading...</p>
+			</div>
+		{:else if profile.error}
+			<div role="alert" aria-live="assertive">
+				<p class="text-red-600">{apiErrorMessage(profile.error)}</p>
 			</div>
 		{:else}
 			<!-- Section 1: Profile Information Form -->
