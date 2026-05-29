@@ -1,9 +1,11 @@
 <script>
-	import { UserService } from '$lib/api';
-	import { auth, Form, invokeApi, apiErrorMessage } from '$lib';
+	import { auth, Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
+	import { useProfileData } from './profileData.svelte.js';
+
+	const profile = useProfileData();
 
 	let name = $state('');
 	let phone = $state('');
@@ -20,45 +22,34 @@
 		}
 	});
 
-	async function loadProfile() {
+	onMount(async () => {
 		if (!auth.userId) return;
-
 		loadingData = true;
 		try {
-			const user = await invokeApi(() => UserService.getUserById(auth.userId));
+			const user = await profile.getProfile();
 			name = user.name || '';
 			phone = user.phone || '';
 			email = user.email;
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to load profile:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loadingData = false;
 		}
-	}
+	});
 
 	async function handleSubmit() {
 		error = null;
 		successMessage = null;
 		loading = true;
 		try {
-			await invokeApi(() => UserService.updateUser(auth.userId, { name, phone }));
+			await profile.saveProfile({ name, phone });
 			successMessage = 'Profile updated successfully.';
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to update profile:', err);
-			}
 			error = apiErrorMessage(err);
 		} finally {
 			loading = false;
 		}
 	}
-
-	onMount(() => {
-		loadProfile();
-	});
 </script>
 
 {#if auth.isLoggedIn}
