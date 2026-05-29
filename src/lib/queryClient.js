@@ -34,6 +34,9 @@ export const queryClient = new QueryClient({
 			// explicit `invalidateQueries` after a mutation. With staleTime Infinity,
 			// refetchOnWindowFocus/refetchOnMount stay inert, matching prior behavior.
 			staleTime: Infinity,
+			// Drop cached data 15 min after a query goes unobserved (e.g. after
+			// navigating away), so the cache doesn't grow unbounded within a session.
+			gcTime: 1000 * 60 * 15,
 			// Auth (401) retry is handled in `authedQueryFn`. Here we only retry
 			// transient/server errors and never retry client (4xx) errors.
 			retry: (failureCount, error) => {

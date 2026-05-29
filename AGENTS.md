@@ -87,10 +87,31 @@ It follows secure, accessible, and simply standards-first principles.
 
 All API calls belong in `+page.js` or `+layout.js` load functions — never in components.
 
-> **Experimental:** `/admin/plan` uses `@tanstack/svelte-query` (v6, runes) as a scoped POC. QueryClient and
-> auth-aware `authedQueryFn` live in `src/lib/queryClient.js`; provider in
-> `src/routes/admin/plan/+layout.svelte`; query/mutation wiring in `planData.svelte.js`. Do not expand svelte-query
-> to other routes without rewriting this section.
+> **svelte-query (v6, runes):** `/admin/plan` fetches data with `@tanstack/svelte-query` instead of load functions.
+> The pattern is templated for reuse on other query-backed routes — see **svelte-query Template** below. Routes still
+> using load functions + `Map` cache (per **Principles**) are unchanged; pick one approach per route, don't mix.
+
+### svelte-query Template
+
+Shared infrastructure (do not duplicate per route):
+
+- `src/lib/queryClient.js` — singleton `QueryClient` (`staleTime: Infinity`, `gcTime: 15min`, no-retry-on-4xx) and
+  `authedQueryFn` (401 refresh-and-retry, reusing `invokeApi`'s coalesced `refreshToken`).
+- `src/lib/queryKeys.js` — central `queryKeys` registry; one block per resource (`all` prefix + factory fns). Single
+  source of truth so a query and its invalidation can't drift.
+- `src/lib/resourceQuery.svelte.js` — generic primitives: `useResourceQuery` (reactive collection fetch, unwraps
+  `{ items }`, exposes `items`/`isLoading`/`isFetching`/`error`), `useResourceMutation` (mutate + coarse
+  `invalidateQueries` on the resource's `.all` key; returns `mutateAsync` so it settles after refetch), and
+  `fetchResource` (imperative one-off authed fetch, no caching — for always-fresh detail reads).
+- Mount `<QueryClientProvider client={queryClient}>` in the route's `+layout.svelte`.
+
+To add a query-backed route:
+
+1. Add the resource's key block to `queryKeys.js`.
+2. Create a route-local `<name>Data.svelte.js` hook that composes the `useResource*` helpers (see
+   `src/routes/admin/plan/planData.svelte.js` as the reference). Read reactive URL params **inside** the query thunk
+   so navigation refetches. Keep `+page.svelte` thin and components presentational.
+3. Ensure the route layout provides the QueryClient.
 
 ### Principles
 
