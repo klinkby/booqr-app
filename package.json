@@ -22,6 +22,7 @@
 		"@sveltejs/kit": "^2.60.1",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tailwindcss/vite": "^4.3.0",
+		"@tanstack/svelte-query": "^6.1.33",
 		"dotenv": "^17.4.1",
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -36,7 +37,6 @@
 		"vite": "^8.0.11"
 	},
 	"dependencies": {
-		"@tanstack/svelte-query": "^6.1.33",
 		"minidenticons": "^4.2.1"
 	}
 }
