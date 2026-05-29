@@ -89,4 +89,3 @@ export function usePlanVacancies(getRange) {
 		getVacancy: (id) => authedQueryFn(() => VacancyService.getVacancyById(id)),
 	};
 }
-

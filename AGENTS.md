@@ -30,12 +30,12 @@ It follows secure, accessible, and simply standards-first principles.
   import { request } from '$lib/api/core/request';
 
   await request(OpenAPI, {
-    method: 'POST',
-    url: '/api/users/change-password',
-    query: Object.fromEntries($page.url.searchParams),
-    body: { password },
-    mediaType: 'application/json',
-    errors: { 400: 'Bad Request' },
+  	method: 'POST',
+  	url: '/api/users/change-password',
+  	query: Object.fromEntries($page.url.searchParams),
+  	body: { password },
+  	mediaType: 'application/json',
+  	errors: { 400: 'Bad Request' },
   });
   ```
 
@@ -110,9 +110,9 @@ All API calls belong in `+page.js` or `+layout.js` load functions — never in c
   // myCache.js
   const cache = new Map();
   export const myCache = {
-    get: (from, to) => cache.get(`${from}|${to}`),
-    set: (from, to, items) => cache.set(`${from}|${to}`, items),
-    purge: (from, to) => cache.delete(`${from}|${to}`),
+  	get: (from, to) => cache.get(`${from}|${to}`),
+  	set: (from, to, items) => cache.set(`${from}|${to}`, items),
+  	purge: (from, to) => cache.delete(`${from}|${to}`),
   };
   ```
 
@@ -156,41 +156,41 @@ Import all from `'$lib'`. To add: create `.svelte` in `src/lib/components/` and 
 
 Generic accessible table with optional edit/delete row actions and pagination.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `columns` | `Array<{ key, label, hideOnMobile? }>` | required | `key` maps to row property; `hideOnMobile` hides below `md` breakpoint |
-| `rows` | `Array<object>` | required | Data rows |
-| `hasPreviousPage` / `hasNextPage` | `boolean` | `false` | Enable paging buttons |
-| `onedit` / `ondelete` | `(row) => void` | `undefined` | Row callbacks; Actions column hidden if both omitted |
-| `onnextpage` / `onpreviouspage` | `() => void` | `undefined` | Paging callbacks; nav hidden if both omitted |
+| Prop                              | Type                                   | Default     | Description                                                            |
+| --------------------------------- | -------------------------------------- | ----------- | ---------------------------------------------------------------------- |
+| `columns`                         | `Array<{ key, label, hideOnMobile? }>` | required    | `key` maps to row property; `hideOnMobile` hides below `md` breakpoint |
+| `rows`                            | `Array<object>`                        | required    | Data rows                                                              |
+| `hasPreviousPage` / `hasNextPage` | `boolean`                              | `false`     | Enable paging buttons                                                  |
+| `onedit` / `ondelete`             | `(row) => void`                        | `undefined` | Row callbacks; Actions column hidden if both omitted                   |
+| `onnextpage` / `onpreviouspage`   | `() => void`                           | `undefined` | Paging callbacks; nav hidden if both omitted                           |
 
 ### Form (`src/lib/components/Form.svelte`)
 
 Accessible form wrapper handling submission, errors, and loading state. Children are injected as the fieldset body.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `legend` | `string` | required | Fieldset label (`sr-only`) |
-| `error` | `string \| null` | `null` | Error message (kept in DOM for `aria-live`) |
-| `loading` | `boolean` | `false` | Disables fieldset; shows "Please wait…" on submit button |
-| `submitLabel` | `string` | `'Submit'` | Submit button label |
-| `deleteLabel` | `string` | `undefined` | Delete button label; hidden if omitted |
-| `onsubmit` | `(event) => void` | required | `preventDefault` called automatically |
-| `oncancel` / `ondelete` | `() => void` | `undefined` | Buttons hidden if omitted; delete is left-aligned in red |
-| `children` | snippet | required | Form fields |
+| Prop                    | Type              | Default     | Description                                              |
+| ----------------------- | ----------------- | ----------- | -------------------------------------------------------- |
+| `legend`                | `string`          | required    | Fieldset label (`sr-only`)                               |
+| `error`                 | `string \| null`  | `null`      | Error message (kept in DOM for `aria-live`)              |
+| `loading`               | `boolean`         | `false`     | Disables fieldset; shows "Please wait…" on submit button |
+| `submitLabel`           | `string`          | `'Submit'`  | Submit button label                                      |
+| `deleteLabel`           | `string`          | `undefined` | Delete button label; hidden if omitted                   |
+| `onsubmit`              | `(event) => void` | required    | `preventDefault` called automatically                    |
+| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; delete is left-aligned in red |
+| `children`              | snippet           | required    | Form fields                                              |
 
 ### Calendar (`src/lib/components/Calendar.svelte`)
 
 Presentational weekly time grid powered by `@event-calendar/core`. Data in via props, interactions out via callbacks.
 
-| Prop | Description |
-|------|-------------|
-| `events` | Array of event objects (see format below) |
-| `onDatesChange(info)` | Week navigation; `{start, end, startStr, endStr, view}` |
-| `onDateClick(info)` | Slot click; `{date, dateStr, allDay, resource, jsEvent, view}` |
-| `onEventClick(info)` | Event click; `{event, jsEvent, view}` |
-| `onEventResize(info)` | Resize (event needs `durationEditable: true`) |
-| `onEventDrop(info)` | Drag (event needs `startEditable: true`) |
+| Prop                  | Description                                                    |
+| --------------------- | -------------------------------------------------------------- |
+| `events`              | Array of event objects (see format below)                      |
+| `onDatesChange(info)` | Week navigation; `{start, end, startStr, endStr, view}`        |
+| `onDateClick(info)`   | Slot click; `{date, dateStr, allDay, resource, jsEvent, view}` |
+| `onEventClick(info)`  | Event click; `{event, jsEvent, view}`                          |
+| `onEventResize(info)` | Resize (event needs `durationEditable: true`)                  |
+| `onEventDrop(info)`   | Drag (event needs `startEditable: true`)                       |
 
 Event shape: `{ id, start, end, title, startEditable?, durationEditable?, backgroundColor?, textColor?, extendedProps? }`.
 `start`/`end` accept ISO8601 strings or Date objects.
@@ -216,17 +216,17 @@ shortcuts. Event styling via `classNames: ['!bg-red-500', '!text-white']`.
 
 Side-panel form for creating and viewing vacancies. Uses `$bindable` props (Svelte 5 two-way binding).
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `mode` | `string` | `'create'` | `'create'` or `'view'` (read-only, all fields disabled) |
-| `date` | `string` | `''` | `YYYY-MM-DD`; displayed as formatted read-only text |
-| `startTime` / `endTime` | `string` (bindable) | `''` | `HH:mm`, 5-minute step |
-| `locationId` / `employeeId` | `string` (bindable) | `''` | Selected IDs |
-| `locations` | `Array<{id, name}>` | `[]` | — |
-| `employees` | `Array<{id, name, email}>` | `[]` | — |
-| `error` / `loading` | — | `null`/`false` | Error message; loading state |
-| `onsubmit` / `oncancel` | callbacks | required | Submit (not called in view mode) / cancel |
-| `ondelete` | `() => void` | `undefined` | Shown only in view mode |
+| Prop                        | Type                       | Default        | Description                                             |
+| --------------------------- | -------------------------- | -------------- | ------------------------------------------------------- |
+| `mode`                      | `string`                   | `'create'`     | `'create'` or `'view'` (read-only, all fields disabled) |
+| `date`                      | `string`                   | `''`           | `YYYY-MM-DD`; displayed as formatted read-only text     |
+| `startTime` / `endTime`     | `string` (bindable)        | `''`           | `HH:mm`, 5-minute step                                  |
+| `locationId` / `employeeId` | `string` (bindable)        | `''`           | Selected IDs                                            |
+| `locations`                 | `Array<{id, name}>`        | `[]`           | —                                                       |
+| `employees`                 | `Array<{id, name, email}>` | `[]`           | —                                                       |
+| `error` / `loading`         | —                          | `null`/`false` | Error message; loading state                            |
+| `onsubmit` / `oncancel`     | callbacks                  | required       | Submit (not called in view mode) / cancel               |
+| `ondelete`                  | `() => void`               | `undefined`    | Shown only in view mode                                 |
 
 In view mode submit becomes "Close". Validates end > start. Panel: `w-80`, `sticky top-4`.
 
@@ -234,11 +234,11 @@ In view mode submit becomes "Close". Validates end > start. Panel: `w-80`, `stic
 
 Responsive sticky header with brand, nav links, hamburger on mobile, and optional Logout button.
 
-| Prop | Type | Default |
-|------|------|---------|
-| `links` | `Array<{ name, href }>` | `[]` |
-| `brandName` | `string` | `'App'` |
-| `onlogout` | `() => void` | `undefined` |
+| Prop        | Type                    | Default     |
+| ----------- | ----------------------- | ----------- |
+| `links`     | `Array<{ name, href }>` | `[]`        |
+| `brandName` | `string`                | `'App'`     |
+| `onlogout`  | `() => void`            | `undefined` |
 
 Active link: exact match for `/`, `startsWith` for all other routes. Typical usage:
 
@@ -255,19 +255,19 @@ let links = $derived([
 
 Presentational password reset email request form. Parent owns all state and API logic.
 
-| Prop | Type | Default |
-|------|------|---------|
-| `email` (bindable) | `string` | `''` |
-| `error` / `message` | `string \| null` | `null` |
-| `loading` | `boolean` | `false` |
-| `onsubmit` | `() => void` | required |
+| Prop                | Type             | Default  |
+| ------------------- | ---------------- | -------- |
+| `email` (bindable)  | `string`         | `''`     |
+| `error` / `message` | `string \| null` | `null`   |
+| `loading`           | `boolean`        | `false`  |
+| `onsubmit`          | `() => void`     | required |
 
 Error/success kept in DOM with `class:hidden` for reliable `aria-live` announcements.
 
 ### Password Validation
 
 ```js
-/^(?=(.*[0-9]))(?=.*[!@#$%^&*()\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z])).{8,}$/
+/^(?=(.*[0-9]))(?=.*[!@#$%^&*()\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z])).{8,}$/;
 ```
 
 Min 8 chars, one uppercase, one lowercase, one digit, one special character.
