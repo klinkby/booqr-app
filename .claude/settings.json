@@ -1,11 +1,11 @@
 {
-  "sandbox": {
-    "enabled": true,
-    "autoAllowBashIfSandboxed": true,
-    "network": {
-      "allowedDomains": ["www.booqr.dk", "registry.npmjs.org", "api.github.com"]
-    }
-  },
+	"sandbox": {
+		"enabled": true,
+		"autoAllowBashIfSandboxed": true,
+		"network": {
+			"allowedDomains": ["www.booqr.dk", "registry.npmjs.org", "api.github.com"]
+		}
+	},
 	"permissions": {
 		"deny": [
 			"Read(**/.env*)",
