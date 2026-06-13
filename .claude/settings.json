@@ -13,7 +13,8 @@
 			"Read(**/.ssh/**)",
 			"Write(**/.env*)",
 			"Write(**/.ssh/**)",
-			"Write(.github/workflows/*)"
+			"Write(.github/workflows/*)",
+			"Write(**/.claude/**)"
 		]
 	}
 }
