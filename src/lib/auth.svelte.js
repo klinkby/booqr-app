@@ -101,8 +101,5 @@ function validate(tokenObj) {
 	if (!tokenObj.exp || typeof tokenObj.exp !== 'number') return false;
 	const now = Math.floor(Date.now() / 1000);
 
-	if (tokenObj.exp <= now) return false;
-	if (typeof tokenObj.nbf === 'number' && tokenObj.nbf > now) return false;
-
-	return true;
+	return tokenObj.exp > now;
 }
