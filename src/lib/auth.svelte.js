@@ -50,6 +50,20 @@ if (browser) {
 		configurable: true,
 	});
 	OpenAPI.CREDENTIALS = 'include';
+	// Enforce: credentials are only sent to /api/ paths regardless of OpenAPI.BASE,
+	// preventing accidental cookie leakage if BASE is ever pointed at an external host.
+	OpenAPI.FETCH = (url, init) => {
+		let isApiPath;
+		try {
+			isApiPath = new URL(url, location.origin).pathname.startsWith('/api/');
+		} catch {
+			isApiPath = false;
+		}
+		if (!isApiPath && init?.credentials === 'include') {
+			return fetch(url, { ...init, credentials: 'same-origin' });
+		}
+		return fetch(url, init);
+	};
 }
 
 function bootstrapToken() {
@@ -84,10 +98,11 @@ function parseToken(jwtBearer) {
 function validate(tokenObj) {
 	if (!tokenObj || typeof tokenObj !== 'object') return false;
 
-	// Require expiration field
 	if (!tokenObj.exp || typeof tokenObj.exp !== 'number') return false;
 	const now = Math.floor(Date.now() / 1000);
 
-	// Valid if not yet expired
-	return tokenObj.exp > now;
+	if (tokenObj.exp <= now) return false;
+	if (typeof tokenObj.nbf === 'number' && tokenObj.nbf > now) return false;
+
+	return true;
 }
