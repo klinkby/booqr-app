@@ -7,14 +7,6 @@
 		}
 	},
 	"permissions": {
-		"deny": [
-			"Read(**/.env*)",
-			"Read(**/.npmrc)",
-			"Read(**/.ssh/**)",
-			"Write(**/.env*)",
-			"Write(**/.ssh/**)",
-			"Write(.github/workflows/*)",
-			"Write(**/.claude/**)"
-		]
+		"deny": ["Edit(.claude/settings.json)", "Write(.claude/settings.json)"]
 	}
 }
