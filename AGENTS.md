@@ -115,6 +115,10 @@ Shared (do not duplicate per route):
    `src/routes/admin/plan/planData.svelte.js`. Read reactive URL params **inside** the query thunk so navigation
    refetches. Return a single object so `+page.svelte` makes one call.
 3. Call the hook in `+page.svelte`; keep the page thin — form state and event handlers only.
+4. **Filterable lists**: when a query key varies by filter params (e.g. `queryKeys.users.paged(k, role)`), make the
+   key a factory rather than a static array so each filter combination caches separately under the shared `.all`
+   prefix. `usePagedResourceQuery` auto-resets its internal page `start` back to `0` whenever the base query key
+   changes, so a filter change never leaves you on a stale page offset.
 
 ### Principles
 
@@ -158,6 +162,20 @@ button navigates to `.../new`.
 
 **Form page**: Dynamic `[id]` route; derive `isEdit = id !== 'new'`; use `Form` component with children fields; load
 existing data in `onMount` for edit mode; use `max-w-2xl` wrapper.
+
+**List page top row**: put the "Create" button and any filter toggle together in one
+`flex justify-between items-center` row above the table (not centered below it). Style both as
+`bg-transparent border border-gray-300 hover:bg-gray-50` (thin gray border, no fill) rather than a solid color, for a
+consistent, low-emphasis action row.
+
+### Filter Overlay Pattern
+
+Reference: `src/routes/admin/contacts/ContactsFilterForm.svelte` + `src/routes/admin/contacts/+page.svelte`.
+
+Icon-only funnel toggle button (`aria-label`/`aria-expanded`/`aria-controls`) in a `relative` wrapper; the filter
+renders as an `absolute right-0 top-full mt-2 z-10` overlay. Use a real form element with `onsubmit` calling
+`preventDefault()` then an `onsubmit` prop, so Enter submits and closes the overlay. Debounce free-text
+inputs 500ms via a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately on submit.
 
 ## Reusable Components (`src/lib/components/`)
 
