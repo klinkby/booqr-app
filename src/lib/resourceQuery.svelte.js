@@ -89,6 +89,18 @@ export function usePagedResourceQuery(options) {
 	const PAGE_SIZE = 100;
 	let start = $state(0);
 
+	// Reset to the first page whenever the base key (e.g. filter params)
+	// changes, so switching filters never lands on a stale offset.
+	let previousKeyJson;
+	$effect(() => {
+		const { queryKey } = options();
+		const keyJson = JSON.stringify(queryKey);
+		if (previousKeyJson !== undefined && previousKeyJson !== keyJson) {
+			start = 0;
+		}
+		previousKeyJson = keyJson;
+	});
+
 	const query = createQuery(() => {
 		const { queryKey, fetcher, enabled = true } = options();
 		return {
