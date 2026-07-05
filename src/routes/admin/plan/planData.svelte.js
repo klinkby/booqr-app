@@ -23,7 +23,7 @@ export function usePlanData(getRange) {
 		return {
 			queryKey: queryKeys.vacancies.range(from, to),
 			enabled: !!from && !!to,
-			fetcher: () => VacancyService.getVacancies(from, to),
+			fetcher: () => VacancyService.getVacancies(from, to, 0, 100),
 		};
 	});
 
@@ -36,7 +36,7 @@ export function usePlanData(getRange) {
 	// VacancyForm's employee selector which initialises from auth.userId (a User ID).
 	const employees = useResourceQuery(() => ({
 		queryKey: queryKeys.users.employees,
-		fetcher: () => UserService.getUsers(undefined, 'Employee'),
+		fetcher: () => UserService.getUsers(undefined, 'Employee', 0, 100),
 	}));
 
 	const addVacancy = useResourceMutation(queryKeys.vacancies.all, (requestBody) =>

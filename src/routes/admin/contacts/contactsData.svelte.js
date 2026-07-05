@@ -16,7 +16,7 @@ export function useContactsData(getFilters = () => ({})) {
 		const role = roles && roles.length ? roles : undefined;
 		return {
 			queryKey: queryKeys.users.paged(k, role),
-			fetcher: (start, num) => UserService.getUsers(k, role, num, start),
+			fetcher: (start, num) => UserService.getUsers(k, role, start, num),
 		};
 	});
 }
