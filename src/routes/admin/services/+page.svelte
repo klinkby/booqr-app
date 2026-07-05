@@ -21,6 +21,14 @@
 </script>
 
 <div>
+	<div class="mb-4">
+		<button
+			class="px-4 py-2 text-sm font-medium text-gray-700 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+			onclick={handleCreate}
+			type="button"
+			>Create Service
+		</button>
+	</div>
 	{#if services.isLoading}
 		<div role="status" aria-live="polite"><p>Loading...</p></div>
 	{:else if services.error}
@@ -41,12 +49,4 @@
 		{/snippet}
 		<DataTable {columns} rows={services.rows} onedit={handleEdit} {cellContent} />
 	{/if}
-	<div class="mt-6 flex justify-center">
-		<button
-			class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-			onclick={handleCreate}
-			type="button"
-			>Create Service
-		</button>
-	</div>
 </div>
