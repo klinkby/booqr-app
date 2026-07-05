@@ -6,19 +6,20 @@ export class VacancyService {
      * Vacancy
      * @param fromTime
      * @param toTime
+     * @param start
+     * @param num
      * @returns CollectionResponseOfCalendarEvent OK
      * @throws ApiError
      */
-    static getVacancies(fromTime, toTime) {
+    static getVacancies(fromTime, toTime, start, num) {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/vacancies',
             query: {
                 'FromTime': fromTime,
                 'ToTime': toTime,
-            },
-            errors: {
-                400: `Bad Request`,
+                'Start': start,
+                'Num': num,
             },
         });
     }
@@ -36,8 +37,8 @@ export class VacancyService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
             },
         });
     }
@@ -54,10 +55,6 @@ export class VacancyService {
             url: '/api/vacancies/{id}',
             path: {
                 'id': id,
-            },
-            errors: {
-                400: `Bad Request`,
-                404: `Not Found`,
             },
         });
     }
@@ -76,8 +73,8 @@ export class VacancyService {
                 'id': id,
             },
             errors: {
-                400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
                 409: `Conflict`,
             },
         });

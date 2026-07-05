@@ -17,9 +17,6 @@ export class ServiceService {
                 'Start': start,
                 'Num': num,
             },
-            errors: {
-                400: `Bad Request`,
-            },
         });
     }
     /**
@@ -38,6 +35,7 @@ export class ServiceService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
             },
         });
     }
@@ -57,7 +55,6 @@ export class ServiceService {
             },
             errors: {
                 400: `Bad Request`,
-                404: `Not Found`,
             },
         });
     }
@@ -81,7 +78,8 @@ export class ServiceService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
-                409: `Conflict`,
+                403: `Forbidden`,
+                412: `Precondition Failed`,
             },
         });
     }
@@ -102,7 +100,7 @@ export class ServiceService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
-                409: `Conflict`,
+                403: `Forbidden`,
             },
         });
     }

@@ -7,7 +7,7 @@ test.describe('Calendar UX Adjustments', () => {
 		await setupAuthToken(page);
 	});
 
-	test('calendar page loads with extend hours button', async ({ page }) => {
+	test('calendar page loads with extend hours button', async ({ page }, testInfo) => {
 		await page.goto('/admin/plan');
 
 		// Check that page has loaded
@@ -15,9 +15,12 @@ test.describe('Calendar UX Adjustments', () => {
 
 		// Check that extend hours button is visible
 		await expect(page.locator('button:has-text("Extend Hours")')).toBeVisible();
+
+		// Capture screenshot
+		await page.screenshot({ path: testInfo.outputPath('calendar-extend-hours.png') });
 	});
 
-	test('form panel width is narrower (w-80 instead of w-96)', async ({ page }) => {
+	test('form panel width is narrower (w-80 instead of w-96)', async ({ page }, testInfo) => {
 		await page.goto('/admin/plan');
 
 		// Wait for the calendar component to be visible
@@ -37,9 +40,12 @@ test.describe('Calendar UX Adjustments', () => {
 		// Verify the form panel has the w-80 class (320px width)
 		const formPanel = page.locator('.w-80').first();
 		await expect(formPanel).toBeVisible();
+
+		// Capture screenshot
+		await page.screenshot({ path: testInfo.outputPath('calendar-create-form.png') });
 	});
 
-	test('form shows "Vacancy Details" title in view mode', async ({ page }) => {
+	test('form shows "Vacancy Details" title in view mode', async ({ page }, testInfo) => {
 		// Mock the getVacancyById API call
 		await page.route('**/api/vacancies/1', (route) => {
 			route.fulfill({
@@ -70,17 +76,23 @@ test.describe('Calendar UX Adjustments', () => {
 
 		// Verify view mode form appears
 		await expect(page.locator('text=Vacancy Details')).toBeVisible({ timeout: 3000 });
+
+		// Capture screenshot
+		await page.screenshot({ path: testInfo.outputPath('calendar-view-details.png') });
 	});
 
-	test('delete button exists in Form component', async ({ page }) => {
+	test('delete button exists in Form component', async ({ page }, testInfo) => {
 		await page.goto('/admin/plan');
 
 		// The Form component now supports deleteLabel and ondelete props
 		// We can verify the component is present
 		await expect(page.locator('h1')).toHaveText('Plan');
+
+		// Capture screenshot
+		await page.screenshot({ path: testInfo.outputPath('calendar-delete-button.png') });
 	});
 
-	test('calendar supports event click handler', async ({ page }) => {
+	test('calendar supports event click handler', async ({ page }, testInfo) => {
 		await page.goto('/admin/plan');
 
 		// Wait for calendar to render with proper elements
@@ -90,5 +102,8 @@ test.describe('Calendar UX Adjustments', () => {
 		// Events should be clickable when rendered
 		const calendarContainer = page.locator('.ec');
 		await expect(calendarContainer).toBeVisible({ timeout: 5000 });
+
+		// Capture screenshot
+		await page.screenshot({ path: testInfo.outputPath('calendar-event-click.png') });
 	});
 });

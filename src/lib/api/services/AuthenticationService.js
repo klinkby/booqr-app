@@ -16,6 +16,7 @@ export class AuthenticationService {
             mediaType: 'application/json',
             errors: {
                 400: `Bad Request`,
+                401: `Unauthorized`,
             },
         });
     }
@@ -30,23 +31,20 @@ export class AuthenticationService {
             method: 'POST',
             url: '/api/auth/refresh',
             errors: {
-                400: `Bad Request`,
+                401: `Unauthorized`,
             },
         });
     }
     /**
      * Log out
      * Authentication
-     * @returns void
+     * @returns boolean OK
      * @throws ApiError
      */
     static logout() {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/auth/logout',
-            errors: {
-                400: `Bad Request`,
-            },
         });
     }
 }

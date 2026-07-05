@@ -40,7 +40,9 @@ export const queryKeys = {
 		// the contacts list, the employee-filtered roster, and the profile.
 		all: ['users'],
 		detail: (id) => [...queryKeys.users.all, id],
-		paged: ['users', 'paged'],
+		// `k` (name) and `roles` (array) vary per contacts-filter state; each
+		// combination caches separately while still sharing the `all` prefix.
+		paged: (k, roles) => [...queryKeys.users.all, 'paged', k ?? null, roles ?? null],
 		// UserService.getUsers(role='Employee') → /api/users?Role=Employee.
 		// IDs match user IDs stored in services.employees / vacancy.employeeId.
 		employees: ['users', 'employees'],

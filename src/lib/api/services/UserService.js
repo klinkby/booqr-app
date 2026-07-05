@@ -16,7 +16,6 @@ export class UserService {
             mediaType: 'application/json',
             errors: {
                 400: `Bad Request`,
-                409: `Conflict`,
             },
         });
     }
@@ -35,6 +34,8 @@ export class UserService {
             mediaType: 'application/json',
             errors: {
                 400: `Bad Request`,
+                404: `Not Found`,
+                412: `Precondition Failed`,
             },
         });
     }
@@ -46,7 +47,7 @@ export class UserService {
      * @param toTime
      * @param start
      * @param num
-     * @returns CollectionResponseOfMyBooking OK
+     * @returns MyBooking OK
      * @throws ApiError
      */
     static getMyBookings(id, fromTime, toTime, start, num) {
@@ -65,6 +66,7 @@ export class UserService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
             },
         });
     }
@@ -87,6 +89,7 @@ export class UserService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
                 404: `Not Found`,
             },
         });
@@ -96,20 +99,25 @@ export class UserService {
      * User
      * @param k
      * @param role
+     * @param start
+     * @param num
      * @returns CollectionResponseOfUser OK
      * @throws ApiError
      */
-    static getUsers(k, role) {
+    static getUsers(k, role, start, num) {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/users',
             query: {
                 'K': k,
                 'Role': role,
+                'Start': start,
+                'Num': num,
             },
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
             },
         });
     }
@@ -128,6 +136,7 @@ export class UserService {
             mediaType: 'application/json',
             errors: {
                 400: `Bad Request`,
+                403: `Forbidden`,
             },
         });
     }
@@ -148,6 +157,7 @@ export class UserService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
                 404: `Not Found`,
             },
         });
@@ -172,7 +182,7 @@ export class UserService {
             errors: {
                 400: `Bad Request`,
                 401: `Unauthorized`,
-                409: `Conflict`,
+                403: `Forbidden`,
             },
         });
     }
@@ -191,9 +201,8 @@ export class UserService {
                 'id': id,
             },
             errors: {
-                400: `Bad Request`,
                 401: `Unauthorized`,
-                409: `Conflict`,
+                403: `Forbidden`,
             },
         });
     }
