@@ -17,9 +17,6 @@ export class VacancyService {
                 'FromTime': fromTime,
                 'ToTime': toTime,
             },
-            errors: {
-                400: `Bad Request`,
-            },
         });
     }
     /**
@@ -36,8 +33,8 @@ export class VacancyService {
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
             },
         });
     }
@@ -54,10 +51,6 @@ export class VacancyService {
             url: '/api/vacancies/{id}',
             path: {
                 'id': id,
-            },
-            errors: {
-                400: `Bad Request`,
-                404: `Not Found`,
             },
         });
     }
@@ -76,8 +69,8 @@ export class VacancyService {
                 'id': id,
             },
             errors: {
-                400: `Bad Request`,
                 401: `Unauthorized`,
+                403: `Forbidden`,
                 409: `Conflict`,
             },
         });
