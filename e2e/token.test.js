@@ -7,7 +7,7 @@ test.describe('Login flow with token validation', () => {
 		await context.clearCookies();
 	});
 
-	test('full login flow stores token and updates nav', async ({ page }) => {
+	test('full login flow stores token and updates nav', async ({ page }, testInfo) => {
 		const email = process.env.TEST_EMAIL ?? 'test@example.com';
 		const password = process.env.TEST_PASSWORD ?? 'TestPassword1!';
 
@@ -44,5 +44,8 @@ test.describe('Login flow with token validation', () => {
 		// Verify token stored in sessionStorage
 		const accessToken = await page.evaluate(() => sessionStorage.getItem('access_token'));
 		expect(accessToken).toBeTruthy();
+
+		// Capture screenshot
+		await page.screenshot({ path: testInfo.outputPath('login-success.png') });
 	});
 });
