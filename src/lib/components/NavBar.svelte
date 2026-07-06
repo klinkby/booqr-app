@@ -29,18 +29,13 @@
 				{#each links as { name, href } (href)}
 					<a
 						href={resolve(href)}
-						class="font-medium transition-colors {isActive(href)
-							? 'text-indigo-600'
-							: 'text-gray-700 hover:text-indigo-600'}"
+						class="font-medium transition-colors {isActive(href) ? 'text-indigo-600' : 'hover:text-indigo-600'}"
 					>
 						{name}
 					</a>
 				{/each}
 				{#if onlogout}
-					<button
-						onclick={onlogout}
-						class="font-medium text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer"
-					>
+					<button onclick={onlogout} class="font-medium hover:text-indigo-600 transition-colors cursor-pointer">
 						Sign out
 					</button>
 				{/if}
@@ -50,7 +45,7 @@
 				onclick={() => (isOpen = !isOpen)}
 				aria-expanded={isOpen}
 				aria-label="Toggle menu"
-				class="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+				class="md:hidden p-2 hover:bg-gray-100 rounded-md transition-colors"
 			>
 				<svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
 					<path
@@ -73,7 +68,7 @@
 						onclick={() => (isOpen = false)}
 						class="block py-2.5 px-3 rounded-lg font-medium transition-colors {isActive(href)
 							? 'bg-indigo-50 text-indigo-600'
-							: 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'}"
+							: 'hover:bg-gray-50 hover:text-indigo-600'}"
 					>
 						{name}
 					</a>
@@ -84,7 +79,7 @@
 							isOpen = false;
 							onlogout();
 						}}
-						class="block w-full text-left py-2.5 px-3 rounded-lg font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors cursor-pointer"
+						class="block w-full text-left py-2.5 px-3 rounded-lg font-medium hover:bg-gray-50 hover:text-indigo-600 transition-colors cursor-pointer"
 					>
 						Sign out
 					</button>

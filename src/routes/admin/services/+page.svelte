@@ -23,7 +23,7 @@
 <div>
 	<div class="mb-4">
 		<button
-			class="px-4 py-2 text-sm font-medium text-gray-700 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+			class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
 			onclick={handleCreate}
 			type="button"
 			>Create Service
@@ -40,7 +40,7 @@
 			{#if column.key === 'employeeUsers'}
 				<span class="flex flex-col gap-1">
 					{#each row.employeeUsers as emp (emp.id)}
-						<UserName name={emp.name || emp.email} email={emp.email} />
+						<UserName id={emp.id} name={emp.name || emp.email} email={emp.email} />
 					{/each}
 				</span>
 			{:else}
