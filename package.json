@@ -29,7 +29,7 @@
 		"eslint-plugin-svelte": "^3.20.0",
 		"globals": "^17.6.0",
 		"openapi-typescript-codegen": "^0.30.0",
-		"@playwright/test": "^1.61.0",
+		"@playwright/test": "^1.61.1",
 		"prettier": "^3.9.1",
 		"prettier-plugin-svelte": "^4.1.1",
 		"@sveltejs/adapter-static": "^3.0.10",
