@@ -48,14 +48,14 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			<UserName name={row.name} email={row.email} />
+			<UserName id={row.id} name={row.name} email={row.email} />
 		{:else}
 			{row[column.key]}
 		{/if}
 	{/snippet}
 	<div class="mb-4 flex justify-between items-center">
 		<button
-			class="px-4 py-2 text-sm font-medium text-gray-700 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+			class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
 			onclick={handleCreate}
 			type="button"
 			>Create Contact
@@ -65,12 +65,17 @@
 				aria-controls="contacts-filter-panel"
 				aria-expanded={showFilters}
 				aria-label="Toggle contact filters"
-				class="p-2 text-gray-700 bg-transparent border border-gray-300 hover:bg-gray-50 rounded-md transition-colors"
+				class="p-2 bg-transparent border border-gray-300 hover:bg-gray-50 rounded-md transition-colors"
 				onclick={toggleFilters}
 				type="button"
 			>
 				<svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-					<path d="M3 6h18M6 12h12M10 18h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+					<path
+						d="M3.75 5.25h16.5l-6.15 7.38v5.62l-4.2 2.1v-7.72L3.75 5.25Z"
+						stroke-width="1.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
 				</svg>
 			</button>
 			{#if showFilters}

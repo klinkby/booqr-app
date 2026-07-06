@@ -65,14 +65,14 @@
 		<nav aria-label="Pagination" class="flex justify-between items-center mt-4 px-4">
 			<button
 				type="button"
-				class="bg-indigo-600 text-white px-4 py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+				class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				disabled={!hasPreviousPage}
 				onclick={onpreviouspage}
 				>Previous
 			</button>
 			<button
 				type="button"
-				class="bg-indigo-600 text-white px-4 py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+				class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				disabled={!hasNextPage}
 				onclick={onnextpage}
 				>Next

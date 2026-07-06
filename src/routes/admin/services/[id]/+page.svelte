@@ -1,5 +1,5 @@
 <script>
-	import { Form, UserName, apiErrorMessage } from '$lib';
+	import { Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -116,8 +116,7 @@
 									onchange={() => toggleEmployee(emp.id)}
 									class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
 								/>
-								<label for="emp-{emp.id}" class="text-sm text-gray-700">{emp.name || emp.email}</label>
-								<UserName name={emp.name || emp.email} email={emp.email} />
+								<label for="emp-{emp.id}" class="text-sm text-gray-700 flex">{emp.name || emp.email}</label>
 							</div>
 						{:else}
 							<p class="text-sm text-gray-500">No employees found.</p>

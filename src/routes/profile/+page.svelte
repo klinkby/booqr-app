@@ -68,7 +68,7 @@
 						</div>
 					{/if}
 
-					<Form legend="Edit profile information" {error} {loading} submitLabel="Save Changes" onsubmit={handleSubmit}>
+					<Form legend="Edit profile information" {error} {loading} submitLabel="Update" onsubmit={handleSubmit}>
 						<!-- Email: read-only display -->
 						<div>
 							<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
