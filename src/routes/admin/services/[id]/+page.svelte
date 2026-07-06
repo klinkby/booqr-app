@@ -1,5 +1,5 @@
 <script>
-	import { Form, UserName, apiErrorMessage } from '$lib';
+	import { Form, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
