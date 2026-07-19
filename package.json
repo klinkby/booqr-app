@@ -17,7 +17,7 @@
 	"dependencies": {
 		"@event-calendar/core": "^5.7.1",
 		"minidenticons": "^4.2.1",
-		"svelte": "^5.55.7",
+		"svelte": "^5.56.4",
 		"@sveltejs/kit": "^2.69.2",
 		"@tanstack/svelte-query": "^6.1.34"
 	},
