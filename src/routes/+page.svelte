@@ -16,6 +16,7 @@
 	let selectedBooking = $state(null);
 	let formServiceId = $state('');
 	let formStartTime = $state('');
+	let formNotes = $state('');
 	let formError = $state(null);
 	let formLoading = $state(false);
 
@@ -116,6 +117,7 @@
 		selectedBooking = null;
 		formMode = 'book';
 		formServiceId = '';
+		formNotes = '';
 		formStartTime = DateUtils.toLocalTime(new Date(vacancy.startTime));
 		formError = null;
 		showForm = true;
@@ -128,6 +130,7 @@
 			await home.addBooking({
 				vacancyId: selectedVacancy.id,
 				serviceId: formServiceId,
+				notes: formNotes || null,
 				startTime: new Date(
 					DateUtils.toLocalDate(new Date(selectedVacancy.startTime)) + 'T' + formStartTime,
 				).toISOString(),
@@ -188,6 +191,7 @@
 					locations={home.locations}
 					bind:serviceId={formServiceId}
 					bind:startTime={formStartTime}
+					bind:notes={formNotes}
 					error={formError}
 					loading={formLoading}
 					onsubmit={handleSubmit}

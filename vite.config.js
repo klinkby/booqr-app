@@ -4,6 +4,8 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 const API_TARGET = 'https://www.booqr.dk';
+const LOCAL_API_TARGET = 'http://localhost:8080';
+const USE_LOCAL_API = !!process.env.API_LOCAL;
 const H1_HEADERS = new Set(['host', 'connection', 'transfer-encoding', 'keep-alive', 'upgrade']);
 
 /** Proxies an incoming HTTP/1.1 request to the upstream over HTTP/2. */
@@ -39,13 +41,16 @@ export default defineConfig({
 	oxc: {
 		target: 'es2022',
 	},
+	server: USE_LOCAL_API ? { proxy: { '/api': { target: LOCAL_API_TARGET, changeOrigin: true } } } : undefined,
 	plugins: [
-		{
-			name: 'h2-proxy',
-			configureServer(server) {
-				server.middlewares.use('/api', proxyToH2);
-			},
-		},
+		USE_LOCAL_API
+			? null
+			: {
+					name: 'h2-proxy',
+					configureServer(server) {
+						server.middlewares.use('/api', proxyToH2);
+					},
+				},
 		tailwindcss(),
 		sveltekit(),
 	],

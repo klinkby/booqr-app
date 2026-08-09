@@ -3,6 +3,7 @@
  * @property {string} name
  * @property {string} duration
  * @property {Array<number | string>} employees
+ * @property {string | null} [description]
  * @property {number | string} [id]
  * @property {string} [created]
  * @property {string | null} [deleted]

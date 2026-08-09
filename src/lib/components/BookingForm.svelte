@@ -1,5 +1,5 @@
 <script>
-	import { Form } from '$lib';
+	import { Form, LimitedTextarea } from '$lib';
 	import { DateUtils } from '$lib/dateUtils.js';
 
 	let {
@@ -11,6 +11,7 @@
 		locations = [],
 		serviceId = $bindable(''),
 		startTime = $bindable(''),
+		notes = $bindable(''),
 		error = null,
 		loading = false,
 		onsubmit,
@@ -29,6 +30,11 @@
 
 	const selectedService = $derived(services.find((s) => String(s.id) === serviceId));
 	const serviceDurationMinutes = $derived(selectedService ? parseDurationMinutes(selectedService.duration) : 0);
+	const serviceDurationDisplay = $derived(
+		serviceDurationMinutes > 0
+			? `${Math.floor(serviceDurationMinutes / 60)}:${String(serviceDurationMinutes % 60).padStart(2, '0')}`
+			: '',
+	);
 
 	const vacancyDate = $derived(vacancy ? DateUtils.toLocalDate(new Date(vacancy.startTime)) : '');
 	const vacancyStartTime = $derived(vacancy ? DateUtils.toLocalTime(new Date(vacancy.startTime)) : '');
@@ -74,6 +80,12 @@
 			startTime = timeSlots[0] ?? '';
 		}
 	});
+
+	function slotLabel(slot) {
+		if (!serviceDurationMinutes) return slot;
+		const end = new Date(new Date(vacancyDate + 'T' + slot).getTime() + serviceDurationMinutes * 60000);
+		return `${slot} - ${DateUtils.toLocalTime(end)}`;
+	}
 
 	const canDelete = $derived(isReadonly && !!ondelete && !!booking?.startTime);
 
@@ -131,10 +143,20 @@
 						<option value={String(service.id)}>{service.name}</option>
 					{/each}
 				</select>
+				{#if selectedService}
+					<div class="mt-1 text-sm text-gray-500">
+						{#if serviceDurationDisplay}
+							<p class="font-medium">Duration: {serviceDurationDisplay}</p>
+						{/if}
+						{#if selectedService.description}
+							<p class="whitespace-pre-line">{selectedService.description}</p>
+						{/if}
+					</div>
+				{/if}
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="bookingStartTime"> Start Time </label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="bookingStartTime"> Time </label>
 				<select
 					bind:value={startTime}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -143,10 +165,16 @@
 					required
 				>
 					{#each timeSlots as slot (slot)}
-						<option value={slot}>{slot}</option>
+						<option value={slot}>{slotLabel(slot)}</option>
 					{/each}
 				</select>
 			</div>
+
+			<LimitedTextarea
+				id="bookingNotes"
+				label={employeeName ? `Notes for ${employeeName}` : 'Notes'}
+				bind:value={notes}
+			/>
 		{:else if isReadonly && booking}
 			<dl class="space-y-2 text-sm">
 				{#if booking.serviceName}

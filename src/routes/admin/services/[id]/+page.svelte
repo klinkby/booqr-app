@@ -1,5 +1,5 @@
 <script>
-	import { Form, apiErrorMessage } from '$lib';
+	import { Form, LimitedTextarea, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -13,6 +13,7 @@
 
 	let name = $state('');
 	let duration = $state('');
+	let description = $state('');
 	let selectedEmployeeIds = $state([]);
 	let error = $state(null);
 	let loading = $state(false);
@@ -38,6 +39,7 @@
 			const existing = await service.getService(id);
 			name = existing.name;
 			duration = existing.duration;
+			description = existing.description || '';
 			selectedEmployeeIds = (existing.employees || []).map(String);
 		} catch (err) {
 			error = apiErrorMessage(err);
@@ -50,7 +52,11 @@
 		error = null;
 		loading = true;
 		try {
-			await service.saveService({ id, isEdit, payload: { name, duration, employees: selectedEmployeeIds } });
+			await service.saveService({
+				id,
+				isEdit,
+				payload: { name, duration, description: description || null, employees: selectedEmployeeIds },
+			});
 			await goto(resolve('/admin/services'));
 		} catch (err) {
 			error = apiErrorMessage(err);
@@ -103,6 +109,8 @@
 						placeholder="e.g., 01:00:00"
 					/>
 				</div>
+
+				<LimitedTextarea id="description" label="Description" bind:value={description} />
 
 				<fieldset>
 					<legend class="block text-sm font-medium text-gray-700 mb-1">Employees</legend>
