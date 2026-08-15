@@ -9,14 +9,22 @@ export const FAKE_TOKEN =
 	'.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6IkVtcGxveWVlIiwibmJmIjoxNzcwNDc1NjgwLCJleHAiOjI3NzA0NzkyODAsImlhdCI6MTc3MDQ3NTY4MCwiaXNzIjoiYm9vcXIiLCJhdWQiOiJodHRwczovL3d3dy5ib29xci5kayJ9' +
 	'.fake';
 
-const LOCATIONS = [
-	{ id: 1, name: 'Location A' },
-	{ id: 2, name: 'Location B' },
+export const LOCATIONS = [
+	{ id: 1, name: 'Location A', address1: '1 Main Street', city: 'Springfield' },
+	{ id: 2, name: 'Location B', address1: '2 Side Street', city: 'Springfield' },
 ];
 
-const EMPLOYEES = [
+export const EMPLOYEES = [
 	{ id: 'emp1', name: 'Employee One', email: 'emp1@example.com', role: 'Employee' },
 	{ id: 'emp2', name: 'Employee Two', email: 'emp2@example.com', role: 'Employee' },
+];
+
+// Single-employee service: the customer booking wizard's "With whom?" step
+// (step 3) is skipped by default, while "Where?" (step 2) still shows since
+// LOCATIONS above has more than one entry — exercising both the shown and
+// skipped variants of the same skip-logic in the same default mock setup.
+export const SERVICES = [
+	{ id: 'svc1', name: 'Haircut', duration: '00:30:00', description: 'A classic haircut.', employees: ['emp1'] },
 ];
 
 /** Returns ISO strings for vacancies that fall in the current calendar week. */
@@ -72,7 +80,7 @@ export async function setupApiMocks(page) {
 		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: LOCATIONS }) }),
 	);
 	await page.route('**/api/services*', (route) =>
-		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }),
+		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: SERVICES }) }),
 	);
 	await page.route('**/api/employees*', (route) =>
 		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
@@ -80,9 +88,16 @@ export async function setupApiMocks(page) {
 	await page.route('**/api/users/*/my-bookings*', (route) =>
 		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }),
 	);
-	await page.route('**/api/users*', (route) =>
-		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
-	);
+	// Method-aware: GET lists users (e.g. the admin roster); POST is the
+	// customer sign-up call (`UserService.addUser`) and must not silently 200
+	// off the GET fallback, or the sign-up e2e test would prove nothing.
+	await page.route('**/api/users*', (route) => {
+		const request = route.request();
+		if (request.method() === 'POST') {
+			return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 'newUser1' }) });
+		}
+		return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) });
+	});
 }
 
 /**
