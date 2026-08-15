@@ -16,6 +16,12 @@ export const queryKeys = {
 	vacancies: {
 		all: ['vacancies'],
 		range: (from, to) => [...queryKeys.vacancies.all, from, to],
+		// Anchor month ('YYYY-MM') for the customer booking wizard's availability
+		// hook. The hook fetches a wider horizon around the anchor (see
+		// bookingData.svelte.js) but keys the cache on the anchor alone, so
+		// paging the month grid one step at a time doesn't refetch the whole
+		// overlapping window twice.
+		month: (serviceId, anchorMonth) => [...queryKeys.vacancies.all, 'month', serviceId, anchorMonth],
 	},
 	bookings: {
 		all: ['bookings'],

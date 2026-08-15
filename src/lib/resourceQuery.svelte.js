@@ -161,6 +161,33 @@ export function usePublicMutation(mutator) {
 }
 
 /**
+ * Loops the `Start`/`Num` pagination AGENTS.md requires (`Num=100` per page)
+ * until a page returns fewer than `Num` items, then returns every item
+ * concatenated as a single `{ items }` envelope — the same shape
+ * `useResourceQuery`'s fetcher slot expects, so callers don't special-case it.
+ *
+ * Not wrapped in `authedQueryFn` itself — callers pass it as the `fetcher` to
+ * `useResourceQuery`/`useResourceMutation`, which apply `authedQueryFn` (and
+ * therefore 401 refresh-and-retry) to the whole multi-page loop as one unit.
+ *
+ * @param {(start: number, num: number) => Promise<{items: Array}>} fetcher
+ * @returns {Promise<{items: Array}>}
+ */
+export async function fetchAllPages(fetcher) {
+	const NUM = 100;
+	let start = 0;
+	const items = [];
+	for (;;) {
+		const page = await fetcher(start, NUM);
+		const pageItems = page?.items ?? [];
+		items.push(...pageItems);
+		if (pageItems.length < NUM) break;
+		start += NUM;
+	}
+	return { items };
+}
+
+/**
  * Imperative one-off authed fetch with no caching — for detail fetches that
  * must be fresh on every call (e.g. opening a view panel). Still gets 401
  * refresh-and-retry; deliberately skips the query cache so a reopened panel

@@ -12,3 +12,8 @@ export { default as BookingForm } from './components/BookingForm.svelte';
 export { default as NavBar } from './components/NavBar.svelte';
 export { default as Avatar } from './components/Avatar.svelte';
 export { default as UserName } from './components/UserName.svelte';
+export { default as ServiceList } from './components/ServiceList.svelte';
+export { default as ChoiceList } from './components/ChoiceList.svelte';
+export { default as MonthPicker } from './components/MonthPicker.svelte';
+export { default as TimeSlotList } from './components/TimeSlotList.svelte';
+export { default as BookingSummary } from './components/BookingSummary.svelte';
