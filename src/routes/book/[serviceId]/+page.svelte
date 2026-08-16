@@ -249,18 +249,20 @@
 				type="button"
 				disabled={disablePrevMonth}
 				onclick={() => goToMonth(addMonthsStr(effectiveMonth, -1))}
+				aria-label="Previous month"
 				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
-				‹ Prev
+				‹
 			</button>
 			<h1 tabindex="-1" class="text-2xl font-semibold outline-none">{monthLabel}</h1>
 			<button
 				type="button"
 				disabled={disableNextMonth}
 				onclick={() => goToMonth(addMonthsStr(effectiveMonth, 1))}
+				aria-label="Next month"
 				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
-				Next ›
+				›
 			</button>
 		</div>
 		<MonthPicker days={monthDays} onSelectDay={selectDay} />
@@ -278,7 +280,7 @@
 					: 'Previous available: none'}
 				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
-				‹ Prev
+				‹
 			</button>
 			<h1 tabindex="-1" class="text-2xl font-semibold outline-none">{dateLabel}</h1>
 			<button
@@ -291,7 +293,7 @@
 					: 'Next available: none'}
 				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
-				Next ›
+				›
 			</button>
 		</div>
 		<TimeSlotList {slots} onSelectSlot={selectSlot} />

@@ -14,7 +14,7 @@
 					type="button"
 					onclick={() => onSelectSlot(slot)}
 					aria-label="{DateUtils.toLocalTime(slot.startTime)} to {DateUtils.toLocalTime(slot.endTime)}"
-					class="w-full px-2 py-2 text-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+					class="w-full px-1 py-1 text-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
 				>
 					{DateUtils.toLocalTime(slot.startTime)}
 				</button>
