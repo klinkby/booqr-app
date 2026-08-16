@@ -41,7 +41,7 @@ async function mockSingleVacancy(page, target, { id = 'e2e-slot-1', employeeId =
 
 async function advanceToMonth(page, monthDiff) {
 	for (let i = 0; i < monthDiff; i++) {
-		await page.getByRole('button', { name: 'Next ›' }).click();
+		await page.getByRole('button', { name: 'Next month' }).click();
 	}
 }
 
@@ -181,7 +181,10 @@ test.describe('Customer booking flow', () => {
 		await page.getByRole('button', { name: 'Sign in' }).click();
 
 		await expect(page.locator('h1')).toHaveText('Confirm appointment');
-		await expect(page.getByText(EMPLOYEES[0].name)).toBeVisible();
+		// Employee name appears twice on this page: once in the breadcrumb and
+		// once in the appointment detail list.
+		await expect(page.getByLabel('Your selections so far')).toContainText(EMPLOYEES[0].name);
+		await expect(page.getByText(EMPLOYEES[0].name).last()).toBeVisible();
 		await page.check('#acceptCancellation');
 		await page.getByRole('button', { name: 'Book now' }).click();
 
@@ -243,9 +246,9 @@ test.describe('Customer booking flow', () => {
 
 		await expect(page.getByRole('button', { name: /09:00/ })).toBeVisible();
 
-		// The time step's Prev/Next set `aria-label` to the target-date hover
-		// text, which overrides "‹ Prev"/"Next ›" as the accessible name — so
-		// these must be selected by that label, not the visible glyph text.
+		// The time step's Prev/Next buttons show only a bare "‹"/"›" glyph and
+		// rely on `aria-label` (set to the target-date hover text) for their
+		// accessible name — so these must be selected by that label.
 		const nextButton = page.getByRole('button', { name: /Next available/ });
 		await expect(nextButton).toBeEnabled();
 		await expect(nextButton).toHaveAttribute(

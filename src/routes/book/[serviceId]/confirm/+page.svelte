@@ -143,6 +143,7 @@
 		const items = [];
 		if (service) items.push(service.name);
 		if (locationName) items.push(locationName);
+		if (employeeName) items.push(employeeName);
 		if (startDate) items.push(`${startDate.getDate()} ${startDate.toLocaleDateString('en-US', { month: 'long' })}`);
 		if (startDate) items.push(DateUtils.toLocalTime(startDate));
 		return items;
@@ -201,6 +202,14 @@
 				/>
 			</div>
 		</Form>
+		<p class="mt-4 text-sm text-gray-600">
+			<a
+				href={resolve('/change-password')}
+				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
+			>
+				Forgot your password?
+			</a>
+		</p>
 		<p class="mt-4 text-sm text-gray-600">
 			New here?
 			<button
@@ -303,8 +312,8 @@
 			loading={bookLoading}
 			onsubmit={handleBook}
 			submitLabel="Book now"
+			submitDisabled={!acceptCancellation}
 		>
-			<LimitedTextarea id="notes" label="Notes for the employee (optional)" bind:value={notes} />
 			<div>
 				<div class="flex items-start gap-2">
 					<input
@@ -316,13 +325,22 @@
 						class="mt-1"
 					/>
 					<label for="acceptCancellation" class="text-sm text-gray-700">
-						I accept that the appointment can be cancelled up to the day before the reservation.
+						I accept that the appointment can be cancelled up to the day before the reservation, and the
+						<a
+							href={resolve('/terms-and-conditions')}
+							target="_blank"
+							rel="noopener"
+							class="text-indigo-600 hover:text-indigo-500 underline"
+						>
+							terms and conditions
+						</a>.
 					</label>
 				</div>
 				{#if cancellationError}
 					<p id="acceptCancellationError" class="text-sm text-red-600 mt-1">{cancellationError}</p>
 				{/if}
 			</div>
+			<LimitedTextarea id="notes" label="Notes for the employee (optional)" bind:value={notes} />
 		</Form>
 	{/if}
 {/if}
