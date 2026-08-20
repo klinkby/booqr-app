@@ -269,4 +269,31 @@ test.describe('Customer booking flow', () => {
 			new RegExp(`Previous available: ${near.getDate()} ${nearMonthLabel}`),
 		);
 	});
+
+	test('no available dates shows a message instead of a disabled calendar', async ({ page }) => {
+		// Override vacancies to return nothing — simulating a service with
+		// no open slots anywhere in the lookahead horizon.
+		await page.route('**/api/vacancies*', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }),
+		);
+
+		await page.goto('/');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+
+		// Step 2: "Where?" — pick a location.
+		await expect(page.locator('h1')).toHaveText('Where?');
+		await page.getByRole('button', { name: 'Location A' }).click();
+
+		// Step 4 (month): should show the unavailability message, not a calendar.
+		await expect(page.locator('h1')).toHaveText('No dates available');
+		await expect(
+			page.getByText('There are no available dates for this service right now. Please check back later.'),
+		).toBeVisible();
+		await expect(page.getByRole('link', { name: 'Back to services' })).toBeVisible();
+
+		// No MonthPicker table should be rendered.
+		await expect(page.locator('table')).not.toBeVisible();
+
+		await page.screenshot({ path: 'e2e/screenshots/no-dates-available.png', fullPage: true });
+	});
 });
