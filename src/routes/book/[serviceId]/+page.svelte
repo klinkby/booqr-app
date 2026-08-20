@@ -249,15 +249,7 @@
 			<div role="status" aria-live="polite"><p>Loading availability…</p></div>
 		{:else if booking.daysWithSlots.size === 0}
 			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">No dates available</h1>
-			<p class="text-gray-600 mb-4">
-				There are no available dates for this service right now. Please check back later.
-			</p>
-			<a
-				href={resolve('/')}
-				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
-			>
-				Back to services
-			</a>
+			<p class="text-gray-600">There are no available dates for this service right now. Please check back later.</p>
 		{:else}
 			<div class="flex items-center justify-between mb-6">
 				<button

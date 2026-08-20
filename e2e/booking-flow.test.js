@@ -289,7 +289,6 @@ test.describe('Customer booking flow', () => {
 		await expect(
 			page.getByText('There are no available dates for this service right now. Please check back later.'),
 		).toBeVisible();
-		await expect(page.getByRole('link', { name: 'Back to services' })).toBeVisible();
 
 		// No MonthPicker table should be rendered.
 		await expect(page.locator('table')).not.toBeVisible();
