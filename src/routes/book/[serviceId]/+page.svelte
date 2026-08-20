@@ -244,28 +244,44 @@
 		<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">With whom?</h1>
 		<ChoiceList options={employeeOptions} onselect={selectEmployee} emptyMessage="No one available." />
 	{:else if showMonthStep}
-		<div class="flex items-center justify-between mb-6">
-			<button
-				type="button"
-				disabled={disablePrevMonth}
-				onclick={() => goToMonth(addMonthsStr(effectiveMonth, -1))}
-				aria-label="Previous month"
-				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+		{#if booking.isLoading}
+			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{monthLabel}</h1>
+			<div role="status" aria-live="polite"><p>Loading availability…</p></div>
+		{:else if booking.daysWithSlots.size === 0}
+			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">No dates available</h1>
+			<p class="text-gray-600 mb-4">
+				There are no available dates for this service right now. Please check back later.
+			</p>
+			<a
+				href={resolve('/')}
+				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 			>
-				‹
-			</button>
-			<h1 tabindex="-1" class="text-2xl font-semibold outline-none">{monthLabel}</h1>
-			<button
-				type="button"
-				disabled={disableNextMonth}
-				onclick={() => goToMonth(addMonthsStr(effectiveMonth, 1))}
-				aria-label="Next month"
-				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-			>
-				›
-			</button>
-		</div>
-		<MonthPicker days={monthDays} onSelectDay={selectDay} />
+				Back to services
+			</a>
+		{:else}
+			<div class="flex items-center justify-between mb-6">
+				<button
+					type="button"
+					disabled={disablePrevMonth}
+					onclick={() => goToMonth(addMonthsStr(effectiveMonth, -1))}
+					aria-label="Previous month"
+					class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					‹
+				</button>
+				<h1 tabindex="-1" class="text-2xl font-semibold outline-none">{monthLabel}</h1>
+				<button
+					type="button"
+					disabled={disableNextMonth}
+					onclick={() => goToMonth(addMonthsStr(effectiveMonth, 1))}
+					aria-label="Next month"
+					class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					›
+				</button>
+			</div>
+			<MonthPicker days={monthDays} onSelectDay={selectDay} />
+		{/if}
 	{:else if showTimeStep}
 		<div class="flex items-center justify-between mb-6">
 			<button
