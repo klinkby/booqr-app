@@ -1,6 +1,7 @@
 import { connect } from 'node:http2';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { defineConfig } from 'vite';
 
 const API_TARGET = 'https://www.booqr.dk';
@@ -53,5 +54,10 @@ export default defineConfig({
 				},
 		tailwindcss(),
 		sveltekit(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
+			strategy: ['preferredLanguage', 'baseLocale'],
+		}),
 	],
 });

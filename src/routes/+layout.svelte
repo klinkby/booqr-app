@@ -8,8 +8,15 @@
 	import { page } from '$app/state';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 	import { queryClient } from '$lib/queryClient';
+	import { getLocale, getTextDirection } from '$lib/paraglide/runtime.js';
 
 	let { children } = $props();
+
+	$effect(() => {
+		const locale = getLocale();
+		document.documentElement.lang = locale;
+		document.documentElement.dir = getTextDirection(locale);
+	});
 
 	function titleFromPath(pathname) {
 		const seg = pathname.split('/').filter(Boolean);
