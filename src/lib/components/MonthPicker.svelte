@@ -1,4 +1,6 @@
 <script>
+	import { m } from '$lib/paraglide/messages.js';
+
 	let { days = [], onSelectDay } = $props();
 
 	// Chunk days into weeks of 7
@@ -12,16 +14,16 @@
 </script>
 
 <table class="w-full border-collapse text-center">
-	<caption class="sr-only">Day picker</caption>
+	<caption class="sr-only">{m.dayPickerCaption()}</caption>
 	<thead>
 		<tr>
-			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">Mon</th>
-			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">Tue</th>
-			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">Wed</th>
-			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">Thu</th>
-			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">Fri</th>
-			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">Sat</th>
-			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">Sun</th>
+			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">{m.dayMon()}</th>
+			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">{m.dayTue()}</th>
+			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">{m.dayWed()}</th>
+			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">{m.dayThu()}</th>
+			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">{m.dayFri()}</th>
+			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">{m.daySat()}</th>
+			<th scope="col" class="text-xs font-medium text-gray-500 pb-2">{m.daySun()}</th>
 		</tr>
 	</thead>
 	<tbody>

@@ -17,6 +17,6 @@ export default [
 		},
 	},
 	{
-		ignores: ['build/', '.svelte-kit/', 'src/lib/api/'],
+		ignores: ['build/', '.svelte-kit/', 'project.inlang/', 'src/lib/api/', 'src/lib/paraglide/'],
 	},
 ];

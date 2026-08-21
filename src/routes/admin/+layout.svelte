@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { children } = $props();
 
@@ -23,5 +24,5 @@
 {#if auth.isEmployee}
 	{@render children()}
 {:else if auth.isLoggedIn}
-	<p role="alert">Access denied. Redirecting to home page&hellip;</p>
+	<p role="alert">{m.accessDenied()}</p>
 {/if}

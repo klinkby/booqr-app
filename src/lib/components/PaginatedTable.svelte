@@ -1,5 +1,6 @@
 <script>
 	import DataTable from './DataTable.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let {
 		columns,
@@ -18,14 +19,14 @@
 
 {#if isLoading}
 	<div role="status" aria-live="polite">
-		<p>Loading...</p>
+		<p>{m.loading()}</p>
 	</div>
 {:else if error}
 	<div role="alert" aria-live="assertive">
 		<p class="text-red-600">{error}</p>
 	</div>
 {:else if rows.length === 0}
-	<p>No items found.</p>
+	<p>{m.noItemsFound()}</p>
 {:else}
 	<DataTable
 		{columns}

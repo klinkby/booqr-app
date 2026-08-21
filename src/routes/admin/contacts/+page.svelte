@@ -4,10 +4,11 @@
 	import { resolve } from '$app/paths';
 	import { useContactsData } from './contactsData.svelte.js';
 	import ContactsFilterForm from './ContactsFilterForm.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	const columns = [
-		{ key: 'name', label: 'Name' },
-		{ key: 'role', label: 'Role', hideOnMobile: true },
+		{ key: 'name', label: m.labelName() },
+		{ key: 'role', label: m.labelRole(), hideOnMobile: true },
 	];
 
 	let showFilters = $state(false);
@@ -58,13 +59,13 @@
 			class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
 			onclick={handleCreate}
 			type="button"
-			>Create Contact
+			>{m.createContact()}
 		</button>
 		<div class="relative">
 			<button
 				aria-controls="contacts-filter-panel"
 				aria-expanded={showFilters}
-				aria-label="Toggle contact filters"
+				aria-label={m.toggleContactFilters()}
 				class="p-2 bg-transparent border border-gray-300 hover:bg-gray-50 rounded-md transition-colors"
 				onclick={toggleFilters}
 				type="button"

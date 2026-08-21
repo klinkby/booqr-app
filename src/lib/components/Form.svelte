@@ -1,9 +1,11 @@
 <script>
+	import { m } from '$lib/paraglide/messages.js';
+
 	let {
 		legend,
 		error = null,
 		loading = false,
-		submitLabel = 'Submit',
+		submitLabel = m.submit(),
 		submitDisabled = false,
 		deleteLabel = undefined,
 		onsubmit,
@@ -70,7 +72,7 @@
 				disabled={loading}
 				class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
 				onclick={oncancel}
-				>Cancel
+				>{m.cancel()}
 			</button>
 		{/if}
 		<button
@@ -78,7 +80,7 @@
 			class:opacity-50={submitDisabled && !loading}
 			class:cursor-not-allowed={submitDisabled && !loading}
 			disabled={loading}
-			type="submit">{loading ? 'Please wait\u2026' : submitLabel}</button
+			type="submit">{loading ? m.pleaseWait() : submitLabel}</button
 		>
 	</div>
 </form>

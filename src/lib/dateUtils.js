@@ -1,3 +1,5 @@
+import { m } from '$lib/paraglide/messages.js';
+
 export class DateUtils {
 	static #pad(n) {
 		return String(n).padStart(2, '0');
@@ -44,8 +46,8 @@ export class DateUtils {
 		const totalMinutes = Math.round(DateUtils.parseDurationSeconds(duration) / 60);
 		const hours = Math.floor(totalMinutes / 60);
 		const minutes = totalMinutes % 60;
-		if (hours === 0) return `${minutes} min`;
-		if (minutes === 0) return `${hours} h`;
-		return `${hours} h ${minutes} min`;
+		if (hours === 0) return m.durationMinutes({ minutes });
+		if (minutes === 0) return m.durationHours({ hours });
+		return m.durationHoursMinutes({ hours, minutes });
 	}
 }

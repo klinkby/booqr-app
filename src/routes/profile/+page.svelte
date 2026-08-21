@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useProfileData } from './profileData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	const profile = useProfileData();
 
@@ -38,7 +39,7 @@
 		loading = true;
 		try {
 			await profile.saveProfile({ name, phone });
-			successMessage = 'Profile updated successfully.';
+			successMessage = m.profileUpdated();
 		} catch (err) {
 			error = apiErrorMessage(err);
 		} finally {
@@ -51,7 +52,7 @@
 	<div>
 		{#if profile.isLoading}
 			<div role="status" aria-live="polite">
-				<p>Loading...</p>
+				<p>{m.loading()}</p>
 			</div>
 		{:else if profile.error}
 			<div role="alert" aria-live="assertive">
@@ -68,10 +69,10 @@
 						</div>
 					{/if}
 
-					<Form legend="Edit profile information" {error} {loading} submitLabel="Update" onsubmit={handleSubmit}>
+					<Form legend={m.legendEditProfile()} {error} {loading} submitLabel={m.update()} onsubmit={handleSubmit}>
 						<!-- Email: read-only display -->
 						<div>
-							<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
+							<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelEmail()} </label>
 							<input
 								id="email"
 								name="email"
@@ -79,13 +80,13 @@
 								disabled
 								bind:value={email}
 								class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm"
-								title="Email cannot be changed"
+								title={m.emailCannotBeChanged()}
 							/>
 						</div>
 
 						<!-- Name: editable -->
 						<div>
-							<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> Name </label>
+							<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
 							<input
 								id="name"
 								name="name"
@@ -98,14 +99,14 @@
 
 						<!-- Phone: editable -->
 						<div>
-							<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+							<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">{m.labelPhone()}</label>
 							<input
 								id="phone"
 								name="phone"
 								type="tel"
 								required
 								pattern={'[0-9]{8}'}
-								title="Phone number must be exactly 8 digits"
+								title={m.phoneValidation()}
 								bind:value={phone}
 								class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 							/>

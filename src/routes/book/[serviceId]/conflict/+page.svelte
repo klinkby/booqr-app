@@ -1,6 +1,7 @@
 <script>
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let heading = $state();
 
@@ -12,9 +13,9 @@
 	let bookingBaseHref = $derived(resolve(`/book/${page.params.serviceId}`));
 </script>
 
-<h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-4 outline-none">That time was just taken</h1>
+<h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-4 outline-none">{m.timeTaken()}</h1>
 
-<p class="text-gray-600 mb-6">Someone else booked that slot just before you. Please choose another time.</p>
+<p class="text-gray-600 mb-6">{m.timeTakenMessage()}</p>
 
 <div class="flex flex-col gap-2">
 	<!-- eslint-disable svelte/no-navigation-without-resolve -- bookingBaseHref is already built from resolve(); a query string is appended after -->
@@ -22,13 +23,13 @@
 		href={dateParam ? `${bookingBaseHref}?date=${dateParam}` : bookingBaseHref}
 		class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 	>
-		Choose another time that day
+		{m.chooseAnotherTime()}
 	</a>
 	<a
 		href={bookingBaseHref}
 		class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 	>
-		Choose a different day
+		{m.chooseDifferentDay()}
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 </div>

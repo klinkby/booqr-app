@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useHomeData } from './homeData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	const home = useHomeData();
 
@@ -17,13 +18,13 @@
 	}
 </script>
 
-<h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">Select a service</h1>
+<h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.selectAServiceHeading()}</h1>
 
 {#if home.isLoading}
-	<div role="status" aria-live="polite"><p>Loading…</p></div>
+	<div role="status" aria-live="polite"><p>{m.loading()}</p></div>
 {:else if home.error}
 	<div role="alert" aria-live="assertive">
-		<p class="text-red-600">{apiErrorMessage(home.error, 'Failed to load services. Please try again.')}</p>
+		<p class="text-red-600">{apiErrorMessage(home.error, m.errorLoadServices())}</p>
 	</div>
 {:else}
 	<ServiceList services={home.services} onselect={handleSelect} />

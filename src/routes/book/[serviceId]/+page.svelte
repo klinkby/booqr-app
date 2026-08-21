@@ -5,6 +5,8 @@
 	import { page } from '$app/state';
 	import { DateUtils } from '$lib/dateUtils.js';
 	import { useBookingData } from './bookingData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	const todayStr = DateUtils.toLocalDate(new Date());
 	const currentMonthStr = todayStr.slice(0, 7);
@@ -97,18 +99,18 @@
 	const employeeOptions = $derived(booking.serviceEmployees.map((e) => ({ id: String(e.id), primary: e.name })));
 
 	const monthLabel = $derived(
-		new Date(effectiveMonth + '-01T00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+		new Date(effectiveMonth + '-01T00:00').toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' }),
 	);
 
 	const monthDays = $derived.by(() => {
-		const [y, m] = effectiveMonth.split('-').map(Number);
-		const daysInMonth = new Date(y, m, 0).getDate();
-		const firstWeekday = (new Date(y, m - 1, 1).getDay() + 6) % 7; // Mon=0..Sun=6
+		const [year, month] = effectiveMonth.split('-').map(Number);
+		const daysInMonth = new Date(year, month, 0).getDate();
+		const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7; // Mon=0..Sun=6
 		const totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
 		const days = [];
 		for (let i = 0; i < totalCells; i++) {
 			const dayNum = i - firstWeekday + 1;
-			const cellDate = new Date(y, m - 1, dayNum);
+			const cellDate = new Date(year, month - 1, dayNum);
 			const dateStr = DateUtils.toLocalDate(cellDate);
 			days.push({
 				date: dateStr,
@@ -129,19 +131,19 @@
 	const dateLabel = $derived.by(() => {
 		if (!selectedDate) return '';
 		const d = new Date(selectedDate + 'T00:00');
-		return `${d.getDate()}. ${d.toLocaleDateString('en-US', { month: 'long' })} ${d.getFullYear()}`;
+		return `${d.getDate()}. ${d.toLocaleDateString(getLocale(), { month: 'long' })} ${d.getFullYear()}`;
 	});
 
 	function addMonthsStr(monthStr, delta) {
-		const [y, m] = monthStr.split('-').map(Number);
-		const d = new Date(y, m - 1 + delta, 1);
+		const [year, month] = monthStr.split('-').map(Number);
+		const d = new Date(year, month - 1 + delta, 1);
 		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 	}
 
 	function targetDayLabel(dateStr) {
 		if (!dateStr) return '';
 		const d = new Date(dateStr + 'T00:00');
-		return `${d.getDate()} ${d.toLocaleDateString('en-US', { month: 'long' })}`;
+		return `${d.getDate()} ${d.toLocaleDateString(getLocale(), { month: 'long' })}`;
 	}
 
 	const slots = $derived(selectedDate ? booking.slotsForDate(selectedDate) : []);
@@ -215,18 +217,18 @@
 <BookingSummary items={breadcrumbItems} />
 
 {#if booking.isLoading && !booking.service}
-	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">Loading…</h1>
-	<div role="status" aria-live="polite"><p>Loading…</p></div>
+	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.loading()}</h1>
+	<div role="status" aria-live="polite"><p>{m.loading()}</p></div>
 {:else if booking.error}
-	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">Something went wrong</h1>
+	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.somethingWentWrong()}</h1>
 	<div role="alert" aria-live="assertive">
-		<p class="text-red-600">{apiErrorMessage(booking.error, 'Failed to load availability. Please try again.')}</p>
+		<p class="text-red-600">{apiErrorMessage(booking.error, m.errorLoadAvailability())}</p>
 	</div>
 {:else if !booking.service}
-	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">Service not found</h1>
-	<p class="text-red-600">This service could not be found.</p>
+	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.serviceNotFound()}</h1>
+	<p class="text-red-600">{m.serviceNotFoundMessage()}</p>
 	<a href={resolve('/')} class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline">
-		Back to services
+		{m.backToServices()}
 	</a>
 {:else}
 	<button
@@ -234,29 +236,29 @@
 		onclick={handleBack}
 		class="text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline mb-4"
 	>
-		← Back
+		{m.back()}
 	</button>
 
 	{#if showLocationStep}
-		<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">Where?</h1>
-		<ChoiceList options={locationOptions} onselect={selectLocation} emptyMessage="No locations available." />
+		<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.where()}</h1>
+		<ChoiceList options={locationOptions} onselect={selectLocation} emptyMessage={m.noLocationsAvailable()} />
 	{:else if showEmployeeStep}
-		<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">With whom?</h1>
-		<ChoiceList options={employeeOptions} onselect={selectEmployee} emptyMessage="No one available." />
+		<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.withWhom()}</h1>
+		<ChoiceList options={employeeOptions} onselect={selectEmployee} emptyMessage={m.noOneAvailable()} />
 	{:else if showMonthStep}
 		{#if booking.isLoading}
 			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{monthLabel}</h1>
-			<div role="status" aria-live="polite"><p>Loading availability…</p></div>
+			<div role="status" aria-live="polite"><p>{m.loadingAvailability()}</p></div>
 		{:else if booking.daysWithSlots.size === 0}
-			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">No dates available</h1>
-			<p class="text-gray-600">There are no available dates for this service right now. Please check back later.</p>
+			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.noDatesAvailable()}</h1>
+			<p class="text-gray-600">{m.noDatesMessage()}</p>
 		{:else}
 			<div class="flex items-center justify-between mb-6">
 				<button
 					type="button"
 					disabled={disablePrevMonth}
 					onclick={() => goToMonth(addMonthsStr(effectiveMonth, -1))}
-					aria-label="Previous month"
+					aria-label={m.previousMonth()}
 					class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					‹
@@ -266,7 +268,7 @@
 					type="button"
 					disabled={disableNextMonth}
 					onclick={() => goToMonth(addMonthsStr(effectiveMonth, 1))}
-					aria-label="Next month"
+					aria-label={m.nextMonth()}
 					class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					›
@@ -281,11 +283,11 @@
 				disabled={!booking.previousAvailableDate}
 				onclick={() => selectDay(booking.previousAvailableDate)}
 				title={booking.previousAvailableDate
-					? `Previous available: ${targetDayLabel(booking.previousAvailableDate)}`
+					? m.previousAvailable({ date: targetDayLabel(booking.previousAvailableDate) })
 					: undefined}
 				aria-label={booking.previousAvailableDate
-					? `Previous available: ${targetDayLabel(booking.previousAvailableDate)}`
-					: 'Previous available: none'}
+					? m.previousAvailable({ date: targetDayLabel(booking.previousAvailableDate) })
+					: m.previousAvailableNone()}
 				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				‹
@@ -295,10 +297,12 @@
 				type="button"
 				disabled={!booking.nextAvailableDate}
 				onclick={() => selectDay(booking.nextAvailableDate)}
-				title={booking.nextAvailableDate ? `Next available: ${targetDayLabel(booking.nextAvailableDate)}` : undefined}
+				title={booking.nextAvailableDate
+					? m.nextAvailable({ date: targetDayLabel(booking.nextAvailableDate) })
+					: undefined}
 				aria-label={booking.nextAvailableDate
-					? `Next available: ${targetDayLabel(booking.nextAvailableDate)}`
-					: 'Next available: none'}
+					? m.nextAvailable({ date: targetDayLabel(booking.nextAvailableDate) })
+					: m.nextAvailableNone()}
 				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				›

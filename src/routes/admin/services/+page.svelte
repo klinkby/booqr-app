@@ -3,11 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useServicesData } from './servicesData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	const columns = [
-		{ key: 'name', label: 'Name' },
-		{ key: 'duration', label: 'Duration', hideOnMobile: true },
-		{ key: 'employeeUsers', label: 'Employees', hideOnMobile: true },
+		{ key: 'name', label: m.labelName() },
+		{ key: 'duration', label: m.labelDuration(), hideOnMobile: true },
+		{ key: 'employeeUsers', label: m.employees(), hideOnMobile: true },
 	];
 
 	const services = useServicesData();
@@ -26,15 +27,15 @@
 			class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
 			onclick={handleCreate}
 			type="button"
-			>Create Service
+			>{m.createService()}
 		</button>
 	</div>
 	{#if services.isLoading}
-		<div role="status" aria-live="polite"><p>Loading...</p></div>
+		<div role="status" aria-live="polite"><p>{m.loading()}</p></div>
 	{:else if services.error}
 		<div role="alert" aria-live="assertive"><p class="text-red-600">{apiErrorMessage(services.error)}</p></div>
 	{:else if services.rows.length === 0}
-		<p>No services found.</p>
+		<p>{m.noServicesFound()}</p>
 	{:else}
 		{#snippet cellContent(column, row)}
 			{#if column.key === 'employeeUsers'}
