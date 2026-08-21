@@ -11,7 +11,7 @@
 
 <button
 	type="button"
-	class="underline hover:text-gray-900 focus:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+	class="text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 	lang={alternate}
 	aria-label={current === 'da' ? 'Switch to English' : 'Skift til dansk'}
 	onclick={ontoggle}

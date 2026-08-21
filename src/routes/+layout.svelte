@@ -95,7 +95,13 @@
 
 	<footer class="bg-gray-100 text-gray-600 mt-8">
 		<div class="container mx-auto px-4 py-3 max-w-7xl text-sm flex justify-between items-center">
-			<small>&copy; {new Date().getFullYear()} Booqr</small>
+			<small class="text-sm">
+				© 2026 Mads Klinkby,
+				<a
+					class="hover:text-gray-900 focus:text-gray-900 focus:outline-none focus:underline"
+					href="https://github.com/klinkby/booqr-app/blob/main/LICENSE">AGPL licensed</a
+				>.
+			</small>
 			<LanguageToggle current={locale.current} alternate={locale.alternate} ontoggle={() => locale.toggle()} />
 		</div>
 	</footer>
