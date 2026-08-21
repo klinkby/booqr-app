@@ -2,7 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { AuthenticationService } from '$lib/api';
-	import { auth, NavBar } from '$lib';
+	import { auth, NavBar, LanguageToggle, locale } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -81,8 +81,9 @@
 	</main>
 
 	<footer class="bg-gray-100 text-gray-600 mt-8">
-		<div class="container mx-auto px-4 max-w-7xl text-sm">
+		<div class="container mx-auto px-4 py-3 max-w-7xl text-sm flex justify-between items-center">
 			<small>&copy; {new Date().getFullYear()} Booqr</small>
+			<LanguageToggle current={locale.current} alternate={locale.alternate} ontoggle={() => locale.toggle()} />
 		</div>
 	</footer>
 </QueryClientProvider>
