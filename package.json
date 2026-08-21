@@ -25,6 +25,8 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
+		"@inlang/plugin-m-function-matcher": "^2.2.12",
+		"@inlang/plugin-message-format": "^4.4.3",
 		"@playwright/test": "^1.61.0",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
