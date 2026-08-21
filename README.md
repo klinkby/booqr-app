@@ -15,6 +15,8 @@ minimalist, composable architecture.
   system (`$state`, `$derived`, `$effect`, `$props`) for efficient state management.
 - **[SvelteKit SPA Mode](https://svelte.dev/docs/kit/single-page-apps)**: Static site generation targeting static
   deployments with client-side routing.
+- **Internationalization**: [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) provides English
+  and Danish messages, browser-language detection, and a persisted language preference.
 - **[Tailwind CSS](https://tailwindcss.com/)**: Utility-first CSS framework for consistent, minimal styling.
 - **[OpenAPI Code Generation](https://github.com/ferdikoomen/openapi-typescript-codegen)**: Auto-generated API client
   from OpenAPI specification.
@@ -47,9 +49,23 @@ The application is organized following SvelteKit's file-based routing convention
 
 **Note**: Never manually edit files in `src/lib/api/` as they are auto-generated.
 
+## Internationalization
+
+The app uses Paraglide JS for all interface text. Source messages live in `messages/en.json` and `messages/da.json`;
+the Vite plugin compiles them into `src/lib/paraglide/`. Import translated strings as `m` from
+`$lib/paraglide/messages.js`, for example `m.navSignIn()`. Do not edit the generated Paraglide output directly.
+
+Paraglide resolves the locale in this order: its `localStorage` preference, the browser's preferred language, then
+English. The footer language control uses `src/lib/locale.svelte.js` to call Paraglide's `setLocale()`. It intentionally
+reloads the SPA so every translated module initializes with the new locale.
+
+`src/routes/+layout.svelte` is the document-level integration point. It sets `<html lang>` and text direction from
+`getLocale()` / `getTextDirection()` inside a component `$effect`, while also using translated labels in shared layout
+UI. This keeps the document language correct for assistive technology as well as visual translations.
+
 ## Licensed under AGPL-3.0
 
-Copyright (C) 2026 Mads Klinkby
+Copyright (C) 2026 Mads Klinkby ([https://www.kli.dk](https://www.kli.dk))
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
