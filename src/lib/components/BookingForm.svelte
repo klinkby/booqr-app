@@ -1,6 +1,8 @@
 <script>
 	import { Form, LimitedTextarea } from '$lib';
 	import { DateUtils } from '$lib/dateUtils.js';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	let {
 		mode = 'book', // 'book' | 'view'
@@ -54,7 +56,7 @@
 				: ''
 			: vacancyDate;
 		return dateStr
-			? new Date(dateStr + 'T00:00').toLocaleDateString(undefined, {
+			? new Date(dateStr + 'T00:00').toLocaleDateString(getLocale(), {
 					weekday: 'long',
 					year: 'numeric',
 					month: 'long',
@@ -99,12 +101,12 @@
 
 <div class="sticky top-4 p-6 bg-gray-50 border border-gray-200 rounded-lg">
 	<h2 class="text-xl font-semibold mb-4">
-		{isReadonly ? 'My Appointment' : 'Book Appointment'}
+		{isReadonly ? m.myAppointment() : m.bookAppointment()}
 	</h2>
 
 	<Form
 		{error}
-		legend={isReadonly ? 'View appointment' : 'Book appointment'}
+		legend={isReadonly ? m.legendViewAppointment() : m.legendBookAppointment()}
 		{loading}
 		onsubmit={(e) => {
 			if (isReadonly) {
@@ -114,8 +116,8 @@
 			}
 		}}
 		oncancel={isReadonly ? undefined : oncancel}
-		submitLabel={isReadonly ? 'Close' : 'Book'}
-		deleteLabel={canDelete ? 'Cancel Appointment' : undefined}
+		submitLabel={isReadonly ? m.close() : m.book()}
+		deleteLabel={canDelete ? m.cancelAppointment() : undefined}
 		ondelete={canDelete ? ondelete : undefined}
 	>
 		{#if formattedDate}
@@ -124,13 +126,16 @@
 
 		{#if !isReadonly && vacancy}
 			<p class="text-sm text-gray-600">
-				Available: {vacancyStartTime} – {vacancyEndTime}
-				with {employeeName}
-				at {locationName}
+				{m.availableInfo({
+					start: vacancyStartTime,
+					end: vacancyEndTime,
+					employee: employeeName,
+					location: locationName,
+				})}
 			</p>
 
 			<div>
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="serviceId"> Service </label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="serviceId"> {m.labelService()} </label>
 				<select
 					bind:value={serviceId}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -138,7 +143,7 @@
 					name="serviceId"
 					required
 				>
-					<option value="" disabled selected>Select a service</option>
+					<option value="" disabled selected>{m.selectAService()}</option>
 					{#each services as service (service.id)}
 						<option value={String(service.id)}>{service.name}</option>
 					{/each}
@@ -146,7 +151,7 @@
 				{#if selectedService}
 					<div class="mt-1 text-sm text-gray-500">
 						{#if serviceDurationDisplay}
-							<p class="font-medium">Duration: {serviceDurationDisplay}</p>
+							<p class="font-medium">{m.durationDisplay({ duration: serviceDurationDisplay })}</p>
 						{/if}
 						{#if selectedService.description}
 							<p class="whitespace-pre-line">{selectedService.description}</p>
@@ -156,7 +161,7 @@
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="bookingStartTime"> Time </label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="bookingStartTime"> {m.labelTime()} </label>
 				<select
 					bind:value={startTime}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -172,32 +177,32 @@
 
 			<LimitedTextarea
 				id="bookingNotes"
-				label={employeeName ? `Notes for ${employeeName}` : 'Notes'}
+				label={employeeName ? m.notesForEmployee({ name: employeeName }) : m.labelNotes()}
 				bind:value={notes}
 			/>
 		{:else if isReadonly && booking}
 			<dl class="space-y-2 text-sm">
 				{#if booking.serviceName}
 					<div>
-						<dt class="font-medium text-gray-700">Service</dt>
+						<dt class="font-medium text-gray-700">{m.labelService()}</dt>
 						<dd class="text-gray-600">{booking.serviceName}</dd>
 					</div>
 				{/if}
 				{#if bookingTimeDisplay}
 					<div>
-						<dt class="font-medium text-gray-700">Time</dt>
+						<dt class="font-medium text-gray-700">{m.labelTime()}</dt>
 						<dd class="text-gray-600">{bookingTimeDisplay}</dd>
 					</div>
 				{/if}
 				{#if employeeName}
 					<div>
-						<dt class="font-medium text-gray-700">Employee</dt>
+						<dt class="font-medium text-gray-700">{m.labelEmployee()}</dt>
 						<dd class="text-gray-600">{employeeName}</dd>
 					</div>
 				{/if}
 				{#if locationName}
 					<div>
-						<dt class="font-medium text-gray-700">Location</dt>
+						<dt class="font-medium text-gray-700">{m.labelLocation()}</dt>
 						<dd class="text-gray-600">{locationName}</dd>
 					</div>
 				{/if}

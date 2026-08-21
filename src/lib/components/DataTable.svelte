@@ -1,4 +1,6 @@
 <script>
+	import { m } from '$lib/paraglide/messages.js';
+
 	let {
 		columns,
 		rows,
@@ -27,7 +29,7 @@
 					>
 				{/each}
 				{#if hasActions}
-					<th class="text-sm font-medium text-gray-700 px-4 py-3 bg-gray-50">Actions</th>
+					<th class="text-sm font-medium text-gray-700 px-4 py-3 bg-gray-50">{m.actions()}</th>
 				{/if}
 			</tr>
 		</thead>
@@ -47,12 +49,12 @@
 						<td class="px-4 py-3 text-sm">
 							{#if onedit}
 								<button type="button" class="text-indigo-600 hover:text-indigo-900" onclick={() => onedit(row)}
-									>Edit
+									>{m.edit()}
 								</button>
 							{/if}
 							{#if ondelete}
 								<button type="button" class="text-indigo-600 hover:text-indigo-900 ml-3" onclick={() => ondelete(row)}
-									>Delete
+									>{m.delete()}
 								</button>
 							{/if}
 						</td>
@@ -62,20 +64,20 @@
 		</tbody>
 	</table>
 	{#if hasPaging}
-		<nav aria-label="Pagination" class="flex justify-between items-center mt-4 px-4">
+		<nav aria-label={m.paginationLabel()} class="flex justify-between items-center mt-4 px-4">
 			<button
 				type="button"
 				class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				disabled={!hasPreviousPage}
 				onclick={onpreviouspage}
-				>Previous
+				>{m.previous()}
 			</button>
 			<button
 				type="button"
 				class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				disabled={!hasNextPage}
 				onclick={onnextpage}
-				>Next
+				>{m.next()}
 			</button>
 		</nav>
 	{/if}

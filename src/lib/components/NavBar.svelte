@@ -1,6 +1,7 @@
 <script>
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { links = [], brandName = 'App', pageTitle = undefined, onlogout = undefined } = $props();
 	let isOpen = $state(false);
@@ -12,7 +13,7 @@
 	};
 </script>
 
-<nav aria-label="Main navigation" class="bg-white border-b border-gray-200 sticky top-0 z-50">
+<nav aria-label={m.navMainLabel()} class="bg-white border-b border-gray-200 sticky top-0 z-50">
 	<div class="container mx-auto px-4 max-w-7xl">
 		<div class="flex justify-between h-16 items-center">
 			<div class="flex items-center gap-1">
@@ -36,7 +37,7 @@
 				{/each}
 				{#if onlogout}
 					<button onclick={onlogout} class="font-medium hover:text-indigo-600 transition-colors cursor-pointer">
-						Sign out
+						{m.signOut()}
 					</button>
 				{/if}
 			</div>
@@ -44,7 +45,7 @@
 			<button
 				onclick={() => (isOpen = !isOpen)}
 				aria-expanded={isOpen}
-				aria-label="Toggle menu"
+				aria-label={m.navToggleMenu()}
 				class="md:hidden p-2 hover:bg-gray-100 rounded-md transition-colors"
 			>
 				<svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -81,7 +82,7 @@
 						}}
 						class="block w-full text-left py-2.5 px-3 rounded-lg font-medium hover:bg-gray-50 hover:text-indigo-600 transition-colors cursor-pointer"
 					>
-						Sign out
+						{m.signOut()}
 					</button>
 				{/if}
 			</div>

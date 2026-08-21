@@ -1,4 +1,5 @@
 import { ApiError } from '$lib/api/core/ApiError';
+import { m } from '$lib/paraglide/messages.js';
 
 /**
  * Extracts a human-readable error message from an API error.
@@ -9,7 +10,7 @@ import { ApiError } from '$lib/api/core/ApiError';
  * @param {string} [fallback]
  * @returns {string}
  */
-export function apiErrorMessage(err, fallback = 'Unable to connect to the server. Please try again later.') {
+export function apiErrorMessage(err, fallback = m.errorDefault()) {
 	if (err instanceof ApiError && err.body) {
 		const messages = err.body.errors && Object.values(err.body.errors).flat();
 		if (messages?.length > 0) return messages.join(' ');

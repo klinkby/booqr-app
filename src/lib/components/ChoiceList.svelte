@@ -1,5 +1,7 @@
 <script>
-	let { options = [], onselect, emptyMessage = 'No options available.' } = $props();
+	import { m } from '$lib/paraglide/messages.js';
+
+	let { options = [], onselect, emptyMessage = m.noOptionsAvailable() } = $props();
 </script>
 
 {#if options.length === 0}

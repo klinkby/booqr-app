@@ -1,11 +1,12 @@
 <script>
 	import { DateUtils } from '$lib/dateUtils.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { services = [], onselect } = $props();
 </script>
 
 {#if services.length === 0}
-	<p>No services available yet.</p>
+	<p>{m.noServicesAvailable()}</p>
 {:else}
 	<ul class="space-y-3 list-none p-0 m-0">
 		{#each services as service (service.id)}

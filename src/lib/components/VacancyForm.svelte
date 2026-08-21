@@ -1,5 +1,7 @@
 <script>
 	import { Form } from '$lib';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	let {
 		mode = 'create', // 'create' or 'view'
@@ -19,11 +21,11 @@
 
 	const isReadonly = $derived(mode === 'view');
 
-	const timeError = $derived(startTime && endTime && endTime <= startTime ? 'End time must be after start time' : null);
+	const timeError = $derived(startTime && endTime && endTime <= startTime ? m.endTimeAfterStart() : null);
 
 	const formattedDate = $derived(
 		date
-			? new Date(date + 'T00:00').toLocaleDateString(undefined, {
+			? new Date(date + 'T00:00').toLocaleDateString(getLocale(), {
 					weekday: 'long',
 					year: 'numeric',
 					month: 'long',
@@ -34,11 +36,11 @@
 </script>
 
 <div class="sticky top-4 p-6 bg-gray-50 border border-gray-200 rounded-lg">
-	<h2 class="text-xl font-semibold mb-4">{isReadonly ? 'Vacancy Details' : 'Create New Vacancy'}</h2>
+	<h2 class="text-xl font-semibold mb-4">{isReadonly ? m.vacancyDetails() : m.createNewVacancy()}</h2>
 
 	<Form
 		error={timeError || error}
-		legend={isReadonly ? 'View vacancy' : 'Create vacancy'}
+		legend={isReadonly ? m.legendViewVacancy() : m.legendCreateVacancy()}
 		{loading}
 		oncancel={isReadonly ? undefined : oncancel}
 		onsubmit={(e) => {
@@ -49,8 +51,8 @@
 				onsubmit(e);
 			}
 		}}
-		submitLabel={isReadonly ? 'Close' : 'Create Vacancy'}
-		deleteLabel={isReadonly ? 'Delete' : undefined}
+		submitLabel={isReadonly ? m.close() : m.createVacancy()}
+		deleteLabel={isReadonly ? m.delete() : undefined}
 		{ondelete}
 	>
 		{#if formattedDate}
@@ -59,7 +61,7 @@
 
 		<div class="flex gap-4">
 			<div class="flex-1">
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="startTime"> Start </label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="startTime"> {m.labelStart()} </label>
 				<input
 					bind:value={startTime}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -73,7 +75,7 @@
 			</div>
 
 			<div class="flex-1">
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="endTime"> End </label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="endTime"> {m.labelEnd()} </label>
 				<input
 					bind:value={endTime}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -88,7 +90,7 @@
 		</div>
 
 		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="locationId"> Location </label>
+			<label class="block text-sm font-medium text-gray-700 mb-1" for="locationId"> {m.labelLocation()} </label>
 			<select
 				bind:value={locationId}
 				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -97,7 +99,7 @@
 				required
 				disabled={isReadonly}
 			>
-				<option value="" disabled selected>Select a location</option>
+				<option value="" disabled selected>{m.selectALocation()}</option>
 				{#each locations as location (location.id)}
 					<option value={String(location.id)}>{location.name}</option>
 				{/each}
@@ -105,7 +107,7 @@
 		</div>
 
 		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="employeeId"> Employee </label>
+			<label class="block text-sm font-medium text-gray-700 mb-1" for="employeeId"> {m.labelEmployee()} </label>
 			<select
 				bind:value={employeeId}
 				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
@@ -114,7 +116,7 @@
 				required
 				disabled={isReadonly}
 			>
-				<option value="" disabled selected>Select an employee</option>
+				<option value="" disabled selected>{m.selectAnEmployee()}</option>
 				{#each employees as employee (employee.id)}
 					<option value={String(employee.id)}>{employee.name || employee.email}</option>
 				{/each}

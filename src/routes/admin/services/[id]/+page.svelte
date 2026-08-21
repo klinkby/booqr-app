@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { useServiceData } from './serviceData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
@@ -73,20 +74,20 @@
 <div>
 	{#if service.isLoading || loadingData}
 		<div role="status" aria-live="polite">
-			<p>Loading...</p>
+			<p>{m.loading()}</p>
 		</div>
 	{:else}
 		<div class="max-w-2xl">
 			<Form
-				legend={isEdit ? 'Edit service' : 'Create service'}
+				legend={isEdit ? m.legendEditService() : m.legendCreateService()}
 				{error}
 				{loading}
-				submitLabel={isEdit ? 'Update' : 'Create'}
+				submitLabel={isEdit ? m.update() : m.create()}
 				onsubmit={handleSubmit}
 				oncancel={handleCancel}
 			>
 				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> Name </label>
+					<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
 					<input
 						id="name"
 						name="name"
@@ -98,7 +99,7 @@
 				</div>
 
 				<div>
-					<label for="duration" class="block text-sm font-medium text-gray-700 mb-1"> Duration </label>
+					<label for="duration" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelDuration()} </label>
 					<input
 						id="duration"
 						name="duration"
@@ -106,14 +107,14 @@
 						required
 						bind:value={duration}
 						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-						placeholder="e.g., 01:00:00"
+						placeholder={m.durationPlaceholder()}
 					/>
 				</div>
 
-				<LimitedTextarea id="description" label="Description" bind:value={description} />
+				<LimitedTextarea id="description" label={m.labelDescription()} bind:value={description} />
 
 				<fieldset>
-					<legend class="block text-sm font-medium text-gray-700 mb-1">Employees</legend>
+					<legend class="block text-sm font-medium text-gray-700 mb-1">{m.employees()}</legend>
 					<div class="space-y-2">
 						{#each service.employees as emp (emp.id)}
 							<div class="flex items-center gap-2">
@@ -127,7 +128,7 @@
 								<label for="emp-{emp.id}" class="text-sm text-gray-700 flex">{emp.name || emp.email}</label>
 							</div>
 						{:else}
-							<p class="text-sm text-gray-500">No employees found.</p>
+							<p class="text-sm text-gray-500">{m.noEmployeesFound()}</p>
 						{/each}
 					</div>
 				</fieldset>

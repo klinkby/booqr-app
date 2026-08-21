@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import { useLoginData } from './loginData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	const loginData = useLoginData();
 
@@ -48,7 +49,7 @@
 				// eslint-disable-next-line svelte/no-navigation-without-resolve -- returnUrl comes from URL query param and is already a fully-resolved path
 				await goto(returnUrl);
 			} else {
-				error = 'Authentication failed. Please try again.';
+				error = m.authenticationFailed();
 			}
 		} catch (err) {
 			// Log error in development mode for debugging
@@ -65,30 +66,30 @@
 
 <div>
 	<div class="max-w-2xl">
-		<Form {error} legend="Sign in" {loading} onsubmit={handleSubmit} submitLabel="Sign in">
+		<Form {error} legend={m.signIn()} {loading} onsubmit={handleSubmit} submitLabel={m.signIn()}>
 			<div>
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="email"> Email address </label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="email"> {m.labelEmailAddress()} </label>
 				<input
 					autocomplete="email"
 					bind:value={email}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 					id="email"
 					name="email"
-					placeholder="Email address"
+					placeholder={m.labelEmailAddress()}
 					required
 					type="email"
 				/>
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="password"> Password </label>
+				<label class="block text-sm font-medium text-gray-700 mb-1" for="password"> {m.labelPassword()} </label>
 				<input
 					autocomplete="current-password"
 					bind:value={password}
 					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 					id="password"
 					name="password"
-					placeholder="Password"
+					placeholder={m.labelPassword()}
 					required
 					type="password"
 				/>
@@ -100,7 +101,7 @@
 				href={resolve('/change-password')}
 				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 			>
-				Forgot your password?
+				{m.forgotPassword()}
 			</a>
 		</p>
 	</div>

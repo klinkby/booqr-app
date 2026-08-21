@@ -9,6 +9,7 @@
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 	import { queryClient } from '$lib/queryClient';
 	import { getLocale, getTextDirection } from '$lib/paraglide/runtime.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { children } = $props();
 
@@ -23,19 +24,24 @@
 		if (!seg.length) return null;
 
 		if (seg.length === 3 && seg[0] === 'admin') {
-			const label = { contacts: 'Contact', services: 'Service', locations: 'Location' }[seg[1]];
-			if (label) return seg[2] === 'new' ? `Create ${label}` : `Edit ${label}`;
+			const labels = {
+				contacts: { create: m.titleCreateContact(), edit: m.titleEditContact() },
+				services: { create: m.titleCreateService(), edit: m.titleEditService() },
+				locations: { create: m.titleCreateLocation(), edit: m.titleEditLocation() },
+			};
+			const entry = labels[seg[1]];
+			if (entry) return seg[2] === 'new' ? entry.create : entry.edit;
 		}
 
 		return (
 			{
-				login: 'Sign in',
-				profile: 'My Profile',
-				'change-password': 'Change Password',
-				plan: 'Plan',
-				contacts: 'Contacts',
-				services: 'Services',
-				locations: 'Locations',
+				login: m.titleSignIn(),
+				profile: m.titleMyProfile(),
+				'change-password': m.titleChangePassword(),
+				plan: m.titlePlan(),
+				contacts: m.titleContacts(),
+				services: m.titleServices(),
+				locations: m.titleLocations(),
 			}[seg.at(-1)] ?? null
 		);
 	}
@@ -45,14 +51,14 @@
 	let links = $derived([
 		...(auth.isEmployee
 			? [
-					{ name: 'Plan', href: '/admin/plan' },
-					{ name: 'Contacts', href: '/admin/contacts' },
-					{ name: 'Services', href: '/admin/services' },
-					{ name: 'Locations', href: '/admin/locations' },
+					{ name: m.navPlan(), href: '/admin/plan' },
+					{ name: m.navContacts(), href: '/admin/contacts' },
+					{ name: m.navServices(), href: '/admin/services' },
+					{ name: m.navLocations(), href: '/admin/locations' },
 				]
 			: []),
-		...(auth.isLoggedIn ? [{ name: 'My Profile', href: '/profile' }] : []),
-		...(auth.isLoggedIn ? [] : [{ name: 'Sign in', href: '/login' }]),
+		...(auth.isLoggedIn ? [{ name: m.navMyProfile(), href: '/profile' }] : []),
+		...(auth.isLoggedIn ? [] : [{ name: m.navSignIn(), href: '/login' }]),
 	]);
 
 	async function handleLogout() {
@@ -78,7 +84,7 @@
 		class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded"
 		href="#main-content"
 	>
-		Skip to main content
+		{m.skipToMainContent()}
 	</a>
 
 	<NavBar brandName="Booqr" {links} {pageTitle} onlogout={auth.isLoggedIn ? handleLogout : undefined} />

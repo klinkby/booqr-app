@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { DateUtils } from '$lib/dateUtils.js';
 	import { usePlanData } from './planData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	// Vacancy/location/employee data + mutations owned by the svelte-query hook.
 	// The range is read live from the URL inside the thunk so week navigation refetches.
@@ -33,7 +34,7 @@
 			id: 'preview',
 			start: formData.date + 'T' + formData.startTime,
 			end: formData.date + 'T' + formData.endTime,
-			title: 'New Vacancy',
+			title: m.newVacancy(),
 			startEditable: true,
 			durationEditable: true,
 			classNames: ['!bg-gray-300', '!text-gray-600', '!border-gray-400', '!border-dashed'],
@@ -47,13 +48,13 @@
 			start: DateUtils.utcToLocalIso(vacancy.startTime),
 			end: DateUtils.utcToLocalIso(vacancy.endTime),
 			title: vacancy.bookingId
-				? 'Booked'
+				? m.booked()
 				: [
 						plan.employees.find((e) => e.id === vacancy.employeeId)?.name,
 						plan.locations.find((l) => l.id === vacancy.locationId)?.name,
 					]
 						.filter(Boolean)
-						.join(' @ ') || 'Available',
+						.join(' @ ') || m.available(),
 			startEditable: false,
 			durationEditable: false,
 			classNames: vacancy.bookingId
@@ -181,7 +182,7 @@
 <div class="container mx-auto max-w-7xl">
 	{#if plan.error}
 		<div role="alert" class="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
-			{apiErrorMessage(plan.error, 'Failed to load vacancies. Please try again.')}
+			{apiErrorMessage(plan.error, m.errorLoadVacancies())}
 		</div>
 	{/if}
 

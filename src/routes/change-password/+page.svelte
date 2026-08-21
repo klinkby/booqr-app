@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { useChangePasswordData } from './changePasswordData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	const cp = useChangePasswordData();
 
@@ -32,14 +33,14 @@
 		resetMessage = null;
 
 		if (!resetEmail) {
-			resetError = 'Please enter your email address.';
+			resetError = m.pleaseEnterEmail();
 			return;
 		}
 
 		resetLoading = true;
 		try {
 			await cp.requestReset(resetEmail);
-			resetMessage = 'A password reset link has been sent to your email.';
+			resetMessage = m.passwordResetSent();
 		} catch (err) {
 			if (import.meta.env.DEV) {
 				console.error('Failed to request password reset:', err);
@@ -54,13 +55,12 @@
 		error = null;
 
 		if (password !== confirmPassword) {
-			error = 'Passwords do not match.';
+			error = m.passwordsDoNotMatch();
 			return;
 		}
 
 		if (!passwordPattern.test(password)) {
-			error =
-				'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.';
+			error = m.passwordRequirements();
 			return;
 		}
 
@@ -86,7 +86,7 @@
 	<div class="max-w-2xl">
 		{#if !action}
 			<p class="text-sm text-gray-600 mb-4">
-				Enter your email address and a time-limited link to change your password will be sent to your inbox.
+				{m.changePasswordIntro()}
 			</p>
 			<PasswordReset
 				bind:email={resetEmail}
@@ -97,7 +97,7 @@
 			/>
 		{:else if expired}
 			<div role="alert" class="rounded-md bg-red-50 p-4 mb-6">
-				<p class="text-sm text-red-800">This password reset link has expired. Please request a new one.</p>
+				<p class="text-sm text-red-800">{m.passwordResetExpired()}</p>
 			</div>
 			<PasswordReset
 				bind:email={resetEmail}
@@ -107,9 +107,15 @@
 				onsubmit={handleReset}
 			/>
 		{:else}
-			<Form legend="Change your password" {error} {loading} submitLabel="Change Password" onsubmit={handleSubmit}>
+			<Form
+				legend={m.legendChangePassword()}
+				{error}
+				{loading}
+				submitLabel={m.changePassword()}
+				onsubmit={handleSubmit}
+			>
 				<div>
-					<label for="password" class="block text-sm font-medium text-gray-700 mb-1"> New password </label>
+					<label for="password" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelNewPassword()} </label>
 					<input
 						id="password"
 						name="password"
@@ -124,7 +130,7 @@
 
 				<div>
 					<label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">
-						Confirm new password
+						{m.labelConfirmNewPassword()}
 					</label>
 					<input
 						id="confirm-password"

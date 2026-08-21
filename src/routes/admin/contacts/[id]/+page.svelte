@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { useContactData } from './contactData.svelte.js';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let id = $derived($page.params.id);
 	let isEdit = $derived(id !== 'new');
@@ -60,21 +61,21 @@
 <div>
 	{#if loadingData}
 		<div role="status" aria-live="polite">
-			<p>Loading...</p>
+			<p>{m.loading()}</p>
 		</div>
 	{:else}
 		<div class="max-w-2xl">
 			<Form
-				legend={isEdit ? 'Edit contact' : 'Create contact'}
+				legend={isEdit ? m.legendEditContact() : m.legendCreateContact()}
 				{error}
 				{loading}
-				submitLabel={isEdit ? 'Update' : 'Create'}
+				submitLabel={isEdit ? m.update() : m.create()}
 				onsubmit={handleSubmit}
 				oncancel={handleCancel}
 			>
 				<div>
 					{#if isEdit}
-						<span id="email-label" class="block text-sm font-medium text-gray-700 mb-1">Email</span>
+						<span id="email-label" class="block text-sm font-medium text-gray-700 mb-1">{m.labelEmail()}</span>
 						<a
 							href="mailto:{email}"
 							aria-labelledby="email-label"
@@ -83,7 +84,7 @@
 							{email}
 						</a>
 					{:else}
-						<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
+						<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelEmail()} </label>
 						<input
 							id="email"
 							name="email"
@@ -97,7 +98,7 @@
 
 				{#if isEdit}
 					<div>
-						<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> Name </label>
+						<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
 						<input
 							id="name"
 							name="name"
@@ -108,7 +109,7 @@
 					</div>
 
 					<div>
-						<label for="phone" class="block text-sm font-medium text-gray-700 mb-1"> Phone </label>
+						<label for="phone" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelPhone()} </label>
 						<input
 							id="phone"
 							name="phone"
@@ -119,7 +120,7 @@
 					</div>
 
 					<div>
-						<label for="role" class="block text-sm font-medium text-gray-700 mb-1"> Role </label>
+						<label for="role" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelRole()} </label>
 						<input
 							id="role"
 							name="role"
@@ -127,7 +128,7 @@
 							disabled
 							bind:value={role}
 							class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm"
-							title="Role cannot be changed via this form"
+							title={m.roleCannotBeChanged()}
 						/>
 					</div>
 				{/if}

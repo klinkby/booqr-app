@@ -1,6 +1,7 @@
 <script>
 	import { Calendar, Interaction, TimeGrid } from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let {
 		events = [],
@@ -52,7 +53,7 @@
 			center: 'title',
 			end: '',
 		},
-		buttonText: { prev: 'Previous week', next: 'Next week', today: 'Today' },
+		buttonText: { prev: m.calendarPreviousWeek(), next: m.calendarNextWeek(), today: m.calendarToday() },
 		datesSet: (info) => onDatesChange?.(info),
 		dateClick: (info) => onDateClick?.(info),
 		eventClick: (info) => onEventClick?.(info),
@@ -71,7 +72,7 @@
 			onclick={expandCalendar}
 			class="px-4 py-2 text-sm text-gray-600 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50"
 		>
-			Extend Hours (+6h)
+			{m.calendarExtendHours()}
 		</button>
 	</div>
 {/if}
