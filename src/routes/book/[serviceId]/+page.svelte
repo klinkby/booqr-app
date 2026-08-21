@@ -103,14 +103,14 @@
 	);
 
 	const monthDays = $derived.by(() => {
-		const [y, m] = effectiveMonth.split('-').map(Number);
-		const daysInMonth = new Date(y, m, 0).getDate();
-		const firstWeekday = (new Date(y, m - 1, 1).getDay() + 6) % 7; // Mon=0..Sun=6
+		const [year, month] = effectiveMonth.split('-').map(Number);
+		const daysInMonth = new Date(year, month, 0).getDate();
+		const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7; // Mon=0..Sun=6
 		const totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
 		const days = [];
 		for (let i = 0; i < totalCells; i++) {
 			const dayNum = i - firstWeekday + 1;
-			const cellDate = new Date(y, m - 1, dayNum);
+			const cellDate = new Date(year, month - 1, dayNum);
 			const dateStr = DateUtils.toLocalDate(cellDate);
 			days.push({
 				date: dateStr,
@@ -135,8 +135,8 @@
 	});
 
 	function addMonthsStr(monthStr, delta) {
-		const [y, m] = monthStr.split('-').map(Number);
-		const d = new Date(y, m - 1 + delta, 1);
+		const [year, month] = monthStr.split('-').map(Number);
+		const d = new Date(year, month - 1 + delta, 1);
 		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 	}
 
