@@ -2,6 +2,7 @@
 	import { Calendar, List } from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
 	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	let {
 		events = [],
@@ -17,6 +18,14 @@
 		if (cal) cal.setOption('events', events);
 	});
 
+	// Read once at init: switching language reloads the SPA (see AGENTS.md), so
+	// the locale never changes within a component instance's lifetime.
+	const locale = getLocale();
+	// Danish (and the rest of the app's date formatting) uses 24-hour time;
+	// English uses 12-hour. Drive it explicitly off the locale rather than
+	// relying on the library's per-locale default.
+	const hour12 = locale !== 'da';
+
 	const options = {
 		// listYear lists every booking across the whole year in one scrolling
 		// list (so all months with bookings show at once). Prev/next/today are
@@ -24,6 +33,10 @@
 		// December) stay reachable — they page by year in this view.
 		view: 'listYear',
 		firstDay: 1,
+		// Localizes day/month names in the list day headers and the title.
+		locale,
+		// Event time (the timeText shown in each row) honours the locale's clock.
+		eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12 },
 		headerToolbar: {
 			start: 'prev,next today',
 			center: 'title',
