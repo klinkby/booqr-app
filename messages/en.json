@@ -143,6 +143,10 @@
 	"emailCannotBeChanged": "Email cannot be changed",
 	"phoneValidation": "Phone number must be exactly 8 digits",
 
+	"myBookings": "My bookings",
+	"bookNewAppointment": "Book a new appointment",
+	"noBookings": "You have no upcoming bookings.",
+
 	"termsAndConditions": "Terms and Conditions",
 	"termsPlaceholder": "These terms and conditions are coming soon. By creating an account you agree to use this service responsibly.",
 

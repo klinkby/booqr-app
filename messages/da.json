@@ -143,6 +143,10 @@
 	"emailCannotBeChanged": "E-mail kan ikke ændres",
 	"phoneValidation": "Telefonnummeret skal være præcis 8 cifre",
 
+	"myBookings": "Mine bookinger",
+	"bookNewAppointment": "Book en ny tid",
+	"noBookings": "Du har ingen kommende bookinger.",
+
 	"termsAndConditions": "Vilkår og betingelser",
 	"termsPlaceholder": "Disse vilkår og betingelser kommer snart. Ved at oprette en konto accepterer du at bruge denne tjeneste ansvarligt.",
 
