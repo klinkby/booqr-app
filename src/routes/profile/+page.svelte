@@ -72,7 +72,7 @@
 
 			<!-- Calendar takes the remaining width on the left; the profile form is a
 			     fixed narrower pane on the right. Stacks (calendar first) on mobile. -->
-			<div class="flex flex-col gap-8 lg:flex-row">
+			<div class="flex flex-col gap-12 lg:flex-row lg:gap-16">
 				<!-- Section 1: Bookings List Calendar -->
 				<section class="min-w-0 flex-1" aria-labelledby="bookings-heading">
 					<h2 id="bookings-heading" class="text-2xl font-bold mb-4">{m.myBookings()}</h2>
