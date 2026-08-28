@@ -64,6 +64,40 @@ function currentWeekVacancies() {
 	];
 }
 
+/** Returns MyBooking objects dated in the current month for profile page display. */
+function currentMonthBookings() {
+	const today = new Date();
+	const year = today.getFullYear();
+	const month = today.getMonth();
+
+	// Create two bookings on different days this month: 10:00-10:30 and 14:00-14:30
+	function makeBookingTime(dayOfMonth, hours, minutes) {
+		const d = new Date(year, month, dayOfMonth, hours, minutes, 0, 0);
+		return d.toISOString();
+	}
+
+	return [
+		{
+			id: 'booking-e2e-1',
+			startTime: makeBookingTime(5, 10, 0),
+			endTime: makeBookingTime(5, 10, 30),
+			serviceId: 'svc1',
+			locationId: 1,
+			employeeId: 'emp1',
+			hasNotes: false,
+		},
+		{
+			id: 'booking-e2e-2',
+			startTime: makeBookingTime(12, 14, 0),
+			endTime: makeBookingTime(12, 14, 30),
+			serviceId: 'svc1',
+			locationId: 1,
+			employeeId: 'emp1',
+			hasNotes: false,
+		},
+	];
+}
+
 /**
  * Registers route mocks for all API endpoints used by the app's layout and
  * admin calendar page. Safe to call multiple times; later registrations win.
@@ -85,9 +119,9 @@ export async function setupApiMocks(page) {
 	await page.route('**/api/employees*', (route) =>
 		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
 	);
-	await page.route('**/api/users/*/my-bookings*', (route) =>
-		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }),
-	);
+	// Playwright matches routes in REVERSE registration order (last wins), so
+	// register from least- to most-specific: the generic users collection
+	// first, then my-bookings, then the single-user detail last.
 	// Method-aware: GET lists users (e.g. the admin roster); POST is the
 	// customer sign-up call (`UserService.addUser`) and must not silently 200
 	// off the GET fallback, or the sign-up e2e test would prove nothing.
@@ -97,6 +131,26 @@ export async function setupApiMocks(page) {
 			return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 'newUser1' }) });
 		}
 		return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) });
+	});
+	// Bookings list for the profile page: return current month bookings.
+	await page.route('**/api/users/*/my-bookings*', (route) =>
+		route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({ items: currentMonthBookings() }),
+		}),
+	);
+	// Single-user detail (GET /api/users/1) — registered last so it wins over
+	// the generic collection route; populates the profile form.
+	await page.route('**/api/users/1', (route) => {
+		if (route.request().method() === 'GET') {
+			return route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ id: '1', name: 'Test Customer', email: 'test@example.com', phone: '12345678' }),
+			});
+		}
+		return route.fallback();
 	});
 }
 

@@ -1,19 +1,24 @@
-import { UserService } from '$lib/api';
+import { LocationService, ServiceService, UserService } from '$lib/api';
 import { auth } from '$lib/auth.svelte.js';
 import { authedQueryFn } from '$lib/queryClient.js';
 import { queryKeys } from '$lib/queryKeys';
-import { useResourceMutation } from '$lib/resourceQuery.svelte.js';
+import { useResourceMutation, useResourceQuery } from '$lib/resourceQuery.svelte.js';
+import { DateUtils } from '$lib/dateUtils.js';
 import { createQuery } from '@tanstack/svelte-query';
+import { SvelteMap } from 'svelte/reactivity';
 
 /**
- * Route-local data hook for the profile edit page. The profile is just the
- * current user's detail, so it's keyed as `users.detail(auth.userId)` — under
- * the shared `users` prefix. Saving invalidates `users.all`, which refreshes
+ * Route-local data hook for the profile edit page. Composes the user detail
+ * query (existing), the save mutation (existing), and extends with bookings
+ * queries to expose them as calendar events (joined with service/location/employee names).
+ *
+ * The user detail query is keyed as `users.detail(auth.userId)` — under the
+ * shared `users` prefix. Saving invalidates `users.all`, which refreshes
  * every UserService-derived view (this profile, the contacts list, and the
  * employee roster on services/plan) so a name change propagates everywhere.
  *
- * Profile is a single object (not a collection), so we use createQuery
- * directly rather than useResourceQuery (which unwraps { items }).
+ * Bookings are fetched as the user's full my-bookings set (no query params);
+ * they're joined with service/location/employee names for calendar display.
  */
 export function useProfileData() {
 	const query = createQuery(() => ({
@@ -26,6 +31,31 @@ export function useProfileData() {
 		UserService.updateUser(auth.userId, payload),
 	);
 
+	// Bookings query — fetch the user's full my-bookings set with no query
+	// params; the server decides the result set and the calendar filters/pages
+	// client-side.
+	const bookings = useResourceQuery(() => ({
+		queryKey: queryKeys.bookings.byUser(auth.userId),
+		enabled: !!auth.userId,
+		fetcher: () => UserService.getMyBookings(auth.userId),
+	}));
+
+	// Name lookup lists — these are coarse and unfiltered, so they never change
+	const services = useResourceQuery(() => ({
+		queryKey: queryKeys.services.all,
+		fetcher: () => ServiceService.getServices(0, 100),
+	}));
+
+	const locations = useResourceQuery(() => ({
+		queryKey: queryKeys.locations.all,
+		fetcher: () => LocationService.getLocations(0, 100),
+	}));
+
+	const employees = useResourceQuery(() => ({
+		queryKey: queryKeys.users.employees,
+		fetcher: () => UserService.getUsers(undefined, 'Employee', 0, 100),
+	}));
+
 	return {
 		get user() {
 			return query.data ?? null;
@@ -35,6 +65,25 @@ export function useProfileData() {
 		},
 		get error() {
 			return query.error;
+		},
+		get bookingEvents() {
+			// Transient id→name lookups rebuilt each time this getter is read.
+			// Join each booking's serviceId/employeeId/locationId to a title.
+			const serviceMap = new SvelteMap(services.items.map((s) => [s.id, s.name]));
+			const locationMap = new SvelteMap(locations.items.map((l) => [l.id, l.name]));
+			const employeeMap = new SvelteMap(employees.items.map((e) => [e.id, e.name]));
+
+			return bookings.items.map((b) => {
+				const serviceName = serviceMap.get(b.serviceId) ?? '';
+				const employeeName = employeeMap.get(b.employeeId) ?? '';
+				const locationName = locationMap.get(b.locationId) ?? '';
+				return {
+					id: b.id,
+					start: DateUtils.utcToLocalIso(b.startTime),
+					end: DateUtils.utcToLocalIso(b.endTime),
+					title: `${serviceName} · ${employeeName} · ${locationName}`,
+				};
+			});
 		},
 		saveProfile: (payload) => saveProfile(payload),
 	};

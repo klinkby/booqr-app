@@ -6,6 +6,7 @@ export { default as PaginatedTable } from './components/PaginatedTable.svelte';
 export { default as Form } from './components/Form.svelte';
 export { default as LimitedTextarea } from './components/LimitedTextarea.svelte';
 export { default as Calendar } from './components/Calendar.svelte';
+export { default as ListCalendar } from './components/ListCalendar.svelte';
 export { default as VacancyForm } from './components/VacancyForm.svelte';
 export { default as PasswordReset } from './components/PasswordReset.svelte';
 export { default as BookingForm } from './components/BookingForm.svelte';

@@ -2,6 +2,7 @@
 	import { Calendar, Interaction, TimeGrid } from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
 	import { m } from '$lib/paraglide/messages.js';
+	import { getLocale } from '$lib/paraglide/runtime.js';
 
 	let {
 		events = [],
@@ -14,6 +15,12 @@
 
 	let cal;
 	let slotMaxTime = $state('18:00:00');
+
+	// Read once at init: switching language reloads the SPA (see AGENTS.md), so
+	// the locale never changes within a component instance's lifetime.
+	const locale = getLocale();
+	// Danish uses 24-hour time; English uses 12-hour.
+	const hour12 = locale !== 'da';
 
 	$effect(() => {
 		if (cal) cal.setOption('events', events);
@@ -48,6 +55,11 @@
 		allDaySlot: false,
 		slotMinTime: '06:00:00',
 		slotMaxTime: '18:00:00',
+		// Localizes day headers and the title; 24h vs 12h drives the axis hour
+		// labels (slotLabelFormat) and event times (eventTimeFormat).
+		locale,
+		slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12 },
+		eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12 },
 		headerToolbar: {
 			start: 'prev,next today',
 			center: 'title',

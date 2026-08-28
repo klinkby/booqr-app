@@ -84,6 +84,8 @@
 
 	"calendarPreviousWeek": "Forrige uge",
 	"calendarNextWeek": "Næste uge",
+	"calendarPreviousYear": "Forrige år",
+	"calendarNextYear": "Næste år",
 	"calendarToday": "I dag",
 	"calendarExtendHours": "Udvid timer (+6t)",
 
@@ -142,6 +144,11 @@
 	"legendEditProfile": "Rediger profiloplysninger",
 	"emailCannotBeChanged": "E-mail kan ikke ændres",
 	"phoneValidation": "Telefonnummeret skal være præcis 8 cifre",
+
+	"myBookings": "Mine bookinger",
+	"bookNewAppointment": "Book en ny tid",
+	"noBookings": "Du har ingen kommende bookinger.",
+	"bookingActions": "Booking-handlinger",
 
 	"termsAndConditions": "Vilkår og betingelser",
 	"termsPlaceholder": "Disse vilkår og betingelser kommer snart. Ved at oprette en konto accepterer du at bruge denne tjeneste ansvarligt.",
