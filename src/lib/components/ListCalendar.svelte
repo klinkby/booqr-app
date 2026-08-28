@@ -13,9 +13,26 @@
 	} = $props();
 
 	let cal;
+	let hasEvents = $derived(events.length > 0);
 
 	$effect(() => {
 		if (cal) cal.setOption('events', events);
+	});
+
+	// On initial load, skip to the year of the first upcoming booking so the
+	// customer sees it straight away instead of a "no bookings" empty state.
+	let initialSkipDone = false;
+	$effect(() => {
+		if (!cal || !hasEvents || initialSkipDone) return;
+		initialSkipDone = true;
+		const now = new Date();
+		const upcoming = events
+			.map((e) => new Date(e.start))
+			.filter((d) => d >= now)
+			.sort((a, b) => a - b);
+		if (upcoming.length > 0 && upcoming[0].getFullYear() !== now.getFullYear()) {
+			cal.gotoDate(upcoming[0]);
+		}
 	});
 
 	// Read once at init: switching language reloads the SPA (see AGENTS.md), so
@@ -60,7 +77,7 @@
 	};
 </script>
 
-<div class="list-calendar">
+<div class="list-calendar" class:no-events={!hasEvents}>
 	<Calendar bind:this={cal} {options} plugins={[List]} {eventContent} />
 </div>
 
@@ -101,9 +118,19 @@
 		background-color: #4f46e5; /* indigo-600 */
 		border-color: #4f46e5;
 		color: #fff;
+		margin-left: 0.5rem;
 	}
 	.list-calendar :global(.ec-button.ec-bookNew:hover) {
 		background-color: #4338ca; /* indigo-700 */
 		border-color: #4338ca;
+	}
+
+	/* Disable prev/next/today navigation when there are no bookings — there is
+	   nothing to navigate to, and paging through empty years is confusing. */
+	.list-calendar.no-events :global(.ec-button.ec-prev),
+	.list-calendar.no-events :global(.ec-button.ec-next),
+	.list-calendar.no-events :global(.ec-button.ec-today) {
+		pointer-events: none;
+		opacity: 0.4;
 	}
 </style>

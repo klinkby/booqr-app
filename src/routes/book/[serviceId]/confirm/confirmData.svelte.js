@@ -50,7 +50,10 @@ export function useConfirmData() {
 
 	const addBookingMutation = createMutation(() => ({
 		mutationFn: (requestBody) => authedQueryFn(() => BookingService.addBooking(requestBody)),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.vacancies.all }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: queryKeys.vacancies.all });
+			queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
+		},
 		onError: (error) => {
 			if (error instanceof ApiError && error.status === 409) {
 				queryClient.invalidateQueries({ queryKey: queryKeys.vacancies.all });
