@@ -56,6 +56,15 @@
 		from = DateUtils.toLocalDate(new Date(info.start));
 		to = DateUtils.toLocalDate(new Date(info.end));
 	}
+
+	function handleBookNew() {
+		goto(resolve('/'));
+	}
+
+	function handleMoveEvent(event) {
+		// Rescheduling is wired up in a follow-up; the booking id is event.id.
+		void event;
+	}
 </script>
 
 {#if auth.isLoggedIn}
@@ -71,24 +80,24 @@
 		{:else}
 			<h1 class="sr-only">{m.titleMyProfile()}</h1>
 
-			<!-- Responsive grid layout: calendar first (source order), form on right (lg:order-1) -->
-			<div class="grid gap-8 lg:grid-cols-2">
+			<!-- Calendar takes the remaining width on the left; the profile form is a
+			     fixed narrower pane on the right. Stacks (calendar first) on mobile. -->
+			<div class="flex flex-col gap-8 lg:flex-row">
 				<!-- Section 1: Bookings List Calendar -->
-				<section class="lg:order-2" aria-labelledby="bookings-heading">
+				<section class="min-w-0 flex-1" aria-labelledby="bookings-heading">
 					<h2 id="bookings-heading" class="text-2xl font-bold mb-4">{m.myBookings()}</h2>
-					<ListCalendar events={profile.bookingEvents} onDatesChange={handleDatesChange} />
-					<a
-						href={resolve('/')}
-						class="inline-block mt-4 px-4 py-2 text-sm text-gray-600 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50"
-					>
-						{m.bookNewAppointment()}
-					</a>
+					<ListCalendar
+						events={profile.bookingEvents}
+						onDatesChange={handleDatesChange}
+						onBookNew={handleBookNew}
+						onMoveEvent={handleMoveEvent}
+					/>
 				</section>
 
-				<!-- Section 2: Profile Information Form -->
-				<section class="lg:order-1" aria-labelledby="profile-heading">
+				<!-- Section 2: Profile Information Form (fixed narrower pane) -->
+				<section class="lg:w-80 lg:shrink-0" aria-labelledby="profile-heading">
 					<h2 id="profile-heading" class="text-2xl font-bold mb-4">{m.legendEditProfile()}</h2>
-					<div class="max-w-2xl">
+					<div>
 						<!-- Success message -->
 						{#if successMessage}
 							<div role="status" aria-live="polite" class="rounded-md bg-green-50 p-4 mb-4">

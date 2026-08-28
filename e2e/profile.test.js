@@ -17,11 +17,14 @@ test.describe('Profile Page', () => {
 		// Wait for bookings heading to be visible
 		await expect(page.getByRole('heading', { name: /my bookings/i })).toBeVisible();
 
-		// Assert the CTA link exists
-		await expect(page.getByRole('link', { name: /book a new appointment/i })).toBeVisible();
+		// Assert the CTA is present in the calendar toolbar (now a button)
+		await expect(page.getByRole('button', { name: /book a new appointment/i })).toBeVisible();
 
 		// Assert at least one booking event is rendered (service name from svc1)
 		await expect(page.getByText('Haircut').first()).toBeVisible();
+
+		// Assert each booking exposes an overflow-menu (kebab) button (wired up later)
+		await expect(page.getByRole('button', { name: /booking actions/i }).first()).toBeVisible();
 
 		// Capture screenshot
 		await page.screenshot({ path: 'e2e/screenshots/profile.png', fullPage: true });
