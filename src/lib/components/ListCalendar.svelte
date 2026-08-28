@@ -44,9 +44,18 @@
 <Calendar bind:this={cal} {options} plugins={[List]} {eventContent} />
 
 {#snippet eventContent(info)}
-	<div class="flex items-center justify-between gap-2">
-		<span>{info.event.title}</span>
-		<!-- Overflow menu trigger; the menu itself (Move, …) is wired up later. -->
+	<!-- A custom eventContent snippet replaces the library's default
+	     time+title rendering, so both are recreated here (reusing the
+	     library's ec-event-time / ec-event-title classes for consistent
+	     styling), plus the trailing overflow-menu trigger. -->
+	<div class="flex flex-1 items-center justify-between gap-2">
+		<span class="flex flex-wrap items-baseline gap-x-2">
+			{#if info.timeText}<time class="ec-event-time">{info.timeText}</time>{/if}
+			<span class="ec-event-title">{info.event.title}</span>
+		</span>
+		<!-- Overflow menu trigger; the menu itself (Move, …) is wired up later.
+		     justify-between pushes it to the row's right padding edge, aligning
+		     it with the date shown in the day header above. -->
 		<button
 			type="button"
 			aria-label={m.bookingActions()}
