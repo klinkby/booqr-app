@@ -66,16 +66,9 @@ export function useProfileData() {
 		get error() {
 			return query.error;
 		},
-		get bookingsLoading() {
-			return bookings.isLoading;
-		},
-		get bookingsError() {
-			return bookings.error;
-		},
 		get bookingEvents() {
-			// Transient id→name lookups (plain Maps — not reactive state, just
-			// rebuilt when this derived getter is read). Join each booking's
-			// serviceId/employeeId/locationId to a display title.
+			// Transient id→name lookups rebuilt each time this getter is read.
+			// Join each booking's serviceId/employeeId/locationId to a title.
 			const serviceMap = new SvelteMap(services.items.map((s) => [s.id, s.name]));
 			const locationMap = new SvelteMap(locations.items.map((l) => [l.id, l.name]));
 			const employeeMap = new SvelteMap(employees.items.map((e) => [e.id, e.name]));

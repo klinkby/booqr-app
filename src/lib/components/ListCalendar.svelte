@@ -55,6 +55,8 @@
 		},
 		datesSet: (info) => onDatesChange?.(info),
 		eventClick: (info) => onEventClick?.(info),
+		// Localized empty state (the library's own default is untranslated).
+		noEventsContent: () => m.noBookings(),
 	};
 </script>
 
