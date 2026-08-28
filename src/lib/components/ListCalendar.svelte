@@ -41,7 +41,9 @@
 	};
 </script>
 
-<Calendar bind:this={cal} {options} plugins={[List]} {eventContent} />
+<div class="list-calendar">
+	<Calendar bind:this={cal} {options} plugins={[List]} {eventContent} />
+</div>
 
 {#snippet eventContent(info)}
 	<!-- A custom eventContent snippet replaces the library's default
@@ -70,3 +72,19 @@
 		</button>
 	</div>
 {/snippet}
+
+<style>
+	/* Color the "Book a new appointment" custom toolbar button as the app's
+	   primary call-to-action (indigo-600), matching Form/PasswordReset submit
+	   buttons. Scoped to this component's calendar so the admin weekly Calendar
+	   is unaffected; :global reaches the child <Calendar>'s generated markup. */
+	.list-calendar :global(.ec-button.ec-bookNew) {
+		background-color: #4f46e5; /* indigo-600 */
+		border-color: #4f46e5;
+		color: #fff;
+	}
+	.list-calendar :global(.ec-button.ec-bookNew:hover) {
+		background-color: #4338ca; /* indigo-700 */
+		border-color: #4338ca;
+	}
+</style>
