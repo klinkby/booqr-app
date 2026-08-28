@@ -25,7 +25,9 @@ export const queryKeys = {
 	},
 	bookings: {
 		all: ['bookings'],
-		range: (userId, from, to) => [...queryKeys.bookings.all, userId, from, to],
+		// A user's full my-bookings set (fetched without query params; filtered
+		// and paged client-side by the profile calendar).
+		byUser: (userId) => [...queryKeys.bookings.all, userId],
 	},
 	locations: {
 		all: ['locations'],

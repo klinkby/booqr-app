@@ -4,13 +4,8 @@
 	import { resolve } from '$app/paths';
 	import { useProfileData } from './profileData.svelte.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import { DateUtils } from '$lib/dateUtils.js';
 
-	const now = new Date();
-	let from = $state(DateUtils.toLocalDate(new Date(now.getFullYear(), now.getMonth(), 1)));
-	let to = $state(DateUtils.toLocalDate(new Date(now.getFullYear(), now.getMonth() + 1, 0)));
-
-	const profile = useProfileData(() => ({ from, to }));
+	const profile = useProfileData();
 
 	let name = $state('');
 	let phone = $state('');
@@ -52,11 +47,6 @@
 		}
 	}
 
-	function handleDatesChange(info) {
-		from = DateUtils.toLocalDate(new Date(info.start));
-		to = DateUtils.toLocalDate(new Date(info.end));
-	}
-
 	function handleBookNew() {
 		goto(resolve('/'));
 	}
@@ -86,12 +76,7 @@
 				<!-- Section 1: Bookings List Calendar -->
 				<section class="min-w-0 flex-1" aria-labelledby="bookings-heading">
 					<h2 id="bookings-heading" class="text-2xl font-bold mb-4">{m.myBookings()}</h2>
-					<ListCalendar
-						events={profile.bookingEvents}
-						onDatesChange={handleDatesChange}
-						onBookNew={handleBookNew}
-						onMoveEvent={handleMoveEvent}
-					/>
+					<ListCalendar events={profile.bookingEvents} onBookNew={handleBookNew} onMoveEvent={handleMoveEvent} />
 				</section>
 
 				<!-- Section 2: Profile Information Form (fixed narrower pane) -->

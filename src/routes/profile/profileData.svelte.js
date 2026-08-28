@@ -17,13 +17,10 @@ import { SvelteMap } from 'svelte/reactivity';
  * every UserService-derived view (this profile, the contacts list, and the
  * employee roster on services/plan) so a name change propagates everywhere.
  *
- * Bookings are fetched reactively based on a date range (via the getRange thunk),
- * and joined with service/location/employee names for calendar display.
- *
- * @param {() => { from: string|null, to: string|null }} getRange thunk
- *   returning the current date range (ISO date strings for the visible month bounds).
+ * Bookings are fetched as the user's full my-bookings set (no query params);
+ * they're joined with service/location/employee names for calendar display.
  */
-export function useProfileData(getRange) {
+export function useProfileData() {
 	const query = createQuery(() => ({
 		queryKey: queryKeys.users.detail(auth.userId),
 		enabled: !!auth.userId,
@@ -34,15 +31,14 @@ export function useProfileData(getRange) {
 		UserService.updateUser(auth.userId, payload),
 	);
 
-	// Bookings query — reactive to range
-	const bookings = useResourceQuery(() => {
-		const { from, to } = getRange();
-		return {
-			queryKey: queryKeys.bookings.range(auth.userId, from, to),
-			enabled: !!auth.userId && !!from && !!to,
-			fetcher: () => UserService.getMyBookings(auth.userId, from, to, 0, 100),
-		};
-	});
+	// Bookings query — fetch the user's full my-bookings set with no query
+	// params; the server decides the result set and the calendar filters/pages
+	// client-side.
+	const bookings = useResourceQuery(() => ({
+		queryKey: queryKeys.bookings.byUser(auth.userId),
+		enabled: !!auth.userId,
+		fetcher: () => UserService.getMyBookings(auth.userId),
+	}));
 
 	// Name lookup lists — these are coarse and unfiltered, so they never change
 	const services = useResourceQuery(() => ({
