@@ -84,6 +84,8 @@
 
 	"calendarPreviousWeek": "Previous week",
 	"calendarNextWeek": "Next week",
+	"calendarPreviousYear": "Previous year",
+	"calendarNextYear": "Next year",
 	"calendarToday": "Today",
 	"calendarExtendHours": "Extend Hours (+6h)",
 

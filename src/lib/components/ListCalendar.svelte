@@ -18,7 +18,11 @@
 	});
 
 	const options = {
-		view: 'listMonth',
+		// listYear lists every booking across the whole year in one scrolling
+		// list (so all months with bookings show at once). Prev/next/today are
+		// kept so bookings in an adjacent year (e.g. early January viewed from
+		// December) stay reachable — they page by year in this view.
+		view: 'listYear',
 		firstDay: 1,
 		headerToolbar: {
 			start: 'prev,next today',
@@ -32,8 +36,8 @@
 			},
 		},
 		buttonText: {
-			prev: m.calendarPreviousWeek(),
-			next: m.calendarNextWeek(),
+			prev: m.calendarPreviousYear(),
+			next: m.calendarNextYear(),
 			today: m.calendarToday(),
 		},
 		datesSet: (info) => onDatesChange?.(info),
