@@ -4,3 +4,15 @@ node_modules/
 project.inlang/
 src/lib/api/
 src/lib/paraglide/
+
+# Editor/agent and user-level config that may appear in the working tree
+.claude/
+.vscode/
+.bashrc
+.bash_profile
+.profile
+.zshrc
+.zprofile
+.gitconfig
+.gitmodules
+.ripgreprc
