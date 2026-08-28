@@ -22,4 +22,9 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# playwright
+/e2e/screenshots/
+
+# rider
 .idea
