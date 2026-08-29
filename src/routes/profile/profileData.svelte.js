@@ -114,6 +114,9 @@ export function useProfileData() {
 						employeeName,
 						locationName,
 						manageable: Date.parse(b.startTime) - now >= MANAGE_CUTOFF_MS,
+						serviceId: b.serviceId,
+						employeeId: b.employeeId,
+						locationId: b.locationId,
 					},
 				};
 			});

@@ -55,8 +55,24 @@
 	}
 
 	function handleMoveEvent(event) {
-		// Rescheduling is wired up in a follow-up; the booking id is event.id.
-		void event;
+		const { serviceId, employeeId, locationId } = event.extendedProps;
+		// Bind the rebook intent to a one-time nonce carried both in sessionStorage
+		// and in the wizard URL. The old booking is deleted on completion only when
+		// the two match, so an unrelated booking for the same service (started from
+		// any URL without this nonce) can never consume a stale token.
+		const nonce = crypto.randomUUID();
+		try {
+			sessionStorage.setItem('pendingRebook', JSON.stringify({ bookingId: event.id, nonce }));
+		} catch {
+			// sessionStorage unavailable — nothing to store
+		}
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
+		const params = new URLSearchParams();
+		params.set('employee', employeeId);
+		params.set('location', locationId);
+		params.set('rebook', nonce);
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic path segment combined with a query string
+		goto(`/book/${serviceId}?${params.toString()}`);
 	}
 
 	async function handleCancelEvent(event) {

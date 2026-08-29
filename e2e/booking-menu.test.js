@@ -114,6 +114,44 @@ test.describe('My Bookings overflow menu', () => {
 
 		await expect(page.getByRole('alert').filter({ hasText: /forbidden/i })).toBeVisible();
 	});
+
+	test('Reschedule enters the wizard pre-selected and records the rebook intent', async ({ page }) => {
+		// Rescheduling navigates into the booking wizard with service/employee/
+		// location pre-selected via URL params, and stashes the originating booking
+		// id in sessionStorage so the confirm step can delete it once the new
+		// booking is made. A one-time `rebook` nonce is carried in both places and
+		// must match before the old booking is deleted.
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).first();
+		await kebab.click();
+		await page.getByRole('menuitem', { name: /reschedule/i }).click();
+
+		// The first manageable booking is `booking-e2e-1` for svc1 / emp1 / location 1.
+		await page.waitForURL(/\/book\/svc1\?/);
+		const url = new URL(page.url());
+		expect(url.pathname).toBe('/book/svc1');
+		expect(url.searchParams.get('employee')).toBe('emp1');
+		expect(url.searchParams.get('location')).toBe('1');
+
+		// A one-time nonce binds the URL flow to the sessionStorage token; the old
+		// booking is only deleted on completion when the two match, so an unrelated
+		// same-service booking can't consume a stale token.
+		const nonce = url.searchParams.get('rebook');
+		expect(nonce).toBeTruthy();
+		const pending = await page.evaluate(() => sessionStorage.getItem('pendingRebook'));
+		expect(JSON.parse(pending)).toEqual({ bookingId: 'booking-e2e-1', nonce });
+	});
+
+	test('starting a fresh booking from home clears an abandoned rebook intent', async ({ page }) => {
+		// If the user abandons a rebook and returns home to start a new booking, the
+		// stale intent must be dropped so the new booking never deletes the old one.
+		await page.evaluate(() =>
+			sessionStorage.setItem('pendingRebook', JSON.stringify({ bookingId: 'booking-e2e-1', serviceId: 'svc1' })),
+		);
+		await page.goto('/');
+		await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+		const pending = await page.evaluate(() => sessionStorage.getItem('pendingRebook'));
+		expect(pending).toBeNull();
+	});
 });
 
 // The 24h cutoff compares the booking's instant to now, so it must stay correct

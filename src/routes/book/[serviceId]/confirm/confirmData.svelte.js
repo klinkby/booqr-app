@@ -61,6 +61,15 @@ export function useConfirmData() {
 		},
 	}));
 
+	const deleteBookingMutation = createMutation(() => ({
+		mutationFn: (id) => authedQueryFn(() => BookingService.deleteBooking(id)),
+		onSuccess: () =>
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all }),
+				queryClient.invalidateQueries({ queryKey: queryKeys.vacancies.all }),
+			]),
+	}));
+
 	return {
 		get services() {
 			return services.items;
@@ -77,5 +86,6 @@ export function useConfirmData() {
 		login: (credentials) => login(credentials),
 		signUp: (email) => signUp({ email }),
 		addBooking: (requestBody) => addBookingMutation.mutateAsync(requestBody),
+		deleteBooking: (id) => deleteBookingMutation.mutateAsync(id),
 	};
 }
