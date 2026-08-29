@@ -18,10 +18,19 @@ test.describe('My Bookings overflow menu', () => {
 
 	test('hides the overflow menu for bookings within 24 hours', async ({ page }) => {
 		// The mock returns three bookings: two comfortably in the future and one
-		// ~2h out. Reschedule/cancel are not allowed inside 24h, so that row must
-		// expose no kebab — only the two future bookings do.
+		// ~2h out. Reschedule/cancel are not allowed inside 24h, so that row's kebab
+		// is not offered — only the two future bookings expose an operable one.
 		await expect(page.getByRole('listitem')).toHaveCount(3);
 		await expect(page.getByRole('button', { name: 'Booking actions', exact: true })).toHaveCount(2);
+
+		// The within-24h row still renders a kebab element (kept for layout so the
+		// row keeps its width), but it is visibility:hidden — present in the DOM,
+		// absent from the a11y tree, and not visible. It's the first row (the ~2h
+		// booking is the earliest), so target the first kebab by CSS.
+		const allKebabs = page.locator('button[aria-label="Booking actions"]');
+		await expect(allKebabs).toHaveCount(3);
+		await expect(allKebabs.first()).toBeHidden();
+		await expect(allKebabs.first()).toHaveAttribute('tabindex', '-1');
 	});
 
 	test('opens an accessible menu and stacks above the rows below it', async ({ page }) => {
