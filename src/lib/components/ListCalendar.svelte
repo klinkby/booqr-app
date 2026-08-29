@@ -49,6 +49,17 @@
 		}
 	}
 
+	// Bookings starting within 24 hours can no longer be rescheduled or
+	// cancelled, so the whole overflow menu is hidden for them (this also covers
+	// events already in the past). `event.start` is the calendar's local,
+	// timezone-free Date (profileData converts the API's UTC via
+	// DateUtils.utcToLocalIso), and `Date.now()` is local too, so the comparison
+	// is apples-to-apples.
+	const RESCHEDULE_CUTOFF_MS = 24 * 60 * 60 * 1000;
+	function canManage(event) {
+		return new Date(event.start).getTime() - Date.now() >= RESCHEDULE_CUTOFF_MS;
+	}
+
 	// While a menu is open, close it on any outside click. The trigger's own
 	// onclick calls stopPropagation, so opening never immediately re-closes.
 	$effect(() => {
@@ -179,60 +190,63 @@
 		</span>
 		<!-- Overflow menu: trigger + top-right-anchored popup with booking actions.
 		     justify-between pushes the wrapper to the row's right padding edge,
-		     aligning the ⋮ with the date shown in the day header above. -->
-		<div class="relative shrink-0">
-			<button
-				type="button"
-				aria-label={m.bookingActions()}
-				aria-haspopup="menu"
-				aria-expanded={openMenuId === info.event.id}
-				aria-controls="booking-menu-{info.event.id}"
-				onclick={(e) => {
-					e.stopPropagation();
-					toggleMenu(info.event.id, e.currentTarget);
-				}}
-				onkeydown={(e) => onMenuKeydown(e, info.event.id)}
-				class="px-2 py-0.5 text-lg leading-none text-gray-500 bg-transparent rounded hover:bg-gray-100"
-			>
-				⋮
-			</button>
-			{#if openMenuId === info.event.id}
-				<div
-					use:focusFirst
-					id="booking-menu-{info.event.id}"
-					role="menu"
+		     aligning the ⋮ with the date shown in the day header above. Hidden once
+		     the booking is within 24h — reschedule/cancel are no longer allowed. -->
+		{#if canManage(info.event)}
+			<div class="relative shrink-0">
+				<button
+					type="button"
 					aria-label={m.bookingActions()}
-					class="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+					aria-haspopup="menu"
+					aria-expanded={openMenuId === info.event.id}
+					aria-controls="booking-menu-{info.event.id}"
+					onclick={(e) => {
+						e.stopPropagation();
+						toggleMenu(info.event.id, e.currentTarget);
+					}}
+					onkeydown={(e) => onMenuKeydown(e, info.event.id)}
+					class="px-2 py-0.5 text-lg leading-none text-gray-500 bg-transparent rounded hover:bg-gray-100"
 				>
-					<button
-						type="button"
-						role="menuitem"
-						onclick={(e) => {
-							e.stopPropagation();
-							onMoveEvent?.(info.event);
-							closeMenu();
-						}}
-						onkeydown={(e) => onMenuKeydown(e, info.event.id)}
-						class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
+					⋮
+				</button>
+				{#if openMenuId === info.event.id}
+					<div
+						use:focusFirst
+						id="booking-menu-{info.event.id}"
+						role="menu"
+						aria-label={m.bookingActions()}
+						class="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
 					>
-						{m.rescheduleBooking()}
-					</button>
-					<button
-						type="button"
-						role="menuitem"
-						onclick={(e) => {
-							e.stopPropagation();
-							onCancelEvent?.(info.event);
-							closeMenu();
-						}}
-						onkeydown={(e) => onMenuKeydown(e, info.event.id)}
-						class="block w-full px-3 py-1.5 text-left text-sm text-red-600 bg-transparent hover:bg-red-50"
-					>
-						{m.cancelBooking()}
-					</button>
-				</div>
-			{/if}
-		</div>
+						<button
+							type="button"
+							role="menuitem"
+							onclick={(e) => {
+								e.stopPropagation();
+								onMoveEvent?.(info.event);
+								closeMenu();
+							}}
+							onkeydown={(e) => onMenuKeydown(e, info.event.id)}
+							class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
+						>
+							{m.rescheduleBooking()}
+						</button>
+						<button
+							type="button"
+							role="menuitem"
+							onclick={(e) => {
+								e.stopPropagation();
+								onCancelEvent?.(info.event);
+								closeMenu();
+							}}
+							onkeydown={(e) => onMenuKeydown(e, info.event.id)}
+							class="block w-full px-3 py-1.5 text-left text-sm text-red-600 bg-transparent hover:bg-red-50"
+						>
+							{m.cancelBooking()}
+						</button>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 {/snippet}
 

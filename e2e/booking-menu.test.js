@@ -14,6 +14,13 @@ test.describe('My Bookings overflow menu', () => {
 		// booking rows as role="button" (which also nested the kebab button inside a
 		// button). The only buttons in a row are the kebab overflow triggers.
 		await expect(page.getByRole('button', { name: /haircut/i })).toHaveCount(0);
+	});
+
+	test('hides the overflow menu for bookings within 24 hours', async ({ page }) => {
+		// The mock returns three bookings: two comfortably in the future and one
+		// ~2h out. Reschedule/cancel are not allowed inside 24h, so that row must
+		// expose no kebab — only the two future bookings do.
+		await expect(page.getByRole('listitem')).toHaveCount(3);
 		await expect(page.getByRole('button', { name: 'Booking actions', exact: true })).toHaveCount(2);
 	});
 
