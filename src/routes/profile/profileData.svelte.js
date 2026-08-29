@@ -81,7 +81,12 @@ export function useProfileData() {
 					id: b.id,
 					start: DateUtils.utcToLocalIso(b.startTime),
 					end: DateUtils.utcToLocalIso(b.endTime),
-					title: `${serviceName} · ${employeeName} · ${locationName}`,
+					// Plain title for the library's own use (accessible name, tooltip).
+					// The calendar's eventContent renders the styled variant from the
+					// separate parts below: "<time> <service>" bold, then "(employee)
+					// @ location".
+					title: `${serviceName} (${employeeName}) @ ${locationName}`,
+					extendedProps: { serviceName, employeeName, locationName },
 				};
 			});
 		},
