@@ -64,38 +64,44 @@ function currentWeekVacancies() {
 	];
 }
 
-/** Returns MyBooking objects dated in the current month for profile page display. */
+/**
+ * Returns MyBooking objects for profile page display, dated relative to now so
+ * the profile page's 24-hour management cutoff is exercised deterministically:
+ *   - two bookings comfortably in the future (>24h) — each shows its overflow
+ *     menu, giving two manageable rows (the earlier one anchors the Danish
+ *     "onsdag" / "10.00" checks and sits above the other for the z-index test);
+ *   - one booking ~2 hours from now (<24h) — its overflow menu is hidden.
+ * All fall in the current year so the listYear view renders them.
+ */
 function currentMonthBookings() {
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth();
+	const now = new Date();
 
-	// Create two bookings on different days this month: 10:00-10:30 and 14:00-14:30
-	function makeBookingTime(dayOfMonth, hours, minutes) {
-		const d = new Date(year, month, dayOfMonth, hours, minutes, 0, 0);
-		return d.toISOString();
+	// First manageable booking: next Wednesday (≥3 days out, always >24h) at 10:00.
+	const future1 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0, 0, 0);
+	future1.setDate(future1.getDate() + 3);
+	while (future1.getDay() !== 3 /* Wednesday */) {
+		future1.setDate(future1.getDate() + 1);
 	}
+	// Second manageable booking: the following day at 14:00 (still >24h).
+	const future2 = new Date(future1.getTime());
+	future2.setDate(future2.getDate() + 1);
+	future2.setHours(14, 0, 0, 0);
 
-	return [
-		{
-			id: 'booking-e2e-1',
-			startTime: makeBookingTime(5, 10, 0),
-			endTime: makeBookingTime(5, 10, 30),
-			serviceId: 'svc1',
-			locationId: 1,
-			employeeId: 'emp1',
-			hasNotes: false,
-		},
-		{
-			id: 'booking-e2e-2',
-			startTime: makeBookingTime(12, 14, 0),
-			endTime: makeBookingTime(12, 14, 30),
-			serviceId: 'svc1',
-			locationId: 1,
-			employeeId: 'emp1',
-			hasNotes: false,
-		},
-	];
+	// Non-manageable booking: ~2 hours from now, inside the 24-hour cutoff.
+	const soon = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+
+	const half = 30 * 60 * 1000;
+	const booking = (id, start) => ({
+		id,
+		startTime: start.toISOString(),
+		endTime: new Date(start.getTime() + half).toISOString(),
+		serviceId: 'svc1',
+		locationId: 1,
+		employeeId: 'emp1',
+		hasNotes: false,
+	});
+
+	return [booking('booking-e2e-1', future1), booking('booking-e2e-2', future2), booking('booking-e2e-soon', soon)];
 }
 
 /**

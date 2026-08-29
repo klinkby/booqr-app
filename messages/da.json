@@ -150,6 +150,8 @@
 	"bookNewAppointment": "Book",
 	"noBookings": "Du har ingen kommende bookinger.",
 	"bookingActions": "Booking-handlinger",
+	"rescheduleBooking": "Ombook",
+	"cancelBooking": "Annuller booking",
 
 	"termsAndConditions": "Vilkår og betingelser",
 	"termsPlaceholder": "Disse vilkår og betingelser kommer snart. Ved at oprette en konto accepterer du at bruge denne tjeneste ansvarligt.",

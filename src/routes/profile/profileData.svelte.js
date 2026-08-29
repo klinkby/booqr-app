@@ -7,6 +7,9 @@ import { DateUtils } from '$lib/dateUtils.js';
 import { createQuery } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
 
+// A booking may be rescheduled or cancelled only while it is at least 24h away.
+const MANAGE_CUTOFF_MS = 24 * 60 * 60 * 1000;
+
 /**
  * Route-local data hook for the profile edit page. Composes the user detail
  * query (existing), the save mutation (existing), and extends with bookings
@@ -73,6 +76,7 @@ export function useProfileData() {
 			const locationMap = new SvelteMap(locations.items.map((l) => [l.id, l.name]));
 			const employeeMap = new SvelteMap(employees.items.map((e) => [e.id, e.name]));
 
+			const now = Date.now();
 			return bookings.items.map((b) => {
 				const serviceName = serviceMap.get(b.serviceId) ?? '';
 				const employeeName = employeeMap.get(b.employeeId) ?? '';
@@ -86,7 +90,16 @@ export function useProfileData() {
 					// separate parts below: "<time> <service>" bold, then "(employee)
 					// @ location".
 					title: `${serviceName} (${employeeName}) @ ${locationName}`,
-					extendedProps: { serviceName, employeeName, locationName },
+					// `manageable` is the domain rule for whether a booking can still be
+					// rescheduled or cancelled: only if it starts at least 24h out.
+					// Computed here (not in the presentational calendar) from the raw UTC
+					// startTime vs. now — both true epochs, so it's timezone-correct.
+					extendedProps: {
+						serviceName,
+						employeeName,
+						locationName,
+						manageable: Date.parse(b.startTime) - now >= MANAGE_CUTOFF_MS,
+					},
 				};
 			});
 		},

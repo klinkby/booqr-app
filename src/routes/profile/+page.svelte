@@ -55,6 +55,11 @@
 		// Rescheduling is wired up in a follow-up; the booking id is event.id.
 		void event;
 	}
+
+	function handleCancelEvent(event) {
+		// Cancelling is wired up in a follow-up; the booking id is event.id.
+		void event;
+	}
 </script>
 
 {#if auth.isLoggedIn}
@@ -76,7 +81,12 @@
 				<!-- Section 1: Bookings List Calendar -->
 				<section class="min-w-0 flex-1" aria-labelledby="bookings-heading">
 					<h2 id="bookings-heading" class="text-2xl font-bold mb-4">{m.myBookings()}</h2>
-					<ListCalendar events={profile.bookingEvents} onBookNew={handleBookNew} onMoveEvent={handleMoveEvent} />
+					<ListCalendar
+						events={profile.bookingEvents}
+						onBookNew={handleBookNew}
+						onMoveEvent={handleMoveEvent}
+						onCancelEvent={handleCancelEvent}
+					/>
 				</section>
 
 				<!-- Section 2: Profile Information Form (fixed narrower pane) -->

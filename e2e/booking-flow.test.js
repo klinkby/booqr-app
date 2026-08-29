@@ -123,13 +123,19 @@ test.describe('Customer booking flow', () => {
 		await page.route('**/api/locations*', (route) =>
 			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [LOCATIONS[0]] }) }),
 		);
+		// Give the wizard a future vacancy so the month grid has availability. Without
+		// it the shared current-week mock yields only past-dated slots when the suite
+		// runs late in the week, and the grid shows its "No dates available" empty
+		// state instead of a month heading.
+		const { target } = pickTargetDay();
+		await mockSingleVacancy(page, target);
 
 		await page.goto('/');
 		await page.getByRole('button', { name: /Haircut/ }).click();
 
 		await expect(page.locator('h1')).not.toHaveText('Where?');
 		await expect(page.locator('h1')).not.toHaveText('With whom?');
-		// What's left is the month grid — its heading is the current month name.
+		// What's left is the month grid, which opens on the current month.
 		const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 		await expect(page.locator('h1')).toHaveText(monthLabel);
 	});

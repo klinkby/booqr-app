@@ -10,7 +10,53 @@
 		onDatesChange = undefined,
 		onBookNew = undefined,
 		onMoveEvent = undefined,
+		onCancelEvent = undefined,
 	} = $props();
+
+	// Overflow-menu open state: hold the info.event.id of the row whose menu is
+	// open (the eventContent snippet is instanced per row inside the calendar's
+	// DOM, so a single boolean can't distinguish rows). null = all closed.
+	let openMenuId = $state(null);
+	let menuTriggerEl; // the ⋮ button of the open row, for focus return on close
+
+	function toggleMenu(id, triggerEl) {
+		if (openMenuId === id) {
+			openMenuId = null;
+		} else {
+			openMenuId = id;
+			menuTriggerEl = triggerEl;
+		}
+	}
+	function closeMenu(returnFocus = false) {
+		openMenuId = null;
+		if (returnFocus && menuTriggerEl) menuTriggerEl.focus();
+	}
+
+	// Move focus to the first menuitem when the popup opens, so a keyboard user
+	// who activated the trigger lands inside the menu (standard ARIA-menu
+	// behaviour) instead of having to Tab into it. Runs on mount of the panel.
+	function focusFirst(node) {
+		node.querySelector('[role="menuitem"]')?.focus();
+	}
+
+	// Escape closes the open menu and returns focus to its trigger. Bound to the
+	// interactive controls themselves (trigger + menu items) rather than the
+	// role="menu" container, which would then be flagged as needing a tabindex.
+	function onMenuKeydown(e, id) {
+		if (e.key === 'Escape' && openMenuId === id) {
+			e.stopPropagation();
+			closeMenu(true);
+		}
+	}
+
+	// While a menu is open, close it on any outside click. The trigger's own
+	// onclick calls stopPropagation, so opening never immediately re-closes.
+	$effect(() => {
+		if (openMenuId === null) return;
+		const onDocClick = () => closeMenu();
+		document.addEventListener('click', onDocClick);
+		return () => document.removeEventListener('click', onDocClick);
+	});
 
 	let cal;
 	let hasEvents = $derived(events.length > 0);
@@ -100,7 +146,12 @@
 			next: m.calendarNextYear(),
 		},
 		datesSet: (info) => onDatesChange?.(info),
-		eventClick: (info) => onEventClick?.(info),
+		// Only register eventClick when a consumer actually wants row clicks: the
+		// library stamps role="button" on every event row whenever *any* onclick
+		// handler is present, so an always-on `() => onEventClick?.()` would make the
+		// rows falsely interactive (and nest the kebab <button> inside a
+		// role="button") even on the profile page, which passes no handler.
+		...(onEventClick && { eventClick: (info) => onEventClick(info) }),
 		// Localized empty state (the library's own default is untranslated).
 		noEventsContent: () => m.noBookings(),
 	};
@@ -117,6 +168,11 @@
 	     — the time range and service name bold, then the employee in parens and
 	     the location after "@". Parts come from event.extendedProps (see
 	     profileData). Plus the trailing overflow-menu trigger. -->
+	<!-- `manageable` (may this booking still be rescheduled/cancelled?) is decided
+	     by profileData; the calendar just reflects it. onKeydown is hoisted so the
+	     trigger and both menu items share one Escape handler bound to this row. -->
+	{@const manageable = info.event.extendedProps.manageable}
+	{@const onKeydown = (e) => onMenuKeydown(e, info.event.id)}
 	<div class="flex flex-1 items-center justify-between gap-2">
 		<span class="flex flex-wrap items-baseline gap-x-1">
 			<span class="font-bold">
@@ -126,21 +182,67 @@
 			<span>({info.event.extendedProps.employeeName})</span>
 			<span>@ {info.event.extendedProps.locationName}</span>
 		</span>
-		<!-- Overflow menu trigger; the menu itself (Move, …) is wired up later.
-		     justify-between pushes it to the row's right padding edge, aligning
-		     it with the date shown in the day header above. -->
-		<button
-			type="button"
-			aria-label={m.bookingActions()}
-			aria-haspopup="menu"
-			onclick={(e) => {
-				e.stopPropagation();
-				onMoveEvent?.(info.event);
-			}}
-			class="shrink-0 px-2 py-0.5 text-lg leading-none text-gray-500 bg-transparent rounded hover:bg-gray-100"
-		>
-			⋮
-		</button>
+		<!-- Overflow menu: trigger + top-right-anchored popup with booking actions.
+		     justify-between pushes the wrapper to the row's right padding edge,
+		     aligning the ⋮ with the date shown in the day header above. Within 24h
+		     of the booking (reschedule/cancel no longer allowed) the wrapper is kept
+		     but made `invisible` — it still reserves its width so those rows align
+		     with manageable ones, while visibility:hidden also drops it from the tab
+		     order and accessibility tree. -->
+		<div class="relative shrink-0" class:invisible={!manageable}>
+			<button
+				type="button"
+				aria-label={m.bookingActions()}
+				aria-haspopup="menu"
+				aria-expanded={openMenuId === info.event.id}
+				aria-controls="booking-menu-{info.event.id}"
+				tabindex={manageable ? undefined : -1}
+				onclick={(e) => {
+					e.stopPropagation();
+					if (manageable) toggleMenu(info.event.id, e.currentTarget);
+				}}
+				onkeydown={onKeydown}
+				class="px-2 py-0.5 text-lg leading-none text-gray-500 bg-transparent rounded hover:bg-gray-100"
+			>
+				⋮
+			</button>
+			{#if manageable && openMenuId === info.event.id}
+				<div
+					use:focusFirst
+					id="booking-menu-{info.event.id}"
+					role="menu"
+					aria-label={m.bookingActions()}
+					class="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+				>
+					<button
+						type="button"
+						role="menuitem"
+						onclick={(e) => {
+							e.stopPropagation();
+							onMoveEvent?.(info.event);
+							closeMenu();
+						}}
+						onkeydown={onKeydown}
+						class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
+					>
+						{m.rescheduleBooking()}
+					</button>
+					<button
+						type="button"
+						role="menuitem"
+						onclick={(e) => {
+							e.stopPropagation();
+							onCancelEvent?.(info.event);
+							closeMenu();
+						}}
+						onkeydown={onKeydown}
+						class="block w-full px-3 py-1.5 text-left text-sm text-red-600 bg-transparent hover:bg-red-50"
+					>
+						{m.cancelBooking()}
+					</button>
+				</div>
+			{/if}
+		</div>
 	</div>
 {/snippet}
 
@@ -202,5 +304,25 @@
 	   (root-relative, matching the header's 24px) so they line up exactly. */
 	.list-calendar :global(.ec-list .ec-event) {
 		padding-left: 1.5rem;
+	}
+
+	/* Let a row's overflow menu escape the list container. The library gives
+	   .ec-main `overflow: auto` as a scroll boundary, which would clip the
+	   absolutely-positioned popup — most visibly on the last row, whose menu
+	   opens downward past the container's bottom edge. The listYear view grows
+	   with its content (no fixed height here), so it never actually scrolls,
+	   making `visible` safe: nothing is hidden that the user needed to scroll to. */
+	.list-calendar :global(.ec-main) {
+		overflow: visible;
+	}
+
+	/* Lift the row whose overflow menu is open above its siblings. The library
+	   gives every list row `.ec-event { position: relative; z-index: 1 }` and each
+	   day header `z-index: 2`, so those form stacking contexts that paint over an
+	   absolutely-positioned popup living inside an *earlier* row — the menu's own
+	   z-index only ranks it within its own row. Raising the owning row's z-index
+	   (via :has on the open menu) puts the whole row, popup included, on top. */
+	.list-calendar :global(.ec-list .ec-event:has([role='menu'])) {
+		z-index: 3;
 	}
 </style>
