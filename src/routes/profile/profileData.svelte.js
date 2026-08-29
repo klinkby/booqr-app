@@ -1,10 +1,10 @@
-import { LocationService, ServiceService, UserService } from '$lib/api';
+import { BookingService, LocationService, ServiceService, UserService } from '$lib/api';
 import { auth } from '$lib/auth.svelte.js';
 import { authedQueryFn } from '$lib/queryClient.js';
 import { queryKeys } from '$lib/queryKeys';
 import { useResourceMutation, useResourceQuery } from '$lib/resourceQuery.svelte.js';
 import { DateUtils } from '$lib/dateUtils.js';
-import { createQuery } from '@tanstack/svelte-query';
+import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
 
 // A booking may be rescheduled or cancelled only while it is at least 24h away.
@@ -33,6 +33,21 @@ export function useProfileData() {
 	const saveProfile = useResourceMutation(queryKeys.users.all, (payload) =>
 		UserService.updateUser(auth.userId, payload),
 	);
+
+	// Cancelling a booking touches two resources: the user's my-bookings set and
+	// the vacancy the server re-opens for the freed slot (see the
+	// `vacancy-split-on-booking` project memory). `useResourceMutation`
+	// invalidates a single key, so this one is written out to invalidate both
+	// `bookings.all` and `vacancies.all` coarsely.
+	const queryClient = useQueryClient();
+	const cancelMutation = createMutation(() => ({
+		mutationFn: (id) => authedQueryFn(() => BookingService.deleteBooking(id)),
+		onSuccess: () =>
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all }),
+				queryClient.invalidateQueries({ queryKey: queryKeys.vacancies.all }),
+			]),
+	}));
 
 	// Bookings query — fetch the user's full my-bookings set with no query
 	// params; the server decides the result set and the calendar filters/pages
@@ -104,5 +119,6 @@ export function useProfileData() {
 			});
 		},
 		saveProfile: (payload) => saveProfile(payload),
+		cancelBooking: (id) => cancelMutation.mutateAsync(id),
 	};
 }

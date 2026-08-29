@@ -14,6 +14,9 @@
 	let loading = $state(false);
 	let initialized = $state(false);
 	let successMessage = $state(null);
+	let bookingError = $state(null);
+	let bookingMessage = $state(null);
+	let cancelling = $state(false);
 
 	// Auth guard: redirect unauthenticated users
 	$effect(() => {
@@ -56,9 +59,21 @@
 		void event;
 	}
 
-	function handleCancelEvent(event) {
-		// Cancelling is wired up in a follow-up; the booking id is event.id.
-		void event;
+	async function handleCancelEvent(event) {
+		// ListCalendar fires this without awaiting and closes its menu immediately,
+		// so guard against a second cancel landing before the first settles.
+		if (cancelling) return;
+		cancelling = true;
+		bookingError = null;
+		bookingMessage = null;
+		try {
+			await profile.cancelBooking(event.id);
+			bookingMessage = m.bookingCancelled();
+		} catch (err) {
+			bookingError = apiErrorMessage(err);
+		} finally {
+			cancelling = false;
+		}
 	}
 </script>
 
@@ -81,6 +96,16 @@
 				<!-- Section 1: Bookings List Calendar -->
 				<section class="min-w-0 flex-1" aria-labelledby="bookings-heading">
 					<h2 id="bookings-heading" class="text-2xl font-bold mb-4">{m.myBookings()}</h2>
+					{#if bookingMessage}
+						<div role="status" aria-live="polite" class="rounded-md bg-green-50 p-4 mb-4">
+							<p class="text-sm text-green-800">{bookingMessage}</p>
+						</div>
+					{/if}
+					{#if bookingError}
+						<div role="alert" aria-live="assertive" class="rounded-md bg-red-50 p-4 mb-4">
+							<p class="text-sm text-red-700">{bookingError}</p>
+						</div>
+					{/if}
 					<ListCalendar
 						events={profile.bookingEvents}
 						onBookNew={handleBookNew}

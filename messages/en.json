@@ -152,6 +152,7 @@
 	"bookingActions": "Booking actions",
 	"rescheduleBooking": "Reschedule",
 	"cancelBooking": "Cancel booking",
+	"bookingCancelled": "Booking cancelled.",
 
 	"termsAndConditions": "Terms and Conditions",
 	"termsPlaceholder": "These terms and conditions are coming soon. By creating an account you agree to use this service responsibly.",

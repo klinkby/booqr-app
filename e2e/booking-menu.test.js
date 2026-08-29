@@ -72,6 +72,48 @@ test.describe('My Bookings overflow menu', () => {
 		await expect(menu).toBeHidden();
 		await expect(kebab).toBeFocused();
 	});
+
+	test('Cancel booking issues a DELETE and shows a success status', async ({ page }) => {
+		// Capture the cancel request and satisfy it with the API's 204-style empty
+		// success, plus refetch after invalidation.
+		let deletedId = null;
+		await page.route('**/api/bookings/*', (route) => {
+			if (route.request().method() === 'DELETE') {
+				deletedId = route.request().url().split('/').pop();
+				return route.fulfill({ status: 204, body: '' });
+			}
+			return route.fallback();
+		});
+
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).first();
+		await kebab.click();
+		await page.getByRole('menuitem', { name: /cancel booking/i }).click();
+
+		// Success is announced via role="status"; the DELETE targeted the row's id.
+		await expect(page.getByRole('status').filter({ hasText: /cancelled/i })).toBeVisible();
+		expect(deletedId).toBe('booking-e2e-1');
+	});
+
+	test('a forbidden cancel surfaces an accessible error', async ({ page }) => {
+		// A 403 (e.g. cancelling too late / another user's booking) must render as a
+		// role="alert", aligned with how the profile form and plan page show errors.
+		await page.route('**/api/bookings/*', (route) => {
+			if (route.request().method() === 'DELETE') {
+				return route.fulfill({
+					status: 403,
+					contentType: 'application/problem+json',
+					body: JSON.stringify({ title: 'Forbidden' }),
+				});
+			}
+			return route.fallback();
+		});
+
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).first();
+		await kebab.click();
+		await page.getByRole('menuitem', { name: /cancel booking/i }).click();
+
+		await expect(page.getByRole('alert').filter({ hasText: /forbidden/i })).toBeVisible();
+	});
 });
 
 // The 24h cutoff compares the booking's instant to now, so it must stay correct
