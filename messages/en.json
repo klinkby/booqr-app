@@ -150,6 +150,8 @@
 	"bookNewAppointment": "Book",
 	"noBookings": "You have no upcoming bookings.",
 	"bookingActions": "Booking actions",
+	"rescheduleBooking": "Reschedule",
+	"cancelBooking": "Cancel booking",
 
 	"termsAndConditions": "Terms and Conditions",
 	"termsPlaceholder": "These terms and conditions are coming soon. By creating an account you agree to use this service responsibly.",

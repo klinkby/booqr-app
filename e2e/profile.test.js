@@ -18,7 +18,7 @@ test.describe('Profile Page', () => {
 		await expect(page.getByRole('heading', { name: /my bookings/i })).toBeVisible();
 
 		// Assert the CTA is present in the calendar toolbar (now a button)
-		await expect(page.getByRole('button', { name: /book a new appointment/i })).toBeVisible();
+		await expect(page.getByRole('button', { name: /^book$/i })).toBeVisible();
 
 		// Assert at least one booking event is rendered (service name from svc1)
 		await expect(page.getByText('Haircut').first()).toBeVisible();
