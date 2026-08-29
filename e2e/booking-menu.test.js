@@ -83,32 +83,10 @@ test.describe('My Bookings 24h cutoff is timezone-correct', () => {
 	test.use({ timezoneId: 'Australia/Brisbane' }); // UTC+10, no DST
 
 	test('a booking ~23h out (across the UTC offset) still hides its menu', async ({ page, context }) => {
+		await setupApiMocks(page);
 		await setupAuthToken(page);
 		await context.clearCookies();
-		// Minimal profile mocks; override my-bookings with a single ~23h-out booking.
-		await page.route('**/api/services*', (r) =>
-			r.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({
-					items: [{ id: 'svc1', name: 'Haircut', duration: '00:30:00', description: '', employees: ['emp1'] }],
-				}),
-			}),
-		);
-		await page.route('**/api/employees*', (r) =>
-			r.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({ items: [{ id: 'emp1', name: 'Employee One', email: 'e@x.com', role: 'Employee' }] }),
-			}),
-		);
-		await page.route('**/api/locations*', (r) =>
-			r.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({ items: [{ id: 1, name: 'Location A' }] }),
-			}),
-		);
+		// Override just my-bookings (last route wins) with a single ~23h-out booking.
 		const start = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString();
 		const end = new Date(Date.now() + 23.5 * 60 * 60 * 1000).toISOString();
 		await page.route('**/api/users/*/my-bookings*', (r) =>
@@ -129,15 +107,6 @@ test.describe('My Bookings 24h cutoff is timezone-correct', () => {
 					],
 				}),
 			}),
-		);
-		await page.route('**/api/users/1', (r) =>
-			r.request().method() === 'GET'
-				? r.fulfill({
-						status: 200,
-						contentType: 'application/json',
-						body: JSON.stringify({ id: '1', name: 'Test Customer', email: 'test@example.com', phone: '12345678' }),
-					})
-				: r.fallback(),
 		);
 
 		await page.goto('/profile');

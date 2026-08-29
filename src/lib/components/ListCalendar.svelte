@@ -49,19 +49,6 @@
 		}
 	}
 
-	// Bookings starting within 24 hours can no longer be rescheduled or
-	// cancelled, so the overflow menu is hidden for them (its trigger is kept but
-	// made invisible in the markup, so the row keeps its width; this also covers
-	// events already in the past). The library resolves `event.start` back to the
-	// booking's true instant (verified: it round-trips to the original UTC the API
-	// sent, offset applied), so comparing its epoch to Date.now() is correct
-	// regardless of the viewer's timezone. A missing/invalid start yields NaN,
-	// which fails the check and hides the menu (fail-safe).
-	const RESCHEDULE_CUTOFF_MS = 24 * 60 * 60 * 1000;
-	function canManage(event) {
-		return new Date(event.start).getTime() - Date.now() >= RESCHEDULE_CUTOFF_MS;
-	}
-
 	// While a menu is open, close it on any outside click. The trigger's own
 	// onclick calls stopPropagation, so opening never immediately re-closes.
 	$effect(() => {
@@ -181,7 +168,11 @@
 	     — the time range and service name bold, then the employee in parens and
 	     the location after "@". Parts come from event.extendedProps (see
 	     profileData). Plus the trailing overflow-menu trigger. -->
-	{@const manageable = canManage(info.event)}
+	<!-- `manageable` (may this booking still be rescheduled/cancelled?) is decided
+	     by profileData; the calendar just reflects it. onKeydown is hoisted so the
+	     trigger and both menu items share one Escape handler bound to this row. -->
+	{@const manageable = info.event.extendedProps.manageable}
+	{@const onKeydown = (e) => onMenuKeydown(e, info.event.id)}
 	<div class="flex flex-1 items-center justify-between gap-2">
 		<span class="flex flex-wrap items-baseline gap-x-1">
 			<span class="font-bold">
@@ -210,7 +201,7 @@
 					e.stopPropagation();
 					if (manageable) toggleMenu(info.event.id, e.currentTarget);
 				}}
-				onkeydown={(e) => onMenuKeydown(e, info.event.id)}
+				onkeydown={onKeydown}
 				class="px-2 py-0.5 text-lg leading-none text-gray-500 bg-transparent rounded hover:bg-gray-100"
 			>
 				⋮
@@ -231,7 +222,7 @@
 							onMoveEvent?.(info.event);
 							closeMenu();
 						}}
-						onkeydown={(e) => onMenuKeydown(e, info.event.id)}
+						onkeydown={onKeydown}
 						class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
 					>
 						{m.rescheduleBooking()}
@@ -244,7 +235,7 @@
 							onCancelEvent?.(info.event);
 							closeMenu();
 						}}
-						onkeydown={(e) => onMenuKeydown(e, info.event.id)}
+						onkeydown={onKeydown}
 						class="block w-full px-3 py-1.5 text-left text-sm text-red-600 bg-transparent hover:bg-red-50"
 					>
 						{m.cancelBooking()}
