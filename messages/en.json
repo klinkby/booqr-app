@@ -152,6 +152,7 @@
 	"bookingActions": "Booking actions",
 	"rescheduleBooking": "Reschedule",
 	"cancelBooking": "Cancel booking",
+	"duplicateBooking": "Duplicate",
 	"bookingCancelled": "Booking cancelled.",
 
 	"termsAndConditions": "Terms and Conditions",

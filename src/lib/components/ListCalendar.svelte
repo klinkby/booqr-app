@@ -12,6 +12,7 @@
 		onBookNew = undefined,
 		onMoveEvent = undefined,
 		onCancelEvent = undefined,
+		onDuplicateEvent = undefined,
 	} = $props();
 
 	// Overflow-menu open state: hold the info.event.id of the row whose menu is
@@ -190,29 +191,27 @@
 		</span>
 		<!-- Overflow menu: trigger + top-right-anchored popup with booking actions.
 		     justify-between pushes the wrapper to the row's right padding edge,
-		     aligning the ⋮ with the date shown in the day header above. Within 24h
-		     of the booking (reschedule/cancel no longer allowed) the wrapper is kept
-		     but made `invisible` — it still reserves its width so those rows align
-		     with manageable ones, while visibility:hidden also drops it from the tab
-		     order and accessibility tree. -->
-		<div class="relative shrink-0" class:invisible={!manageable}>
+		     aligning the ⋮ with the date shown in the day header above. The trigger
+		     is always shown (every booking can be duplicated); within 24h of the
+		     booking the Reschedule/Cancel items are omitted from the popup, leaving
+		     only Duplicate. -->
+		<div class="relative shrink-0">
 			<button
 				type="button"
 				aria-label={m.bookingActions()}
 				aria-haspopup="menu"
 				aria-expanded={openMenuId === info.event.id}
 				aria-controls="booking-menu-{info.event.id}"
-				tabindex={manageable ? undefined : -1}
 				onclick={(e) => {
 					e.stopPropagation();
-					if (manageable) toggleMenu(info.event.id, e.currentTarget);
+					toggleMenu(info.event.id, e.currentTarget);
 				}}
 				onkeydown={onKeydown}
 				class="px-2 py-0.5 text-lg leading-none text-gray-500 bg-transparent rounded hover:bg-gray-100"
 			>
 				⋮
 			</button>
-			{#if manageable && openMenuId === info.event.id}
+			{#if openMenuId === info.event.id}
 				<div
 					use:focusFirst
 					id="booking-menu-{info.event.id}"
@@ -225,27 +224,42 @@
 						role="menuitem"
 						onclick={(e) => {
 							e.stopPropagation();
-							onMoveEvent?.(info.event);
+							onDuplicateEvent?.(info.event);
 							closeMenu();
 						}}
 						onkeydown={onKeydown}
 						class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
 					>
-						{m.rescheduleBooking()}
+						{m.duplicateBooking()}
 					</button>
-					<button
-						type="button"
-						role="menuitem"
-						onclick={(e) => {
-							e.stopPropagation();
-							onCancelEvent?.(info.event);
-							closeMenu();
-						}}
-						onkeydown={onKeydown}
-						class="block w-full px-3 py-1.5 text-left text-sm text-red-600 bg-transparent hover:bg-red-50"
-					>
-						{m.cancelBooking()}
-					</button>
+					{#if manageable}
+						<button
+							type="button"
+							role="menuitem"
+							onclick={(e) => {
+								e.stopPropagation();
+								onMoveEvent?.(info.event);
+								closeMenu();
+							}}
+							onkeydown={onKeydown}
+							class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
+						>
+							{m.rescheduleBooking()}
+						</button>
+						<button
+							type="button"
+							role="menuitem"
+							onclick={(e) => {
+								e.stopPropagation();
+								onCancelEvent?.(info.event);
+								closeMenu();
+							}}
+							onkeydown={onKeydown}
+							class="block w-full px-3 py-1.5 text-left text-sm text-red-600 bg-transparent hover:bg-red-50"
+						>
+							{m.cancelBooking()}
+						</button>
+					{/if}
 				</div>
 			{/if}
 		</div>
