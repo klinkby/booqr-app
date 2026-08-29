@@ -219,6 +219,19 @@
 					aria-label={m.bookingActions()}
 					class="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
 				>
+					<button
+						type="button"
+						role="menuitem"
+						onclick={(e) => {
+							e.stopPropagation();
+							onDuplicateEvent?.(info.event);
+							closeMenu();
+						}}
+						onkeydown={onKeydown}
+						class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
+					>
+						{m.duplicateBooking()}
+					</button>
 					{#if manageable}
 						<button
 							type="button"
@@ -247,19 +260,6 @@
 							{m.cancelBooking()}
 						</button>
 					{/if}
-					<button
-						type="button"
-						role="menuitem"
-						onclick={(e) => {
-							e.stopPropagation();
-							onDuplicateEvent?.(info.event);
-							closeMenu();
-						}}
-						onkeydown={onKeydown}
-						class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
-					>
-						{m.duplicateBooking()}
-					</button>
 				</div>
 			{/if}
 		</div>
