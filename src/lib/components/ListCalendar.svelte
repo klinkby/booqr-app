@@ -145,7 +145,7 @@
 {/snippet}
 
 <style>
-	/* Color the "Book a new appointment" custom toolbar button as the app's
+	/* Color the "Book" custom toolbar button as the app's
 	   primary call-to-action (indigo-600), matching Form/PasswordReset submit
 	   buttons. Scoped to this component's calendar so the admin weekly Calendar
 	   is unaffected; :global reaches the child <Calendar>'s generated markup. */
