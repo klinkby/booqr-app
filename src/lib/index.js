@@ -5,6 +5,7 @@ export { default as DataTable } from './components/DataTable.svelte';
 export { default as PaginatedTable } from './components/PaginatedTable.svelte';
 export { default as Form } from './components/Form.svelte';
 export { default as LimitedTextarea } from './components/LimitedTextarea.svelte';
+export { default as PhoneInput } from './components/PhoneInput.svelte';
 export { default as Calendar } from './components/Calendar.svelte';
 export { default as ListCalendar } from './components/ListCalendar.svelte';
 export { default as VacancyForm } from './components/VacancyForm.svelte';
