@@ -1,5 +1,4 @@
 import { LocationService, ServiceService, UserService, VacancyService } from '$lib/api';
-import { auth } from '$lib/auth.svelte.js';
 import { DateUtils } from '$lib/dateUtils.js';
 import { m } from '$lib/paraglide/messages.js';
 import { queryKeys } from '$lib/queryKeys';
@@ -22,8 +21,10 @@ import { SvelteMap } from 'svelte/reactivity';
  *
  * @param {() => { from: string|null, to: string|null }} getRange thunk
  *   returning the current week range read live from the URL.
+ * @param {() => string} getEmployeeId thunk returning the currently-selected
+ *   employee id for the appointments overlay.
  */
-export function usePlanData(getRange) {
+export function usePlanData(getRange, getEmployeeId) {
 	const query = useResourceQuery(() => {
 		const { from, to } = getRange();
 		return {
@@ -45,15 +46,16 @@ export function usePlanData(getRange) {
 		fetcher: () => UserService.getUsers(undefined, 'Employee', 0, 100),
 	}));
 
-	// The logged-in employee's own appointments (bookings where they are the
+	// The selected employee's appointments (bookings where they are the
 	// employee), scoped to the visible week so navigation refetches. Gated on
-	// auth + range. A later change will surface other employees' appointments too.
+	// employeeId + range.
 	const bookings = useResourceQuery(() => {
 		const { from, to } = getRange();
+		const employeeId = getEmployeeId();
 		return {
-			queryKey: queryKeys.bookings.userRange(auth.userId, from, to),
-			enabled: !!auth.userId && !!from && !!to,
-			fetcher: () => UserService.getMyBookings(auth.userId, from, to, 0, 100),
+			queryKey: queryKeys.bookings.userRange(employeeId, from, to),
+			enabled: !!employeeId && !!from && !!to,
+			fetcher: () => UserService.getMyBookings(employeeId, from, to, 0, 100),
 		};
 	});
 

@@ -228,5 +228,7 @@
 
 	"createLocation": "Opret lokation",
 	"legendEditLocation": "Rediger lokation",
-	"legendCreateLocation": "Opret lokation"
+	"legendCreateLocation": "Opret lokation",
+
+	"selectEmployeeToView": "Vælg medarbejder at vise"
 }

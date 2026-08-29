@@ -8,10 +8,28 @@
 
 	// Vacancy/location/employee data + mutations owned by the svelte-query hook.
 	// The range is read live from the URL inside the thunk so week navigation refetches.
-	const plan = usePlanData(() => ({
-		from: page.url.searchParams.get('from'),
-		to: page.url.searchParams.get('to'),
-	}));
+	// The selectedEmployeeId is passed as a second thunk to control the appointments overlay.
+	// Default to the logged-in employee; reconciled against the loaded roster below.
+	let selectedEmployeeId = $state(auth.userId || '');
+
+	const plan = usePlanData(
+		() => ({
+			from: page.url.searchParams.get('from'),
+			to: page.url.searchParams.get('to'),
+		}),
+		() => selectedEmployeeId,
+	);
+
+	// Once the employee roster loads, keep the <select> and selectedEmployeeId in
+	// sync: if the current value isn't an option (e.g. auth.userId isn't in the
+	// roster), fall back to the first employee so the bound value always matches a
+	// rendered <option> — mirrors the locations[0] default used for the vacancy form.
+	$effect(() => {
+		const employees = plan.employees;
+		if (employees.length > 0 && !employees.some((e) => e.id === selectedEmployeeId)) {
+			selectedEmployeeId = employees[0].id;
+		}
+	});
 
 	// Form state
 	let showForm = $state(false);
@@ -191,15 +209,33 @@
 	{/if}
 
 	<div class="flex gap-6">
-		<div class="flex-1 min-w-0" aria-busy={plan.isLoading}>
-			<Calendar
-				events={calendarEvents}
-				onDatesChange={handleDatesChange}
-				onDateClick={handleDateClick}
-				onEventClick={handleEventClick}
-				onEventResize={handleEventResize}
-				onEventDrop={handleEventDrop}
-			/>
+		<div class="flex-1 min-w-0 relative" aria-busy={plan.isLoading}>
+			<!-- Employee selector overlaid at the top-right of the calendar's toolbar
+			     row, vertically centred against the < > today buttons. The calendar
+			     toolbar below reserves right padding (pr-48) so its centred title
+			     can't slide under this control on narrow widths. -->
+			<div class="absolute right-0 top-0 z-10 flex items-center min-h-[2.375rem] max-w-[11rem]">
+				<label for="plan-employee-select" class="sr-only">{m.selectEmployeeToView()}</label>
+				<select
+					id="plan-employee-select"
+					bind:value={selectedEmployeeId}
+					class="w-full truncate rounded-md border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm"
+				>
+					{#each plan.employees as e (e.id)}
+						<option value={e.id}>{e.name}</option>
+					{/each}
+				</select>
+			</div>
+			<div class="[&_.ec-toolbar]:pr-48">
+				<Calendar
+					events={calendarEvents}
+					onDatesChange={handleDatesChange}
+					onDateClick={handleDateClick}
+					onEventClick={handleEventClick}
+					onEventResize={handleEventResize}
+					onEventDrop={handleEventDrop}
+				/>
+			</div>
 		</div>
 
 		{#if showForm}

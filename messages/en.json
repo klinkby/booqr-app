@@ -228,5 +228,7 @@
 
 	"createLocation": "Create Location",
 	"legendEditLocation": "Edit location",
-	"legendCreateLocation": "Create location"
+	"legendCreateLocation": "Create location",
+
+	"selectEmployeeToView": "Select employee to view"
 }
