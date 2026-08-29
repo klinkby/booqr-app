@@ -149,6 +149,18 @@ Presentational password reset email request form. Parent owns all state and API 
 
 Error/success kept in DOM with `class:hidden` for reliable `aria-live` announcements.
 
+### PhoneInput (`src/lib/components/PhoneInput.svelte`)
+
+Presentational phone-number field: `type="tel"` input with the `+` country-code prefix affordance, EU/Scandinavian
+`pattern` validation, and Paraglide label/title/placeholder. Used by the profile form and the admin contact form.
+
+| Prop               | Type      | Default | Description                                                          |
+| ------------------ | --------- | ------- | -------------------------------------------------------------------- |
+| `value` (bindable) | `string`  | `''`    | Phone number, two-way bound to the input                             |
+| `required`         | `boolean` | `true`  | Drives the input's `required` attribute (pass `false` when optional) |
+
+Renders `id="phone"`/`name="phone"` — render at most one per page (both consumers do).
+
 ### Password Validation
 
 ```js
