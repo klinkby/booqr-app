@@ -106,4 +106,50 @@ test.describe('Calendar UX Adjustments', () => {
 		// Capture screenshot
 		await page.screenshot({ path: testInfo.outputPath('calendar-event-click.png') });
 	});
+
+	test('overlays the employee\'s appointments in blue, labeled "customer, service"', async ({ page }, testInfo) => {
+		// A booking for the logged-in employee (customerId '1' → "Test Customer",
+		// serviceId 'svc1' → "Haircut") falling in the current week. Override the
+		// shared my-bookings mock (last registration wins).
+		const today = new Date();
+		const day = today.getDay();
+		const daysFromMonday = day === 0 ? 6 : day - 1;
+		const monday = new Date(today);
+		monday.setDate(today.getDate() - daysFromMonday);
+		const start = new Date(monday);
+		start.setDate(monday.getDate() + 2); // Wednesday of the visible week
+		start.setHours(9, 0, 0, 0);
+		const end = new Date(start.getTime() + 30 * 60 * 1000);
+
+		await page.route('**/api/users/*/my-bookings*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					items: [
+						{
+							id: 'appt-e2e',
+							startTime: start.toISOString(),
+							endTime: end.toISOString(),
+							serviceId: 'svc1',
+							locationId: 1,
+							employeeId: 'emp1',
+							customerId: '1',
+							hasNotes: false,
+						},
+					],
+				}),
+			}),
+		);
+
+		await page.goto('/admin/plan');
+		await expect(page.locator('h1:has-text("Plan")')).toBeVisible();
+
+		// The appointment renders as a blue event carrying the "customer, service"
+		// text label — distinguishable from vacancies by more than color alone.
+		const appointment = page.locator('.ec-event', { hasText: 'Test Customer, Haircut' });
+		await expect(appointment).toBeVisible({ timeout: 5000 });
+
+		await page.screenshot({ path: testInfo.outputPath('calendar-appointment-overlay.png') });
+	});
 });

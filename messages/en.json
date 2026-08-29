@@ -206,6 +206,7 @@
 	"newVacancy": "New Vacancy",
 	"booked": "Booked",
 	"available": "Available",
+	"appointmentTitle": "{customer}, {service}",
 
 	"createContact": "Create Contact",
 	"toggleContactFilters": "Toggle contact filters",

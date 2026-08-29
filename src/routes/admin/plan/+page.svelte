@@ -61,12 +61,14 @@
 				? ['!bg-red-500', '!text-white', '!border-red-600']
 				: ['!bg-green-500', '!text-white', '!border-green-600'],
 			extendedProps: {
+				eventType: 'vacancy',
 				employeeId: vacancy.employeeId,
 				locationId: vacancy.locationId,
 				bookingId: vacancy.bookingId,
 			},
 		}));
-		return previewEvent ? [...vacancyEvents, previewEvent] : vacancyEvents;
+		const events = [...vacancyEvents, ...plan.appointmentEvents];
+		return previewEvent ? [...events, previewEvent] : events;
 	});
 
 	// Week navigation: update URL params so the load function re-fetches for the new range
@@ -98,6 +100,8 @@
 
 	async function handleEventClick(info) {
 		if (info.event.id === 'preview') return;
+		// Appointments are display-only on this calendar (no vacancy edit panel).
+		if (info.event.extendedProps?.eventType === 'appointment') return;
 
 		formMode = 'view';
 		selectedVacancyId = info.event.id;

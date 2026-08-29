@@ -1,6 +1,12 @@
-import { LocationService, UserService, VacancyService } from '$lib/api';
+import { LocationService, ServiceService, UserService, VacancyService } from '$lib/api';
+import { auth } from '$lib/auth.svelte.js';
+import { DateUtils } from '$lib/dateUtils.js';
+import { m } from '$lib/paraglide/messages.js';
 import { queryKeys } from '$lib/queryKeys';
 import { useResourceQuery, useResourceMutation, fetchResource } from '$lib/resourceQuery.svelte.js';
+import { authedQueryFn } from '$lib/queryClient.js';
+import { createQueries } from '@tanstack/svelte-query';
+import { SvelteMap } from 'svelte/reactivity';
 
 /**
  * Route-local data hook for the admin plan calendar. Composes the generic
@@ -39,6 +45,38 @@ export function usePlanData(getRange) {
 		fetcher: () => UserService.getUsers(undefined, 'Employee', 0, 100),
 	}));
 
+	// The logged-in employee's own appointments (bookings where they are the
+	// employee), scoped to the visible week so navigation refetches. Gated on
+	// auth + range. A later change will surface other employees' appointments too.
+	const bookings = useResourceQuery(() => {
+		const { from, to } = getRange();
+		return {
+			queryKey: queryKeys.bookings.userRange(auth.userId, from, to),
+			enabled: !!auth.userId && !!from && !!to,
+			fetcher: () => UserService.getMyBookings(auth.userId, from, to, 0, 100),
+		};
+	});
+
+	// Service names for appointment labels — coarse, unfiltered, never changes.
+	const services = useResourceQuery(() => ({
+		queryKey: queryKeys.services.all,
+		fetcher: () => ServiceService.getServices(0, 100),
+	}));
+
+	// Customer names for the appointment labels. On the plan calendar the viewer
+	// is the *employee* on each booking, so the customer is a different user whose
+	// name must be fetched by id. One detail query per distinct customerId, keyed
+	// under `users.detail` so results share the cache other user-detail views fill.
+	const customerIds = $derived(
+		bookings.items.map((b) => b.customerId).filter((id, i, ids) => id && ids.indexOf(id) === i),
+	);
+	const customerQueries = createQueries(() => ({
+		queries: customerIds.map((id) => ({
+			queryKey: queryKeys.users.detail(id),
+			queryFn: () => authedQueryFn(() => UserService.getUserById(id)),
+		})),
+	}));
+
 	const addVacancy = useResourceMutation(queryKeys.vacancies.all, (requestBody) =>
 		VacancyService.addVacancy(requestBody),
 	);
@@ -53,6 +91,32 @@ export function usePlanData(getRange) {
 		},
 		get employees() {
 			return employees.items;
+		},
+		get appointmentEvents() {
+			// Join each booking's serviceId → name and customerId → name, then map
+			// to a blue calendar event. Mirrors profileData's `bookingEvents`.
+			const serviceMap = new SvelteMap(services.items.map((s) => [s.id, s.name]));
+			// customerIds and customerQueries share an index, so zip them into a map.
+			const customerMap = new SvelteMap(customerIds.map((id, i) => [id, customerQueries[i]?.data?.name ?? '']));
+			return bookings.items.map((b) => {
+				const serviceName = serviceMap.get(b.serviceId) ?? '';
+				const customerName = customerMap.get(b.customerId) ?? '';
+				return {
+					id: `appt-${b.id}`,
+					start: DateUtils.utcToLocalIso(b.startTime),
+					end: DateUtils.utcToLocalIso(b.endTime),
+					title: m.appointmentTitle({ customer: customerName, service: serviceName }),
+					startEditable: false,
+					durationEditable: false,
+					classNames: ['!bg-blue-500', '!text-white', '!border-blue-600'],
+					extendedProps: {
+						eventType: 'appointment',
+						bookingId: b.id,
+						customerId: b.customerId,
+						serviceId: b.serviceId,
+					},
+				};
+			});
 		},
 		get isLoading() {
 			return query.isLoading;
