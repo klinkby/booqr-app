@@ -51,10 +51,11 @@
 
 	// Bookings starting within 24 hours can no longer be rescheduled or
 	// cancelled, so the whole overflow menu is hidden for them (this also covers
-	// events already in the past). `event.start` is the calendar's local,
-	// timezone-free Date (profileData converts the API's UTC via
-	// DateUtils.utcToLocalIso), and `Date.now()` is local too, so the comparison
-	// is apples-to-apples.
+	// events already in the past). The library resolves `event.start` back to the
+	// booking's true instant (verified: it round-trips to the original UTC the API
+	// sent, offset applied), so comparing its epoch to Date.now() is correct
+	// regardless of the viewer's timezone. A missing/invalid start yields NaN,
+	// which fails the check and hides the menu (fail-safe).
 	const RESCHEDULE_CUTOFF_MS = 24 * 60 * 60 * 1000;
 	function canManage(event) {
 		return new Date(event.start).getTime() - Date.now() >= RESCHEDULE_CUTOFF_MS;

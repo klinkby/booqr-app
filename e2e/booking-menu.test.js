@@ -64,3 +64,77 @@ test.describe('My Bookings overflow menu', () => {
 		await expect(kebab).toBeFocused();
 	});
 });
+
+// The 24h cutoff compares the booking's instant to now, so it must stay correct
+// in any viewer timezone (a naive local-wall-clock comparison would drift by the
+// UTC offset). Pin a far-from-UTC zone and a booking ~23h out: it must read as
+// inside the cutoff (no kebab), not outside it. Guards the cutoff's timezone
+// correctness against future refactors of the time math.
+test.describe('My Bookings 24h cutoff is timezone-correct', () => {
+	test.use({ timezoneId: 'Australia/Brisbane' }); // UTC+10, no DST
+
+	test('a booking ~23h out (across the UTC offset) still hides its menu', async ({ page, context }) => {
+		await setupAuthToken(page);
+		await context.clearCookies();
+		// Minimal profile mocks; override my-bookings with a single ~23h-out booking.
+		await page.route('**/api/services*', (r) =>
+			r.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					items: [{ id: 'svc1', name: 'Haircut', duration: '00:30:00', description: '', employees: ['emp1'] }],
+				}),
+			}),
+		);
+		await page.route('**/api/employees*', (r) =>
+			r.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ items: [{ id: 'emp1', name: 'Employee One', email: 'e@x.com', role: 'Employee' }] }),
+			}),
+		);
+		await page.route('**/api/locations*', (r) =>
+			r.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ items: [{ id: 1, name: 'Location A' }] }),
+			}),
+		);
+		const start = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString();
+		const end = new Date(Date.now() + 23.5 * 60 * 60 * 1000).toISOString();
+		await page.route('**/api/users/*/my-bookings*', (r) =>
+			r.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					items: [
+						{
+							id: 'b1',
+							startTime: start,
+							endTime: end,
+							serviceId: 'svc1',
+							locationId: 1,
+							employeeId: 'emp1',
+							hasNotes: false,
+						},
+					],
+				}),
+			}),
+		);
+		await page.route('**/api/users/1', (r) =>
+			r.request().method() === 'GET'
+				? r.fulfill({
+						status: 200,
+						contentType: 'application/json',
+						body: JSON.stringify({ id: '1', name: 'Test Customer', email: 'test@example.com', phone: '12345678' }),
+					})
+				: r.fallback(),
+		);
+
+		await page.goto('/profile');
+		// The booking renders…
+		await expect(page.getByText('Haircut').first()).toBeVisible();
+		// …but is within 24h, so no overflow menu is offered.
+		await expect(page.getByRole('button', { name: 'Booking actions', exact: true })).toHaveCount(0);
+	});
+});
