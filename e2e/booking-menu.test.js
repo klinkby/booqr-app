@@ -16,26 +16,29 @@ test.describe('My Bookings overflow menu', () => {
 		await expect(page.getByRole('button', { name: /haircut/i })).toHaveCount(0);
 	});
 
-	test('hides the overflow menu for bookings within 24 hours', async ({ page }) => {
+	test('offers a kebab on every row, but only Duplicate within 24 hours', async ({ page }) => {
 		// The mock returns three bookings: two comfortably in the future and one
-		// ~2h out. Reschedule/cancel are not allowed inside 24h, so that row's kebab
-		// is not offered — only the two future bookings expose an operable one.
+		// ~2h out. Every booking can be duplicated, so the kebab is now visible and
+		// operable on all three rows.
 		await expect(page.getByRole('listitem')).toHaveCount(3);
-		await expect(page.getByRole('button', { name: 'Booking actions', exact: true })).toHaveCount(2);
+		const kebabs = page.getByRole('button', { name: 'Booking actions', exact: true });
+		await expect(kebabs).toHaveCount(3);
+		for (let i = 0; i < 3; i++) {
+			await expect(kebabs.nth(i)).toBeVisible();
+		}
 
-		// The within-24h row still renders a kebab element (kept for layout so the
-		// row keeps its width), but it is visibility:hidden — present in the DOM,
-		// absent from the a11y tree, and not visible. It's the first row (the ~2h
-		// booking is the earliest), so target the first kebab by CSS.
-		const allKebabs = page.locator('button[aria-label="Booking actions"]');
-		await expect(allKebabs).toHaveCount(3);
-		await expect(allKebabs.first()).toBeHidden();
-		await expect(allKebabs.first()).toHaveAttribute('tabindex', '-1');
+		// The within-24h row is the earliest, so it renders first. Its menu offers
+		// only Duplicate — Reschedule and Cancel are gated to bookings >=24h out.
+		await kebabs.first().click();
+		await expect(page.getByRole('menuitem', { name: /duplicate/i })).toBeVisible();
+		await expect(page.getByRole('menuitem', { name: /reschedule/i })).toHaveCount(0);
+		await expect(page.getByRole('menuitem', { name: /cancel booking/i })).toHaveCount(0);
 	});
 
 	test('opens an accessible menu and stacks above the rows below it', async ({ page }) => {
-		// The kebab (⋮). Exact name targets the button itself.
-		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).first();
+		// The kebab (⋮) on a manageable (>=24h) row — the ~2h row is earliest, so the
+		// second kebab is the first future booking. Exact name targets the button.
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).nth(1);
 		await expect(kebab).toBeVisible();
 		await expect(kebab).toHaveAttribute('aria-haspopup', 'menu');
 		await expect(kebab).toHaveAttribute('aria-expanded', 'false');
@@ -43,13 +46,15 @@ test.describe('My Bookings overflow menu', () => {
 		await kebab.click();
 		await expect(kebab).toHaveAttribute('aria-expanded', 'true');
 
-		// Both actions are exposed as real menu items.
+		// All three actions are exposed as real menu items for a manageable booking.
 		const menu = page.getByRole('menu', { name: /booking actions/i });
 		await expect(menu).toBeVisible();
 		const reschedule = page.getByRole('menuitem', { name: /reschedule/i });
 		const cancel = page.getByRole('menuitem', { name: /cancel booking/i });
+		const duplicate = page.getByRole('menuitem', { name: /duplicate/i });
 		await expect(reschedule).toBeVisible();
 		await expect(cancel).toBeVisible();
+		await expect(duplicate).toBeVisible();
 
 		// z-index regression guard: the popup must render ABOVE the day-header and
 		// booking row beneath it, not behind them. Probe the document's top-most
@@ -85,7 +90,9 @@ test.describe('My Bookings overflow menu', () => {
 			return route.fallback();
 		});
 
-		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).first();
+		// The ~2h row is earliest and offers only Duplicate; the first manageable
+		// (cancellable) booking, booking-e2e-1, is the second kebab.
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).nth(1);
 		await kebab.click();
 		await page.getByRole('menuitem', { name: /cancel booking/i }).click();
 
@@ -108,7 +115,7 @@ test.describe('My Bookings overflow menu', () => {
 			return route.fallback();
 		});
 
-		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).first();
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).nth(1);
 		await kebab.click();
 		await page.getByRole('menuitem', { name: /cancel booking/i }).click();
 
@@ -121,7 +128,7 @@ test.describe('My Bookings overflow menu', () => {
 		// id in sessionStorage so the confirm step can delete it once the new
 		// booking is made. A one-time `rebook` nonce is carried in both places and
 		// must match before the old booking is deleted.
-		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).first();
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true }).nth(1);
 		await kebab.click();
 		await page.getByRole('menuitem', { name: /reschedule/i }).click();
 
@@ -157,12 +164,12 @@ test.describe('My Bookings overflow menu', () => {
 // The 24h cutoff compares the booking's instant to now, so it must stay correct
 // in any viewer timezone (a naive local-wall-clock comparison would drift by the
 // UTC offset). Pin a far-from-UTC zone and a booking ~23h out: it must read as
-// inside the cutoff (no kebab), not outside it. Guards the cutoff's timezone
-// correctness against future refactors of the time math.
+// inside the cutoff (Duplicate only, no Reschedule/Cancel), not outside it.
+// Guards the cutoff's timezone correctness against future refactors of the time math.
 test.describe('My Bookings 24h cutoff is timezone-correct', () => {
 	test.use({ timezoneId: 'Australia/Brisbane' }); // UTC+10, no DST
 
-	test('a booking ~23h out (across the UTC offset) still hides its menu', async ({ page, context }) => {
+	test('a booking ~23h out (across the UTC offset) offers only Duplicate', async ({ page, context }) => {
 		await setupApiMocks(page);
 		await setupAuthToken(page);
 		await context.clearCookies();
@@ -192,7 +199,13 @@ test.describe('My Bookings 24h cutoff is timezone-correct', () => {
 		await page.goto('/profile');
 		// The booking renders…
 		await expect(page.getByText('Haircut').first()).toBeVisible();
-		// …but is within 24h, so no overflow menu is offered.
-		await expect(page.getByRole('button', { name: 'Booking actions', exact: true })).toHaveCount(0);
+		// …with a kebab (every booking is duplicable), but being within 24h its menu
+		// offers only Duplicate — Reschedule and Cancel are gated out. Open the row's
+		// menu and assert its contents (rather than a global kebab count, which is not
+		// what this test is guarding).
+		await page.getByRole('button', { name: 'Booking actions', exact: true }).first().click();
+		await expect(page.getByRole('menuitem', { name: /duplicate/i }).first()).toBeVisible();
+		await expect(page.getByRole('menuitem', { name: /reschedule/i })).toHaveCount(0);
+		await expect(page.getByRole('menuitem', { name: /cancel booking/i })).toHaveCount(0);
 	});
 });

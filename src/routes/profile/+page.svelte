@@ -75,6 +75,16 @@
 		goto(`/book/${serviceId}?${params.toString()}`);
 	}
 
+	function handleDuplicateEvent(event) {
+		const { serviceId, employeeId, locationId } = event.extendedProps;
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
+		const params = new URLSearchParams();
+		params.set('employee', employeeId);
+		params.set('location', locationId);
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic path segment combined with a query string
+		goto(`/book/${serviceId}?${params.toString()}`);
+	}
+
 	async function handleCancelEvent(event) {
 		// ListCalendar fires this without awaiting and closes its menu immediately,
 		// so guard against a second cancel landing before the first settles.
@@ -127,6 +137,7 @@
 						onBookNew={handleBookNew}
 						onMoveEvent={handleMoveEvent}
 						onCancelEvent={handleCancelEvent}
+						onDuplicateEvent={handleDuplicateEvent}
 					/>
 				</section>
 

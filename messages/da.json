@@ -152,6 +152,7 @@
 	"bookingActions": "Booking-handlinger",
 	"rescheduleBooking": "Ombook",
 	"cancelBooking": "Annuller booking",
+	"duplicateBooking": "Dupliker booking",
 	"bookingCancelled": "Booking annulleret.",
 
 	"termsAndConditions": "Vilkår og betingelser",
