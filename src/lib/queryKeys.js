@@ -28,6 +28,8 @@ export const queryKeys = {
 		// A user's full my-bookings set (fetched without query params; filtered
 		// and paged client-side by the profile calendar).
 		byUser: (userId) => [...queryKeys.bookings.all, userId],
+		// A user's my-bookings scoped to a week range (admin plan overlay).
+		userRange: (userId, from, to) => [...queryKeys.bookings.all, userId, from, to],
 	},
 	locations: {
 		all: ['locations'],

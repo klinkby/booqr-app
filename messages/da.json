@@ -206,6 +206,7 @@
 	"newVacancy": "Ny ledig tid",
 	"booked": "Booket",
 	"available": "Ledig",
+	"appointmentTitle": "{customer}, {service}",
 
 	"createContact": "Opret kontakt",
 	"toggleContactFilters": "Skift kontaktfiltre",
@@ -227,5 +228,7 @@
 
 	"createLocation": "Opret lokation",
 	"legendEditLocation": "Rediger lokation",
-	"legendCreateLocation": "Opret lokation"
+	"legendCreateLocation": "Opret lokation",
+
+	"selectEmployeeToView": "Vælg medarbejder at vise"
 }

@@ -206,6 +206,7 @@
 	"newVacancy": "New Vacancy",
 	"booked": "Booked",
 	"available": "Available",
+	"appointmentTitle": "{customer}, {service}",
 
 	"createContact": "Create Contact",
 	"toggleContactFilters": "Toggle contact filters",
@@ -227,5 +228,7 @@
 
 	"createLocation": "Create Location",
 	"legendEditLocation": "Edit location",
-	"legendCreateLocation": "Create location"
+	"legendCreateLocation": "Create location",
+
+	"selectEmployeeToView": "Select employee to view"
 }
