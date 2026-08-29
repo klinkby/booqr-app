@@ -1,6 +1,7 @@
 <script>
 	import { Calendar, List } from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
+	import { untrack } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { getLocale } from '$lib/paraglide/runtime.js';
 
@@ -117,7 +118,10 @@
 		// December) stay reachable; validRange caps paging to the years that
 		// actually hold bookings.
 		view: 'listYear',
-		validRange,
+		// Seed the initial validRange only; the $effect above reactively pushes
+		// later values via setOption. untrack marks the one-time read as deliberate
+		// (this whole `options` object is built once, at construction).
+		validRange: untrack(() => validRange),
 		firstDay: 1,
 		// Localizes day/month names in the list day headers and the title.
 		locale,
@@ -150,8 +154,10 @@
 		// library stamps role="button" on every event row whenever *any* onclick
 		// handler is present, so an always-on `() => onEventClick?.()` would make the
 		// rows falsely interactive (and nest the kebab <button> inside a
-		// role="button") even on the profile page, which passes no handler.
-		...(onEventClick && { eventClick: (info) => onEventClick(info) }),
+		// role="button") even on the profile page, which passes no handler. The
+		// presence check is a one-time decision at construction (untrack), and the
+		// handler is invoked lazily so it always calls the current prop.
+		...(untrack(() => !!onEventClick) && { eventClick: (info) => onEventClick(info) }),
 		// Localized empty state (the library's own default is untranslated).
 		noEventsContent: () => m.noBookings(),
 	};

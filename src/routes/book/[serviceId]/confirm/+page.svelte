@@ -14,6 +14,7 @@
 	const serviceId = $derived(page.params.serviceId);
 	const vacancyId = $derived(page.url.searchParams.get('vacancy'));
 	const startIso = $derived(page.url.searchParams.get('start'));
+	const rebookNonce = $derived(page.url.searchParams.get('rebook'));
 	const linkValid = $derived(!!vacancyId && !!startIso);
 
 	const service = $derived(confirmData.services.find((s) => String(s.id) === String(serviceId)));
@@ -111,6 +112,34 @@
 				notes: notes || null,
 				startTime: startDate.toISOString(),
 			});
+			// Rebook: if this booking replaces a prior one (started via "Reschedule" on
+			// the profile), delete the old booking now that the new one is confirmed.
+			// The stored token is consumed only when its one-time nonce matches the
+			// one carried through the wizard URL — so an unrelated booking for the
+			// same service can never delete a stale rebook target. Best-effort: the
+			// new booking already succeeded, so a delete failure is swallowed, and the
+			// token is consumed exactly once (cleared in finally).
+			try {
+				const raw = sessionStorage.getItem('pendingRebook');
+				if (raw) {
+					const pending = JSON.parse(raw);
+					if (pending?.bookingId && pending.nonce && pending.nonce === rebookNonce) {
+						try {
+							await confirmData.deleteBooking(pending.bookingId);
+						} catch {
+							// swallow — new booking is confirmed; stale old booking self-corrects
+						}
+					}
+				}
+			} catch {
+				// sessionStorage unavailable — nothing to consume
+			} finally {
+				try {
+					sessionStorage.removeItem('pendingRebook');
+				} catch {
+					// ignore
+				}
+			}
 			// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
 			const params = new URLSearchParams();
 			if (employeeName) params.set('employee', employeeName);

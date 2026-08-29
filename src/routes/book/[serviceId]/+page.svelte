@@ -205,6 +205,11 @@
 		const params = new URLSearchParams();
 		params.set('vacancy', String(slot.vacancyId));
 		params.set('start', slot.startTime.toISOString());
+		// Carry the rebook nonce (if this is a reschedule flow) through to the
+		// confirm step; it's matched against the sessionStorage token there before
+		// the old booking is deleted. Harmless if it lingers — it's a one-time nonce.
+		const rebook = page.url.searchParams.get('rebook');
+		if (rebook) params.set('rebook', rebook);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic path segment combined with a query string; resolve() covers the bare path only
 		goto(`/book/${page.params.serviceId}/confirm?${params.toString()}`);
 	}

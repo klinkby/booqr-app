@@ -2,6 +2,7 @@
 	import { ServiceList, apiErrorMessage } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 	import { useHomeData } from './homeData.svelte.js';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -11,6 +12,16 @@
 
 	$effect(() => {
 		heading?.focus();
+	});
+
+	onMount(() => {
+		// Starting a fresh booking from the home page clears any abandoned rebook
+		// intent, so a new booking never deletes a previously-selected booking.
+		try {
+			sessionStorage.removeItem('pendingRebook');
+		} catch {
+			// sessionStorage unavailable — nothing to clear
+		}
 	});
 
 	function handleSelect(service) {
