@@ -143,7 +143,8 @@
 	"profileUpdated": "Profilen er opdateret.",
 	"legendEditProfile": "Rediger profiloplysninger",
 	"emailCannotBeChanged": "E-mail kan ikke ændres",
-	"phoneValidation": "Telefonnummeret skal være præcis 8 cifre",
+	"phoneValidation": "Telefonnummeret skal være en EU-/skandinavisk landekode efterfulgt af abonnentnummeret (fx 4512345678)",
+	"phonePlaceholder": "4512345678",
 
 	"myBookings": "Mine bookinger",
 	"bookNewAppointment": "Book en ny tid",
