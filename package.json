@@ -36,7 +36,7 @@
 		"@tailwindcss/vite": "^4.3.3",
 		"@tanstack/svelte-query": "^6.1.38",
 		"dotenv": "^17.4.2",
-		"eslint": "^10.8.1",
+		"eslint": "^10.9.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.23.0",
 		"globals": "^17.11.0",
