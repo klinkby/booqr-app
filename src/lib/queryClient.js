@@ -5,6 +5,22 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 
 let refreshPromise = null;
+
+/**
+ * True when an ApiError is the backend's `tenant-mismatch` ProblemDetails: an
+ * authenticated JWT whose `tenant` claim ≠ the host-resolved tenant (e.g. a
+ * token minted on alice.booqr.dk replayed on bob.booqr.dk). The `type` is the
+ * full URI `https://www.booqr.dk/problems/tenant-mismatch`, so match the
+ * trailing slug rather than the whole string.
+ */
+function isTenantMismatch(error) {
+	return (
+		error instanceof ApiError &&
+		error.status === 403 &&
+		typeof error.body?.type === 'string' &&
+		error.body.type.endsWith('/problems/tenant-mismatch')
+	);
+}
 /**
  * Runs an API operation with automatic 401 refresh-and-retry, and awaits the shared coalesced refresh
  * (see `refreshToken`) and retries once.
@@ -17,6 +33,18 @@ export async function authedQueryFn(operation) {
 	try {
 		return await operation();
 	} catch (error) {
+		// A tenant-mismatch (403) means this session's token belongs to another
+		// subdomain. A refresh can never fix it — the refresh cookie is
+		// SameSite=Strict and the claim guard is per-host — so drop the session
+		// and force re-login on *this* (correct) subdomain, distinct from a
+		// normal 401 refresh-and-retry.
+		if (isTenantMismatch(error)) {
+			auth.clear();
+			queryClient.clear();
+			const returnUrl = globalThis.location.pathname + globalThis.location.search;
+			await goto(resolve(`/login?returnUrl=${encodeURIComponent(returnUrl)}`));
+			throw error;
+		}
 		if (!(error instanceof ApiError) || error.status !== 401) {
 			throw error;
 		}
