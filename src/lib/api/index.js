@@ -10,5 +10,6 @@ export { BookingService } from './services/BookingService';
 export { EmployeeService } from './services/EmployeeService';
 export { LocationService } from './services/LocationService';
 export { ServiceService } from './services/ServiceService';
+export { TenantService } from './services/TenantService';
 export { UserService } from './services/UserService';
 export { VacancyService } from './services/VacancyService';
