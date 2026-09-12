@@ -2,7 +2,7 @@
 
 Audience: the **frontend orchestration agent**. You coordinate; you spawn **subagents** to implement
 well-scoped subtasks in parallel. Read `docs/1-design.md` first — it is the source of truth. This guide is
-*how* to build it safely. The frontend work is small; most of the design lives server-side.
+_how_ to build it safely. The frontend work is small; most of the design lives server-side.
 
 ## Orchestration model
 
@@ -40,7 +40,8 @@ well-scoped subtasks in parallel. Read `docs/1-design.md` first — it is the so
 
 ## Work breakdown
 
-### Task 1 — Tenant state singleton  **[HAIKU]** (build first; shared contract)
+### Task 1 — Tenant state singleton **[HAIKU]** (build first; shared contract)
+
 - New `src/lib/tenant.svelte.js`: a runes `TenantState` mirroring `src/lib/auth.svelte.js`, holding
   `{ id, slug, displayName, logo }` and a status (`loading` / `resolved` / `notFound`). Export singleton
   `tenant`; re-export from `src/lib/index.js`.
@@ -48,7 +49,8 @@ well-scoped subtasks in parallel. Read `docs/1-design.md` first — it is the so
   driven from the layout (Task 2).
 - **Gate:** lint clean; imports resolve.
 
-### Task 2 — Bootstrap + unknown-subdomain redirect  **[SONNET]** (after Task 1)
+### Task 2 — Bootstrap + unknown-subdomain redirect **[SONNET]** (after Task 1)
+
 - In `src/routes/+layout.svelte`, mirror the existing auth/locale bootstrap `$effect` (client-only,
   `ssr = false`): call `GET /api/tenant` via the generated client (or `request`), populate `tenant`.
   - `200` → `tenant.resolved`, render the app.
@@ -59,17 +61,20 @@ well-scoped subtasks in parallel. Read `docs/1-design.md` first — it is the so
   - While resolving, show an accessible `role="status"` interstitial (Paraglide copy).
 - **Gate:** e2e for known-tenant load, unknown-subdomain redirect, and apex/marketing view all pass.
 
-### Task 3 — Per-tenant branding  **[HAIKU]** (after Task 1; parallel with Task 4)
+### Task 3 — Per-tenant branding **[HAIKU]** (after Task 1; parallel with Task 4)
+
 - Surface `tenant.displayName` (+ logo if present) in `NavBar`/`<title>` via existing presentational
   component props. Keep components presentational; pass branding down as props from the layout.
 - **Gate:** lint clean; branding renders from mocked `tenant`.
 
-### Task 4 — i18n strings  **[HAIKU]** (parallel with Task 3)
+### Task 4 — i18n strings **[HAIKU]** (parallel with Task 3)
+
 - Add any new copy (resolving/redirecting interstitial, marketing-view labels if introduced) to
   `messages/en.json` + `messages/da.json`; reference via `m.*`.
 - **Gate:** Paraglide compiles in the Vite build; no hard-coded strings.
 
-### Task 5 — E2E specs  **[HAIKU]** (after Task 2)
+### Task 5 — E2E specs **[HAIKU]** (after Task 2)
+
 - Playwright specs (mirror existing ones): mock `GET /api/tenant` → `200` (branded app renders; assert one
   `<main>`, one `<h1>`, skip link) and → `404 tenant-not-found` (assert navigation to `www.booqr.dk`, no
   tenant content); apex host → marketing view. Credentials from `TEST_EMAIL`/`TEST_PASSWORD`; never log
@@ -98,3 +103,37 @@ well-scoped subtasks in parallel. Read `docs/1-design.md` first — it is the so
 - PR attaches a **Playwright screenshot** of the branded app and the redirect behavior (per user preference
   for UI/UX changes in this NPM project).
 - Conventional commits; pushed to `claude/multi-tenancy-options-fsx16n`. No feature beyond the design.
+
+# POST MORTEM NOTES FROM THE BACKEND TEAM:
+
+Contract held as designed ✅
+
+These match docs/1-design.md §3 exactly — no frontend change from the plan:
+
+- GET /api/tenant anonymous, resolves tenant from Host, returns branding for a known tenant, 404 ProblemDetails, never a redirect (SPA still does the www.booqr.dk redirect on tenant-not-found).
+- Reserved/apex hosts (www, api, naked booqr.dk) → no tenant.
+
+Specifics the SPA should code against (now concrete)
+
+1. GET /api/tenant response body is { "displayName", "slug" } — and no logo/branding beyond that. The design mentioned "display name, logo ref"; we did not add a logo field (the Core Tenant registry has no logo column). → If the SPA expects
+   a logo ref, that's a follow-up (add a column + expose it). This is the one real deviation from the design's wording.
+2. ProblemDetails type is the full URI https://www.booqr.dk/problems/tenant-not-found (status 404), not the bare string tenant-not-found. The SPA should match on that URI (or the trailing slug), not assume type == "tenant-not-found".
+3. New failure mode: 403 with type: …/problems/tenant-mismatch when an authenticated JWT's tenant claim ≠ the host tenant (e.g. a token from alice.booqr.dk used on bob.booqr.dk). The SPA should treat this like an auth failure (clear token /
+   re-login on the correct subdomain), distinct from a normal 401.
+4. Tenant-required endpoints now return 404 tenant-not-found when the host has no tenant (default-deny), before auth. So a request to a data endpoint on an unknown/apex host gets 404, not 401/500. Health, OpenAPI, /api/tenant, and auth
+   login/refresh/logout are exempt.
+5. Access tokens now carry a tenant claim ("tenant": "<id>"). If the SPA decodes the JWT, that claim now exists; it must be consistent with the subdomain the SPA is on.
+
+Operational things the SPA/app depends on
+
+- Per-subdomain auth: a session is bound to one tenant subdomain. The refresh cookie is SameSite=Strict and the claim guard is per-host, so the SPA must not try to reuse a session across <slug>.booqr.dk boundaries — log in per subdomain.
+- Activation flow changed from the design: provisioning does not email/emit a signed activation link (Control can't reach the signing code). The initial admin is seeded with no password; activation happens via the normal password-reset flow
+  on the tenant's subdomain. If the SPA/onboarding assumed an emailed activation link at provision time, that assumption is now "operator triggers a reset."
+- Routing: the SPA is served for any <slug>.booqr.dk; only naked booqr.dk redirects to www. alice.booqr.dk is no longer mangled to www.alice.booqr.dk (the old bug).
+
+Bottom line
+
+The XHR contract the SPA depends on is intact. The two items most likely to need frontend/coordination work:
+
+- the missing logo/branding field in /api/tenant (design said logo ref; we shipped displayName+slug only), and
+- the new 403 tenant-mismatch handling.
