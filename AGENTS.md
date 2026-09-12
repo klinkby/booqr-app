@@ -86,6 +86,42 @@ It follows secure, accessible, and simply standards-first principles.
   from memory (`password = ''`), redirect to `returnUrl` or `/`.
 - **Logout**: `AuthenticationService.logout()`, `auth.clear()`, `goto('/')`.
 
+## Multi-tenancy
+
+The SPA is served for every `*.booqr.dk` subdomain. Tenant identity is resolved at runtime from the host; the API is
+the sole authority — never assume a subdomain is valid client-side.
+
+- **Tenant state singleton** (`src/lib/tenant.svelte.js`): `TenantState` runes class holding `{ displayName, slug }`
+  and a `status` field. Mirrors `auth.svelte.js`. Singleton exported as `tenant`.
+  - Statuses: `loading` (initial) → `resolved` (known tenant) | `notFound` (API 404, redirect) | `reserved` (apex
+    host) | `error` (non-404 failure, retryable).
+  - Derived booleans: `tenant.isResolved`, `tenant.isLoading`, `tenant.isNotFound`, `tenant.isReserved`,
+    `tenant.isError`.
+  - Mutations: `tenant.resolve({ displayName, slug })`, `tenant.setNotFound()`, `tenant.setReserved()`,
+    `tenant.setError()`, `tenant.retry()`.
+- **`hostCategory(hostname)`** (`src/lib/tenant.svelte.js`): synchronous check — returns `'reserved'` for
+  `booqr.dk`, `www.booqr.dk`, `status.booqr.dk`; `'tenant'` for everything else (subdomains, localhost, preview
+  hosts). Called at module init; reserved hosts skip the API fetch entirely.
+- **`MARKETING_URL`** (`src/lib/tenant.svelte.js`): `https://www.booqr.dk` — derived from `BASE_DOMAIN` so it
+  stays consistent and never drifts from the reserved-host list. Use this constant instead of hardcoding the URL.
+- **Bootstrap** (`src/routes/+layout.svelte`): a client-only `$effect` calls `TenantService.getTenant()` when
+  `tenant.status === 'loading'`. Outcomes:
+  - `200` → `tenant.resolve(branding)` — branded app renders.
+  - `404` with ProblemDetails `type` ending in `/problems/tenant-not-found` → `tenant.setNotFound()` then
+    `window.location.assign(MARKETING_URL)` (full-page redirect; `goto` is same-origin only).
+  - Bare 404 from a CDN/gateway, 500, network error → `tenant.setError()` — error UI shown, user can retry.
+  - **Do not re-throw** inside the bootstrap IIFE — it is fire-and-forget, and an unhandled rejection would
+    surface nothing useful.
+- **Per-tenant branding**: `tenant.displayName` drives `NavBar` brand text and `<title>`. Falls back to
+  `m.marketingHeading()` (Paraglide) — never hardcode `'Booqr'` as the fallback.
+- **403 tenant-mismatch** (`src/lib/queryClient.js`): `isTenantMismatch(error)` detects a `403` whose
+  ProblemDetails `type` ends in `/problems/tenant-mismatch` (a token minted on another subdomain replayed here).
+  On match: `auth.clear()` + `queryClient.clear()` + redirect to `/login`. Distinct from the 401 refresh-and-retry
+  path — a tenant-mismatch cannot be fixed by a refresh.
+- **ProblemDetails matching rule**: always require `typeof error.body?.type === 'string'` before checking
+  `.endsWith(…)`. A bare 404 or 403 from a proxy/gateway lacks a `type` and must be treated as a transient failure,
+  not a semantic tenant signal.
+
 ## Security Considerations (OWASP Aligned)
 
 - **Secrets**: NEVER in code. Use `.env` (gitignored).
