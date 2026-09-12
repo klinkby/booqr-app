@@ -68,6 +68,70 @@ test.describe('Tenant resolution', () => {
 		// Assert the mocked marketing page's content is visible (no tenant app shell leaked).
 		await expect(page.getByRole('heading', { name: 'Marketing' })).toBeVisible();
 	});
+
+	test('non-404 failure shows a retryable error and never redirects', async ({ page }) => {
+		// Guard: fail the test if the app wrongly redirects to the marketing site
+		// on a transient (non-tenant-not-found) failure.
+		await page.route('https://www.booqr.dk/**', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'text/html',
+				body: '<!doctype html><title>Marketing</title><h1>Marketing</h1>',
+			}),
+		);
+
+		// First tenant request fails with a 503 (server hiccup / network-class error).
+		await page.route('**/api/my-tenant*', (route) =>
+			route.fulfill({
+				status: 503,
+				contentType: 'application/problem+json',
+				body: JSON.stringify({ type: 'about:blank', title: 'Service Unavailable', status: 503 }),
+			}),
+		);
+
+		await page.goto('/');
+
+		// Retryable error UI is shown instead of hanging on the loading interstitial.
+		await expect(page.getByRole('heading', { level: 1 })).toHaveText(/something went wrong/i);
+		await expect(page.getByRole('button', { name: /try again/i })).toBeVisible();
+
+		// The browser must NOT have been ejected to the marketing site.
+		expect(page.url()).not.toContain('www.booqr.dk');
+
+		// Now let the tenant endpoint succeed and retry — the app shell should render.
+		await page.route('**/api/my-tenant*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ displayName: 'Acme Salon', slug: 'acme' }),
+			}),
+		);
+
+		await page.getByRole('button', { name: /try again/i }).click();
+
+		// Branded app shell resolves after retry.
+		await expect(page.getByRole('link', { name: 'Acme Salon' })).toBeVisible();
+	});
+
+	test('bare 404 without a ProblemDetails type is treated as an error, not tenant-not-found', async ({ page }) => {
+		// A CDN/proxy 404 with no ProblemDetails body must NOT eject a valid tenant.
+		await page.route('https://www.booqr.dk/**', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'text/html',
+				body: '<!doctype html><title>Marketing</title><h1>Marketing</h1>',
+			}),
+		);
+
+		await page.route('**/api/my-tenant*', (route) =>
+			route.fulfill({ status: 404, contentType: 'text/html', body: '<h1>Not Found</h1>' }),
+		);
+
+		await page.goto('/');
+
+		await expect(page.getByRole('heading', { level: 1 })).toHaveText(/something went wrong/i);
+		expect(page.url()).not.toContain('www.booqr.dk');
+	});
 });
 
 // NOTE: The reserved/apex host branch (booqr.dk, www.booqr.dk, status.booqr.dk)

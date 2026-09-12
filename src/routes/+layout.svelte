@@ -2,7 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { AuthenticationService, TenantService, ApiError } from '$lib/api';
-	import { auth, NavBar, LanguageToggle, locale, tenant } from '$lib';
+	import { auth, NavBar, LanguageToggle, locale, tenant, MARKETING_URL } from '$lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -36,22 +36,31 @@
 				// same-origin only) and do NOT render the tenant app shell — guarded
 				// below so there is no flash of tenant UI. The ProblemDetails `type`
 				// is the full URI …/problems/tenant-not-found; match the trailing slug.
+				// Require an explicit ProblemDetails `type` (mirrors isTenantMismatch
+				// in queryClient.js): a bare 404 from a CDN/proxy/gateway is a
+				// transient failure, not a genuine tenant-not-found — treat it as an
+				// error so a valid tenant is never ejected off the app.
 				const notFound =
 					err instanceof ApiError &&
 					err.status === 404 &&
-					(typeof err.body?.type !== 'string' || err.body.type.endsWith('/problems/tenant-not-found'));
+					typeof err.body?.type === 'string' &&
+					err.body.type.endsWith('/problems/tenant-not-found');
 				if (notFound) {
 					tenant.setNotFound();
-					window.location.assign('https://www.booqr.dk');
+					window.location.assign(MARKETING_URL);
 					return;
 				}
-				throw err;
+				// Any other failure (500, network, CORS, bare 404) is retryable: show
+				// an error UI instead of hanging on 'loading' forever. Do not re-throw
+				// — this runs in a fire-and-forget IIFE and a throw would only become
+				// an uncaught rejection.
+				tenant.setError();
 			}
 		})();
 	});
 
 	// Per-tenant branding: fall back to the app name until resolved.
-	let brandName = $derived(tenant.displayName ?? 'Booqr');
+	let brandName = $derived(tenant.displayName ?? m.marketingHeading());
 
 	function titleFromPath(pathname) {
 		const seg = pathname.split('/').filter(Boolean);
@@ -154,6 +163,26 @@
 			</div>
 		</footer>
 	</QueryClientProvider>
+{:else if tenant.isError}
+	<!-- Non-404 resolution failure (500, network, CORS, bare 404): retryable
+	     error instead of hanging on the loading interstitial. Its own single
+	     <main>/<h1>. Retry resets tenant status to 'loading', re-triggering the
+	     bootstrap $effect above. -->
+	<a
+		class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded"
+		href="#main-content">{m.skipToMainContent()}</a
+	>
+	<main class="container mx-auto px-4 py-16 max-w-2xl text-center" id="main-content">
+		<h1 class="text-2xl font-bold">{m.tenantErrorHeading()}</h1>
+		<p role="alert" class="mt-4 text-gray-700">{m.tenantErrorBody()}</p>
+		<button
+			class="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+			type="button"
+			onclick={() => tenant.retry()}
+		>
+			{m.tenantRetry()}
+		</button>
+	</main>
 {:else}
 	<!-- Resolving (loading) or redirecting after tenant-not-found. Guard the
 	     tenant app shell so it never flashes for an unknown subdomain. The
