@@ -100,7 +100,7 @@ the sole authority — never assume a subdomain is valid client-side.
   - Mutations: `tenant.resolve({ displayName, slug })`, `tenant.setNotFound()`, `tenant.setReserved()`,
     `tenant.setError()`, `tenant.retry()`.
 - **`hostCategory(hostname)`** (`src/lib/tenant.svelte.js`): synchronous check — returns `'reserved'` for
-  `booqr.dk`, `www.booqr.dk`, `status.booqr.dk`; `'tenant'` for everything else (subdomains, localhost, preview
+  `booqr.dk`, `www.booqr.dk`, `status.booqr.dk`, `mta-sts.booqr.dk`; `'tenant'` for everything else (subdomains, localhost, preview
   hosts). Called at module init; reserved hosts skip the API fetch entirely.
 - **`MARKETING_URL`** (`src/lib/tenant.svelte.js`): `https://www.booqr.dk` — derived from `BASE_DOMAIN` so it
   stays consistent and never drifts from the reserved-host list. Use this constant instead of hardcoding the URL.
