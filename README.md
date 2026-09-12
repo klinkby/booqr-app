@@ -71,7 +71,7 @@ the sole authority — never assume a subdomain is valid client-side.
 
 `src/lib/tenant.svelte.js` exports a `tenant` singleton (`TenantState` runes class) holding `{ displayName, slug }`
 and a `status` field (`loading` → `resolved` | `notFound` | `reserved` | `error`). `hostCategory()` synchronously
-classifies the current host as `'reserved'` (the apex `booqr.dk`, `www`, `status`) or `'tenant'` (everything else,
+classifies the current host as `'reserved'` (the apex `booqr.dk`, `www`, `status`, `mta-sts`) or `'tenant'` (everything else,
 including subdomains, localhost, and preview hosts). Reserved hosts skip the API fetch entirely.
 
 The root layout (`src/routes/+layout.svelte`) bootstraps tenant resolution client-side: a `$effect` calls
