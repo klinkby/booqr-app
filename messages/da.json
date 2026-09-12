@@ -231,5 +231,11 @@
 	"legendEditLocation": "Rediger lokation",
 	"legendCreateLocation": "Opret lokation",
 
-	"selectEmployeeToView": "Vælg medarbejder at vise"
+	"selectEmployeeToView": "Vælg medarbejder at vise",
+
+	"tenantResolving": "Indlæser…",
+	"tenantRedirecting": "Omdirigerer…",
+	"marketingHeading": "Booqr",
+	"marketingTagline": "Online booking til din virksomhed.",
+	"marketingBody": "Denne adresse er ikke et bookingsite. Besøg din virksomheds eget booqr.dk-subdomæne for at booke, eller kontakt os for at oprette dit eget."
 }

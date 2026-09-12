@@ -109,6 +109,16 @@ function currentMonthBookings() {
  * admin calendar page. Safe to call multiple times; later registrations win.
  */
 export async function setupApiMocks(page) {
+	// Tenant resolution runs on every page load (localhost is a tenant
+	// candidate). Without a 200 here the app would sit on the resolving
+	// interstitial forever, so mock a known tenant by default.
+	await page.route('**/api/my-tenant*', (route) =>
+		route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({ displayName: 'Test Salon', slug: 'test-salon' }),
+		}),
+	);
 	await page.route('**/api/vacancies*', (route) =>
 		route.fulfill({
 			status: 200,
