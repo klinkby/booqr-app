@@ -7,7 +7,7 @@ import { browser } from '$app/environment';
  * client-side (see docs/1-design.md security notes).
  */
 const BASE_DOMAIN = 'booqr.dk';
-const RESERVED_HOSTS = new Set([BASE_DOMAIN, `www.${BASE_DOMAIN}`, `status.${BASE_DOMAIN}`]);
+const RESERVED_HOSTS = new Set([BASE_DOMAIN, `www.${BASE_DOMAIN}`, `status.${BASE_DOMAIN}`, `mta-sts.${BASE_DOMAIN}`]);
 
 /**
  * The marketing site to redirect to when a host carries no tenant. Derived from
