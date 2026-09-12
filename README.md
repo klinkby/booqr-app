@@ -22,6 +22,7 @@ minimalist, composable architecture.
   from OpenAPI specification.
 - **[TanStack Query](https://tanstack.com/query/latest/docs/framework/svelte/overview)**: Declarative data fetching and
   caching via route-local `*Data.svelte.js` hooks, with automatic 401 refresh-and-retry and coarse cache invalidation.
+- **Multi-tenancy**: Each `*.booqr.dk` subdomain resolves its tenant from the API at runtime; unknown subdomains redirect to the marketing site; reserved apex hosts are excluded synchronously.
 - **JWT Authentication**: Secure authentication flow.
 - **ES2022 Target**: Modern JavaScript features for optimal performance.
 - **[Semantic HTML5](https://html.spec.whatwg.org/)**: Strict adherence to semantic markup and WCAG AA accessibility
@@ -62,6 +63,28 @@ reloads the SPA so every translated module initializes with the new locale.
 `src/routes/+layout.svelte` is the document-level integration point. It sets `<html lang>` and text direction from
 `getLocale()` / `getTextDirection()` inside a component `$effect`, while also using translated labels in shared layout
 UI. This keeps the document language correct for assistive technology as well as visual translations.
+
+## Multi-tenancy
+
+The SPA is served for every `*.booqr.dk` subdomain. Tenant identity is resolved at runtime from the host; the API is
+the sole authority — never assume a subdomain is valid client-side.
+
+`src/lib/tenant.svelte.js` exports a `tenant` singleton (`TenantState` runes class) holding `{ displayName, slug }`
+and a `status` field (`loading` → `resolved` | `notFound` | `reserved` | `error`). `hostCategory()` synchronously
+classifies the current host as `'reserved'` (the apex `booqr.dk`, `www`, `status`) or `'tenant'` (everything else,
+including subdomains, localhost, and preview hosts). Reserved hosts skip the API fetch entirely.
+
+The root layout (`src/routes/+layout.svelte`) bootstraps tenant resolution client-side: a `$effect` calls
+`GET /api/my-tenant`. A `200` response resolves branding; a typed `404` (`tenant-not-found` ProblemDetails) triggers
+a full-page redirect to `MARKETING_URL`; any other failure (bare 404, 500, network error) sets `tenant.isError` so
+the user can retry. The bootstrap IIFE is fire-and-forget — errors must not be re-thrown.
+
+Per-tenant branding flows from `tenant.displayName` into the NavBar and `<title>`. The Paraglide message
+`m.marketingHeading()` is the fallback — never hardcode `'Booqr'`.
+
+A `403` whose ProblemDetails `type` ends in `/problems/tenant-mismatch` is detected by `isTenantMismatch()` in
+`src/lib/queryClient.js`. It clears the session and cache then redirects to `/login`. This is distinct from the `401`
+refresh-and-retry path — a tenant-mismatch cannot be fixed by refreshing the token.
 
 ## Licensed under AGPL-3.0
 
