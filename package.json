@@ -16,7 +16,7 @@
 		"import-api": "curl -sf -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' https://www.booqr.dk/api/v1.json -o /tmp/booqr-v1.json && openapi -i /tmp/booqr-v1.json -o ./src/lib/.api-tmp --client fetch && tsc ./src/lib/.api-tmp/index.ts --target es2022 --module esnext --outDir ./src/lib/api --allowJs --skipLibCheck --allowSyntheticDefaultImports --esModuleInterop --lib es2022,dom && node scripts/postprocess-api-models.js ./src/lib/.api-tmp/models ./src/lib/api/models && rm -rf ./src/lib/.api-tmp"
 	},
 	"dependencies": {
-		"@event-calendar/core": "^5.7.1",
+		"@event-calendar/core": "^5.12.2",
 		"@sveltejs/kit": "^2.69.2",
 		"@tanstack/svelte-query": "^6.1.48",
 		"minidenticons": "^4.2.1",
@@ -24,7 +24,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@event-calendar/core": "^5.12.0",
+		"@event-calendar/core": "^5.12.2",
 		"@inlang/paraglide-js": "^2.25.0",
 		"@inlang/plugin-m-function-matcher": "^2.2.12",
 		"@inlang/plugin-message-format": "^4.4.3",
