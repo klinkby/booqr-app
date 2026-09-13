@@ -39,7 +39,7 @@
 		"eslint": "^10.9.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.23.0",
-		"globals": "^17.11.0",
+		"globals": "^17.12.0",
 		"minidenticons": "^4.2.1",
 		"openapi-typescript-codegen": "^0.31.0",
 		"prettier": "^3.9.6",
