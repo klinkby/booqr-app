@@ -231,5 +231,14 @@
 	"legendEditLocation": "Edit location",
 	"legendCreateLocation": "Create location",
 
-	"selectEmployeeToView": "Select employee to view"
+	"selectEmployeeToView": "Select employee to view",
+
+	"tenantResolving": "Loading…",
+	"tenantRedirecting": "Redirecting…",
+	"tenantErrorHeading": "Something went wrong",
+	"tenantErrorBody": "We couldn't load this booking site. Please check your connection and try again.",
+	"tenantRetry": "Try again",
+	"marketingHeading": "Booqr",
+	"marketingTagline": "Online booking for your business.",
+	"marketingBody": "This address does not host a booking site. Visit your business's own booqr.dk subdomain to book, or get in touch to set up your own."
 }
