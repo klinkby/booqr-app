@@ -25,7 +25,7 @@
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@event-calendar/core": "^5.13.1",
-		"@inlang/paraglide-js": "^2.25.2",
+		"@inlang/paraglide-js": "^2.25.4",
 		"@inlang/plugin-m-function-matcher": "^2.2.16",
 		"@inlang/plugin-message-format": "^4.4.4",
 		"@playwright/test": "^1.63.0",
