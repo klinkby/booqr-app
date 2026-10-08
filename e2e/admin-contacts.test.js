@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupApiMocks, FAKE_TOKEN } from './mocks.js';
+import { pageScreenshot, setupApiMocks, FAKE_TOKEN } from './mocks.js';
 
 test.describe('Admin Contacts Page', () => {
 	test.beforeEach(async ({ page, context }) => {
@@ -7,7 +7,7 @@ test.describe('Admin Contacts Page', () => {
 		await context.clearCookies();
 	});
 
-	test('unauthenticated visit redirects to login and returns to contacts', async ({ page }, testInfo) => {
+	test('unauthenticated visit redirects to login and returns to contacts', async ({ page }) => {
 		const email = process.env.TEST_EMAIL ?? 'test@example.com';
 		const password = process.env.TEST_PASSWORD ?? 'TestPassword1!';
 
@@ -43,6 +43,6 @@ test.describe('Admin Contacts Page', () => {
 		await expect(table.getByRole('columnheader', { name: 'Role' })).toBeVisible();
 
 		// Capture screenshot
-		await page.screenshot({ path: testInfo.outputPath('admin-contacts-table.png') });
+		await pageScreenshot(page, 'admin-contacts');
 	});
 });

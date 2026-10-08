@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { EMPLOYEES, FAKE_TOKEN, LOCATIONS, setupApiMocks } from './mocks.js';
+import { pageScreenshot, EMPLOYEES, FAKE_TOKEN, LOCATIONS, setupApiMocks } from './mocks.js';
 
 /** A day comfortably in the future, plus how many "Next month" clicks the month grid needs to reach it. */
 function pickTargetDay() {
@@ -116,6 +116,8 @@ test.describe('Customer booking flow', () => {
 		// Step 6: inline auth gate (not signed in).
 		await expect(page.locator('h1')).toHaveText('Sign in or sign up');
 		await expect(page.getByText('This time is not held')).toBeVisible();
+
+		await pageScreenshot(page, 'book-service-confirm-auth-gate');
 	});
 
 	test('single location and employee skips straight to the month grid', async ({ page }) => {
@@ -191,6 +193,9 @@ test.describe('Customer booking flow', () => {
 		// once in the appointment detail list.
 		await expect(page.getByLabel('Your selections so far')).toContainText(EMPLOYEES[0].name);
 		await expect(page.getByText(EMPLOYEES[0].name).last()).toBeVisible();
+
+		await pageScreenshot(page, 'book-service-confirm');
+
 		await page.check('#acceptCancellation');
 		await page.getByRole('button', { name: 'Book now' }).click();
 
@@ -199,6 +204,8 @@ test.describe('Customer booking flow', () => {
 		await expect(
 			page.getByText(`Your appointment with ${EMPLOYEES[0].name} at ${LOCATIONS[0].name} is confirmed.`),
 		).toBeVisible();
+
+		await pageScreenshot(page, 'book-done');
 	});
 
 	test('a slot taken between selection and submit lands on the conflict page', async ({ page }) => {
@@ -238,6 +245,8 @@ test.describe('Customer booking flow', () => {
 		await expect(page.locator('h1')).toHaveText('That time was just taken');
 		await expect(page.getByRole('link', { name: 'Choose another time that day' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Choose a different day' })).toBeVisible();
+
+		await pageScreenshot(page, 'book-service-conflict');
 	});
 
 	test('Prev/Next on the time step jump to the nearest available day, crossing months', async ({ page }) => {
@@ -299,6 +308,6 @@ test.describe('Customer booking flow', () => {
 		// No MonthPicker table should be rendered.
 		await expect(page.locator('table')).not.toBeVisible();
 
-		await page.screenshot({ path: 'e2e/screenshots/no-dates-available.png', fullPage: true });
+		await pageScreenshot(page, 'book-service-no-dates');
 	});
 });

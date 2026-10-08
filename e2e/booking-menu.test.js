@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupApiMocks, setupAuthToken } from './mocks.js';
+import { pageScreenshot, setupApiMocks, setupAuthToken } from './mocks.js';
 
 test.describe('My Bookings overflow menu', () => {
 	test.beforeEach(async ({ page, context }) => {
@@ -70,7 +70,7 @@ test.describe('My Bookings overflow menu', () => {
 		);
 		expect(topmostInsideMenu).toBe(true);
 
-		await page.screenshot({ path: 'e2e/screenshots/booking-menu-open.png', fullPage: true });
+		await pageScreenshot(page, 'profile-booking-menu-open');
 
 		// Escape closes the menu and returns focus to the trigger.
 		await page.keyboard.press('Escape');

@@ -179,3 +179,12 @@ export async function setupAuthToken(page) {
 		sessionStorage.setItem('access_token', token);
 	}, FAKE_TOKEN);
 }
+
+/**
+ * Captures a full-page screenshot under e2e/screenshots/ with the shared
+ * format/quality so individual tests only name the shot. `name` is the base
+ * filename without extension (e.g. 'admin-services-edit').
+ */
+export function pageScreenshot(page, name) {
+	return page.screenshot({ path: `e2e/screenshots/${name}.webp`, type: 'webp', quality: 80, fullPage: true });
+}

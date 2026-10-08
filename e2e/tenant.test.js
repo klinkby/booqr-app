@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupApiMocks } from './mocks.js';
+import { pageScreenshot, setupApiMocks } from './mocks.js';
 
 test.describe('Tenant resolution', () => {
 	test.beforeEach(async ({ page }) => {
@@ -31,7 +31,7 @@ test.describe('Tenant resolution', () => {
 		await expect(page.getByRole('link', { name: 'Acme Salon' })).toBeVisible();
 
 		// Capture the branded page state.
-		await page.screenshot({ path: 'e2e/screenshots/tenant-branded.png', fullPage: true });
+		await pageScreenshot(page, 'home');
 	});
 
 	test('unknown subdomain redirects to www.booqr.dk and never shows tenant content', async ({ page }) => {

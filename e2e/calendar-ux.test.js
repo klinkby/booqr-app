@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupApiMocks, setupAuthToken } from './mocks.js';
+import { pageScreenshot, setupApiMocks, setupAuthToken } from './mocks.js';
 
 test.describe('Calendar UX Adjustments', () => {
 	test.beforeEach(async ({ page }) => {
@@ -7,7 +7,7 @@ test.describe('Calendar UX Adjustments', () => {
 		await setupAuthToken(page);
 	});
 
-	test('calendar page loads with extend hours button', async ({ page }, testInfo) => {
+	test('calendar page loads with extend hours button', async ({ page }) => {
 		await page.goto('/admin/plan');
 
 		// Check that page has loaded
@@ -17,10 +17,10 @@ test.describe('Calendar UX Adjustments', () => {
 		await expect(page.locator('button:has-text("Extend Hours")')).toBeVisible();
 
 		// Capture screenshot
-		await page.screenshot({ path: testInfo.outputPath('calendar-extend-hours.png') });
+		await pageScreenshot(page, 'admin-plan');
 	});
 
-	test('form panel width is narrower (w-80 instead of w-96)', async ({ page }, testInfo) => {
+	test('form panel width is narrower (w-80 instead of w-96)', async ({ page }) => {
 		await page.goto('/admin/plan');
 
 		// Wait for the calendar component to be visible
@@ -42,10 +42,10 @@ test.describe('Calendar UX Adjustments', () => {
 		await expect(formPanel).toBeVisible();
 
 		// Capture screenshot
-		await page.screenshot({ path: testInfo.outputPath('calendar-create-form.png') });
+		await pageScreenshot(page, 'admin-plan-create-vacancy');
 	});
 
-	test('form shows "Vacancy Details" title in view mode', async ({ page }, testInfo) => {
+	test('form shows "Vacancy Details" title in view mode', async ({ page }) => {
 		// Mock the getVacancyById API call
 		await page.route('**/api/vacancies/1', (route) => {
 			route.fulfill({
@@ -78,10 +78,10 @@ test.describe('Calendar UX Adjustments', () => {
 		await expect(page.locator('text=Vacancy Details')).toBeVisible({ timeout: 3000 });
 
 		// Capture screenshot
-		await page.screenshot({ path: testInfo.outputPath('calendar-view-details.png') });
+		await pageScreenshot(page, 'admin-plan-view-vacancy');
 	});
 
-	test('delete button exists in Form component', async ({ page }, testInfo) => {
+	test('delete button exists in Form component', async ({ page }) => {
 		await page.goto('/admin/plan');
 
 		// The Form component now supports deleteLabel and ondelete props
@@ -89,10 +89,10 @@ test.describe('Calendar UX Adjustments', () => {
 		await expect(page.locator('h1')).toHaveText('Plan');
 
 		// Capture screenshot
-		await page.screenshot({ path: testInfo.outputPath('calendar-delete-button.png') });
+		await pageScreenshot(page, 'admin-plan-delete-button');
 	});
 
-	test('calendar supports event click handler', async ({ page }, testInfo) => {
+	test('calendar supports event click handler', async ({ page }) => {
 		await page.goto('/admin/plan');
 
 		// Wait for calendar to render with proper elements
@@ -104,10 +104,10 @@ test.describe('Calendar UX Adjustments', () => {
 		await expect(calendarContainer).toBeVisible({ timeout: 5000 });
 
 		// Capture screenshot
-		await page.screenshot({ path: testInfo.outputPath('calendar-event-click.png') });
+		await pageScreenshot(page, 'admin-plan-event-click');
 	});
 
-	test('overlays the employee\'s appointments in blue, labeled "customer, service"', async ({ page }, testInfo) => {
+	test('overlays the employee\'s appointments in blue, labeled "customer, service"', async ({ page }) => {
 		// A booking for the logged-in employee (customerId '1' → "Test Customer",
 		// serviceId 'svc1' → "Haircut") falling in the current week. Override the
 		// shared my-bookings mock (last registration wins).
@@ -150,10 +150,10 @@ test.describe('Calendar UX Adjustments', () => {
 		const appointment = page.locator('.ec-event', { hasText: 'Test Customer, Haircut' });
 		await expect(appointment).toBeVisible({ timeout: 5000 });
 
-		await page.screenshot({ path: testInfo.outputPath('calendar-appointment-overlay.png') });
+		await pageScreenshot(page, 'admin-plan-appointments-overlay');
 	});
 
-	test('employee dropdown switches the appointments overlay to the selected employee', async ({ page }, testInfo) => {
+	test('employee dropdown switches the appointments overlay to the selected employee', async ({ page }) => {
 		// A booking that only exists for emp2, falling in the current week
 		// (customerId '1' → "Test Customer", serviceId 'svc1' → "Haircut").
 		const today = new Date();
@@ -201,6 +201,6 @@ test.describe('Calendar UX Adjustments', () => {
 		const appointment = page.locator('.ec-event', { hasText: 'Test Customer, Haircut' });
 		await expect(appointment).toBeVisible({ timeout: 5000 });
 
-		await page.screenshot({ path: testInfo.outputPath('calendar-employee-select-switch.png') });
+		await pageScreenshot(page, 'admin-plan-select-employee');
 	});
 });
