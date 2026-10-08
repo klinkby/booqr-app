@@ -1,8 +1,8 @@
 <script>
-	import { Form, LimitedTextarea } from '$lib';
-	import { DateUtils } from '$lib/dateUtils.js';
-	import { m } from '$lib/paraglide/messages.js';
-	import { getLocale } from '$lib/paraglide/runtime.js';
+	import { Form, LimitedTextarea } from '#lib';
+	import { DateUtils } from '#lib/dateUtils.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	let {
 		mode = 'book', // 'book' | 'view'

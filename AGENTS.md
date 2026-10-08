@@ -25,8 +25,8 @@ It follows secure, accessible, and simply standards-first principles.
 - **Locales and messages**: Paraglide JS provides English (`en`) and Danish (`da`) UI text. Edit the source messages in
   `messages/en.json` and `messages/da.json`; never manually edit generated `src/lib/paraglide/**` output. The
   `paraglideVitePlugin` in `vite.config.js` compiles the output during Vite builds.
-- **Translated text**: Import `m` from `$lib/paraglide/messages.js` and call its message functions in markup and
-  script, e.g. `m.navSignIn()`. Use `getLocale()` from `$lib/paraglide/runtime.js` when locale-aware formatting is
+- **Translated text**: Import `m` from `#lib/paraglide/messages.js` and call its message functions in markup and
+  script, e.g. `m.navSignIn()`. Use `getLocale()` from `#lib/paraglide/runtime.js` when locale-aware formatting is
   needed, such as `toLocaleDateString(getLocale(), ...)`.
 - **Locale selection**: The configured strategy is `localStorage`, browser `preferredLanguage`, then `baseLocale`.
   `src/lib/locale.svelte.js` is the single language-toggle adapter: it calls Paraglide `setLocale()` and migrates the
@@ -45,8 +45,8 @@ It follows secure, accessible, and simply standards-first principles.
   directly to preserve OpenAPI config (base URL, credentials, error handling):
 
   ```js
-  import { OpenAPI } from '$lib/api/core/OpenAPI';
-  import { request } from '$lib/api/core/request';
+  import { OpenAPI } from '#lib/api/core/OpenAPI.js';
+  import { request } from '#lib/api/core/request.js';
 
   await request(OpenAPI, {
   	method: 'POST',
@@ -128,7 +128,7 @@ the sole authority — never assume a subdomain is valid client-side.
 - **Auth storage**: Access tokens in `sessionStorage`; refresh tokens in `HttpOnly`, `SameSite=Strict` cookies.
 - **XSS**: Svelte 5 auto-escapes. Avoid `{@html ...}`; use `DOMPurify` if unavoidable.
 - **CSP**: Avoid inline styles/scripts.
-- **Error Handling**: Show generic messages. Use `apiErrorMessage(err, fallback)` from `$lib` for API errors
+- **Error Handling**: Show generic messages. Use `apiErrorMessage(err, fallback)` from `#lib` for API errors
   (handles ProblemDetails 400s, falls back safely).
 - **No Console Logging**: Never log tokens, passwords, or PII.
 - **Credentials Scope**: `withCredentials: true` only for `/api/` paths.
@@ -182,7 +182,7 @@ Shared (do not duplicate per route):
 - **Components are presentational**: props in, callbacks out. Presentation-only state (expand/collapse, scroll)
   belongs inside the component. `PaginatedTable` accepts `rows`/`isLoading`/`error` + paging callbacks as props.
 - **URL params drive dynamic queries**: encode filter params in URL search params; use
-  `goto('?...', { replaceState: true, keepFocus: true, noScroll: true })` to update — read them **inside** the thunk.
+  `goto('?...', { replace: true, reset: false })` to update — read them **inside** the thunk.
 - **Coarse invalidation is intentional**: `invalidateQueries({ queryKey: resource.all })` matches every cached
   variant by prefix. Prefer this over fine-grained key construction.
 - **Detail fetches skip the cache**: use `fetchResource` in `onMount` for edit forms so a reopened panel never shows
@@ -250,7 +250,7 @@ inputs 500ms via a separate `debounced*` state plus `$effect`/`setTimeout`, sync
 ## Reusable Components (`src/lib/components/`)
 
 Component reference (prop tables, usage, timezone handling, password validation) lives in
-`src/lib/components/AGENTS.md`, loaded automatically when working under that directory. Import all from `'$lib'`.
+`src/lib/components/AGENTS.md`, loaded automatically when working under that directory. Import all from `'#lib'`.
 
 ## Semantic HTML5 & Accessibility (required)
 
@@ -280,7 +280,7 @@ CI for regression detection.
 - **E2E** (`npm run test:e2e`): Playwright; conventions in `e2e/AGENTS.md`.
 - **Unit** (`npm run test:unit`): Vitest (Node, `vitest.config.js`), files `src/**/*.test.js` colocated. Pure logic
   only — extract it from `*.svelte.js` hooks into plain `.js` (e.g. `bookingAvailability.js`), don't test runes. Keep
-  assertions timezone-independent; `vi.mock('$lib/paraglide/messages.js', …)` for messages.
+  assertions timezone-independent; `vi.mock('#lib/paraglide/messages.js', …)` for messages.
 - **Before committing**: `npm run lint` (ESLint + Prettier check) and `npm run format`.
 - **Linting rules**: `#each` blocks must have keys `(item.id)`; use `SvelteMap` instead of `new Map()` for reactive
   state; no useless mustaches.

@@ -1,6 +1,6 @@
 <script>
 	import DataTable from './DataTable.svelte';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let {
 		columns,

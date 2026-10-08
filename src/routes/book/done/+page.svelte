@@ -1,7 +1,7 @@
 <script>
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let heading = $state();
 

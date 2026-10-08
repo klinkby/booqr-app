@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from './api/core/ApiError';
 
-vi.mock('$lib/paraglide/messages.js', () => ({
+vi.mock('#lib/paraglide/messages.js', () => ({
 	m: { errorDefault: () => 'default-error' },
 }));
 

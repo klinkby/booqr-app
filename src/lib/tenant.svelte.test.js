@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-// `$app/environment` is aliased to a stub (browser = false) in vitest.config.js,
+// `$app/env` is aliased to a stub (browser = false) in vitest.config.js,
 // so importing this runes module runs no browser-only bootstrap side effects.
 import { MARKETING_URL, hostCategory } from './tenant.svelte.js';
 

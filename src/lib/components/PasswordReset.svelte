@@ -1,5 +1,5 @@
 <script>
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let { email = $bindable(''), error = null, message = null, loading = false, onsubmit } = $props();
 </script>

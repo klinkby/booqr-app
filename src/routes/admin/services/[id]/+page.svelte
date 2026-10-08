@@ -1,13 +1,13 @@
 <script>
-	import { Form, LimitedTextarea, apiErrorMessage } from '$lib';
+	import { Form, LimitedTextarea, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useServiceData } from './serviceData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
-	let id = $derived($page.params.id);
+	let id = $derived(page.params.id);
 	let isEdit = $derived(id !== 'new');
 
 	const service = useServiceData();
@@ -58,7 +58,7 @@
 				isEdit,
 				payload: { name, duration, description: description || null, employees: selectedEmployeeIds },
 			});
-			await goto(resolve('/admin/services'));
+			await goto(resolve('admin/services'));
 		} catch (err) {
 			error = apiErrorMessage(err);
 		} finally {
@@ -67,7 +67,7 @@
 	}
 
 	function handleCancel() {
-		goto(resolve('/admin/services'));
+		goto(resolve('admin/services'));
 	}
 </script>
 

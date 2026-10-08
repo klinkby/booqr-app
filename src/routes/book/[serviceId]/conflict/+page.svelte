@@ -1,7 +1,7 @@
 <script>
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let heading = $state();
 
@@ -10,7 +10,7 @@
 	});
 
 	let dateParam = $derived(page.url.searchParams.get('date'));
-	let bookingBaseHref = $derived(resolve(`/book/${page.params.serviceId}`));
+	let bookingBaseHref = $derived(resolve(`book/${page.params.serviceId}`));
 </script>
 
 <h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-4 outline-none">{m.timeTaken()}</h1>

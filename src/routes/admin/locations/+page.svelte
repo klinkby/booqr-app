@@ -1,9 +1,9 @@
 <script>
-	import { PaginatedTable } from '$lib';
+	import { PaginatedTable } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useLocationsData } from './locationsData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	const columns = [
 		{ key: 'name', label: m.labelName() },
@@ -15,11 +15,11 @@
 	const locations = useLocationsData();
 
 	function handleEdit(row) {
-		goto(resolve(`/admin/locations/${row.id}`));
+		goto(resolve(`admin/locations/${row.id}`));
 	}
 
 	function handleCreate() {
-		goto(resolve('/admin/locations/new'));
+		goto(resolve('admin/locations/new'));
 	}
 </script>
 

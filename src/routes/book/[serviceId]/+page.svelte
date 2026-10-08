@@ -1,12 +1,12 @@
 <script>
-	import { BookingSummary, ChoiceList, MonthPicker, TimeSlotList, apiErrorMessage } from '$lib';
+	import { BookingSummary, ChoiceList, MonthPicker, TimeSlotList, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { DateUtils } from '$lib/dateUtils.js';
+	import { DateUtils } from '#lib/dateUtils.js';
 	import { useBookingData } from './bookingData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
-	import { getLocale } from '$lib/paraglide/runtime.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	const todayStr = DateUtils.toLocalDate(new Date());
 	const currentMonthStr = todayStr.slice(0, 7);
@@ -165,7 +165,7 @@
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
 		const params = new URLSearchParams(page.url.searchParams);
 		params.set('location', option.id);
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- query-string-only navigation on the same route; no path change to resolve
+
 		goto(`?${params.toString()}`);
 	}
 
@@ -175,7 +175,7 @@
 		params.set('employee', option.id);
 		params.delete('month');
 		params.delete('date');
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- query-string-only navigation on the same route; no path change to resolve
+
 		goto(`?${params.toString()}`);
 	}
 
@@ -184,7 +184,7 @@
 		const params = new URLSearchParams(page.url.searchParams);
 		params.set('month', monthStr);
 		params.delete('date');
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- query-string-only navigation on the same route; no path change to resolve
+
 		goto(`?${params.toString()}`);
 	}
 
@@ -196,7 +196,7 @@
 		// cross a month boundary, and without this the month grid you land on
 		// after "Back" would show the wrong month for the breadcrumb's date.
 		params.set('month', dateStr.slice(0, 7));
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- query-string-only navigation on the same route; no path change to resolve
+
 		goto(`?${params.toString()}`);
 	}
 
@@ -210,7 +210,7 @@
 		// the old booking is deleted. Harmless if it lingers — it's a one-time nonce.
 		const rebook = page.url.searchParams.get('rebook');
 		if (rebook) params.set('rebook', rebook);
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic path segment combined with a query string; resolve() covers the bare path only
+
 		goto(`/book/${page.params.serviceId}/confirm?${params.toString()}`);
 	}
 

@@ -1,10 +1,10 @@
 <script>
-	import { PaginatedTable, UserName } from '$lib';
+	import { PaginatedTable, UserName } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useContactsData } from './contactsData.svelte.js';
 	import ContactsFilterForm from './ContactsFilterForm.svelte';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	const columns = [
 		{ key: 'name', label: m.labelName() },
@@ -30,11 +30,11 @@
 	}));
 
 	function handleEdit(row) {
-		goto(resolve(`/admin/contacts/${row.id}`));
+		goto(resolve(`admin/contacts/${row.id}`));
 	}
 
 	function handleCreate() {
-		goto(resolve('/admin/contacts/new'));
+		goto(resolve('admin/contacts/new'));
 	}
 
 	function toggleFilters() {
@@ -76,7 +76,7 @@
 						stroke-width="1.5"
 						stroke-linecap="round"
 						stroke-linejoin="round"
-					/>
+					></path>
 				</svg>
 			</button>
 			{#if showFilters}

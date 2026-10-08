@@ -1,4 +1,4 @@
-import { DateUtils } from '$lib/dateUtils.js';
+import { DateUtils } from '#lib/dateUtils.js';
 
 /**
  * Pure, side-effect-free availability arithmetic for the customer booking

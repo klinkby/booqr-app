@@ -1,4 +1,4 @@
-// place files you want to import through the `$lib` alias in this folder.
+// place files you want to import through the `#lib` alias in this folder.
 export { auth } from './auth.svelte.js';
 export { apiErrorMessage } from './apiErrorMessage.js';
 export { default as DataTable } from './components/DataTable.svelte';
@@ -6,8 +6,11 @@ export { default as PaginatedTable } from './components/PaginatedTable.svelte';
 export { default as Form } from './components/Form.svelte';
 export { default as LimitedTextarea } from './components/LimitedTextarea.svelte';
 export { default as PhoneInput } from './components/PhoneInput.svelte';
-export { default as Calendar } from './components/Calendar.svelte';
-export { default as ListCalendar } from './components/ListCalendar.svelte';
+// Calendar and ListCalendar are intentionally NOT re-exported here: they pull the
+// heavy `@event-calendar/core` dependency (with a CSS side-effect import that defeats
+// tree-shaking across this barrel). Import them lazily by direct path instead —
+// `await import('#lib/components/Calendar.svelte')` — so they split into their own
+// chunk and stay out of the shared bundle. See /admin/plan and /profile pages.
 export { default as VacancyForm } from './components/VacancyForm.svelte';
 export { default as PasswordReset } from './components/PasswordReset.svelte';
 export { default as BookingForm } from './components/BookingForm.svelte';

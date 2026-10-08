@@ -1,9 +1,9 @@
-import { LocationService, ServiceService, UserService, VacancyService } from '$lib/api';
-import { DateUtils } from '$lib/dateUtils.js';
-import { m } from '$lib/paraglide/messages.js';
-import { queryKeys } from '$lib/queryKeys';
-import { useResourceQuery, useResourceMutation, fetchResource } from '$lib/resourceQuery.svelte.js';
-import { authedQueryFn } from '$lib/queryClient.js';
+import { LocationService, ServiceService, UserService, VacancyService } from '#lib/api/index.js';
+import { DateUtils } from '#lib/dateUtils.js';
+import { m } from '#lib/paraglide/messages.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { useResourceQuery, useResourceMutation, fetchResource } from '#lib/resourceQuery.svelte.js';
+import { authedQueryFn } from '#lib/queryClient.js';
 import { createQueries } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
 

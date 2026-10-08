@@ -1,6 +1,6 @@
-import { UserService } from '$lib/api';
-import { queryKeys } from '$lib/queryKeys';
-import { fetchResource, useResourceMutation } from '$lib/resourceQuery.svelte.js';
+import { UserService } from '#lib/api/index.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { fetchResource, useResourceMutation } from '#lib/resourceQuery.svelte.js';
 
 /**
  * Route-local data hook for the contact create/edit form.

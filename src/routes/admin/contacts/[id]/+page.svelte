@@ -1,13 +1,13 @@
 <script>
-	import { Form, apiErrorMessage, PhoneInput } from '$lib';
+	import { Form, apiErrorMessage, PhoneInput } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useContactData } from './contactData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
-	let id = $derived($page.params.id);
+	let id = $derived(page.params.id);
 	let isEdit = $derived(id !== 'new');
 
 	const contact = useContactData();
@@ -40,12 +40,8 @@
 		error = null;
 		loading = true;
 		try {
-			await contact.saveContact({
-				id,
-				isEdit,
-				payload: isEdit ? { name, phone } : { email },
-			});
-			await goto(resolve('/admin/contacts'));
+			await contact.saveContact({ id, isEdit, payload: isEdit ? { name, phone } : { email } });
+			await goto(resolve('admin/contacts'));
 		} catch (err) {
 			error = apiErrorMessage(err);
 		} finally {
@@ -54,7 +50,7 @@
 	}
 
 	function handleCancel() {
-		goto(resolve('/admin/contacts'));
+		goto(resolve('admin/contacts'));
 	}
 </script>
 

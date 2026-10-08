@@ -1,15 +1,15 @@
 <script>
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
-	import { AuthenticationService, TenantService, ApiError } from '$lib/api';
-	import { auth, NavBar, LanguageToggle, locale, tenant, MARKETING_URL } from '$lib';
+	import favicon from '#lib/assets/favicon.svg';
+	import { AuthenticationService, TenantService, ApiError } from '#lib/api/index.js';
+	import { auth, NavBar, LanguageToggle, locale, tenant, MARKETING_URL } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
-	import { queryClient } from '$lib/queryClient';
-	import { getLocale, getTextDirection } from '$lib/paraglide/runtime.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { queryClient } from '#lib/queryClient.js';
+	import { getLocale, getTextDirection } from '#lib/paraglide/runtime.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let { children } = $props();
 

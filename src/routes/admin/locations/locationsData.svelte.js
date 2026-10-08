@@ -1,6 +1,6 @@
-import { LocationService } from '$lib/api';
-import { queryKeys } from '$lib/queryKeys';
-import { usePagedResourceQuery } from '$lib/resourceQuery.svelte.js';
+import { LocationService } from '#lib/api/index.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { usePagedResourceQuery } from '#lib/resourceQuery.svelte.js';
 
 /**
  * Route-local data hook for the locations list page. Wraps usePagedResourceQuery
