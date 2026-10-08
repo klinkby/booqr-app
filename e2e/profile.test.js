@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupApiMocks, setupAuthToken } from './mocks.js';
+import { pageScreenshot, setupApiMocks, setupAuthToken } from './mocks.js';
 
 test.describe('Profile Page', () => {
 	test.beforeEach(async ({ page, context }) => {
@@ -27,7 +27,7 @@ test.describe('Profile Page', () => {
 		await expect(page.getByRole('button', { name: /booking actions/i }).first()).toBeVisible();
 
 		// Capture screenshot
-		await page.screenshot({ path: 'e2e/screenshots/profile.png', fullPage: true });
+		await pageScreenshot(page, 'profile');
 	});
 
 	test('bookings calendar localizes day names and uses 24h time in Danish', async ({ page }) => {

@@ -1,111 +1,20 @@
 import { EmployeeService, LocationService, ServiceService, VacancyService } from '$lib/api';
+import { BookingAvailability } from '$lib/bookingAvailability.js';
 import { DateUtils } from '$lib/dateUtils.js';
 import { queryKeys } from '$lib/queryKeys';
 import { fetchAllPages, useResourceQuery } from '$lib/resourceQuery.svelte.js';
 
-const SLOT_STEP_MS = 15 * 60 * 1000;
 // Bounded lookahead for "does any later month/day have availability" checks —
 // businesses publish vacancies a few months out at most in practice. Widening
 // this only costs one extra query param, not extra requests.
 const HORIZON_MONTHS_AHEAD = 6;
 
-// All Date/Set construction lives in these plain, non-exported helpers
-// (never in `useBookingData` itself). `eslint-plugin-svelte`'s
-// prefer-svelte-reactivity rule blanket-flags every `new Date`/`new Set`
-// textually inside an *exported* .svelte.js declaration — regardless of
-// whether it's actually mutated — on the assumption it feeds reactive state.
-// None of these values are reactive state (no setters ever called; each is a
-// fresh, immediately-consumed value), so keeping their construction outside
-// the exported function is the correct fix, not a suppression.
-
-function monthStart(monthStr) {
-	const [y, m] = monthStr.split('-').map(Number);
-	return new Date(y, m - 1, 1);
-}
-
-function addMonths(date, n) {
-	return new Date(date.getFullYear(), date.getMonth() + n, 1);
-}
-
-function todayStr() {
-	return DateUtils.toLocalDate(new Date());
-}
-
-/**
- * Rounds an epoch-ms value up to the next 15-minute-of-the-hour boundary
- * (never down). Real-world UTC offsets are always whole multiples of 15
- * minutes, so rounding the raw epoch value lines up with the LOCAL clock's
- * :00/:15/:30/:45 grid too.
- */
-function nextGridTimeMs(ms) {
-	const rem = ms % SLOT_STEP_MS;
-	return rem === 0 ? ms : ms + (SLOT_STEP_MS - rem);
-}
-
-/** Every 15-minute-grid start time in `vacancy` — at or after `minStartMs` — that leaves room for `durationMs`. */
-function slotsForVacancy(vacancy, durationMs, minStartMs) {
-	const vacStartMs = new Date(vacancy.startTime).getTime();
-	const vacEndMs = new Date(vacancy.endTime).getTime();
-	let curMs = nextGridTimeMs(Math.max(vacStartMs, minStartMs));
-	const slots = [];
-	while (curMs + durationMs <= vacEndMs) {
-		slots.push(new Date(curMs));
-		curMs += SLOT_STEP_MS;
-	}
-	return slots;
-}
-
-function computeServiceEmployees(service, allEmployees) {
-	if (!service) return [];
-	const ids = new Set((service.employees ?? []).map(String));
-	return allEmployees.filter((e) => ids.has(String(e.id)));
-}
-
-/** Bookable for this service, regardless of the user's location/employee choice yet. */
-function computeCandidateVacancies(service, vacancies, durationMs, nowMs) {
-	if (!service || durationMs <= 0) return [];
-	const employeeIds = new Set((service.employees ?? []).map(String));
-	return vacancies.filter((v) => {
-		if (v.bookingId !== null && v.bookingId !== undefined) return false;
-		if (!employeeIds.has(String(v.employeeId))) return false;
-		const endMs = new Date(v.endTime).getTime();
-		if (endMs <= nowMs) return false;
-		const startMs = new Date(v.startTime).getTime();
-		return endMs - startMs >= durationMs;
-	});
-}
-
-/** Set<'YYYY-MM-DD'> (local) — every day, across the fetched horizon, with at least one bookable slot. */
-function computeDaysWithSlots(selectedVacancies, durationMs, nowMs) {
-	// eslint-disable-next-line svelte/prefer-svelte-reactivity -- local accumulator, built fresh on every call and returned as a value; never shared mutable state
-	const set = new Set();
-	if (durationMs <= 0) return set;
-	for (const v of selectedVacancies) {
-		for (const slot of slotsForVacancy(v, durationMs, nowMs)) {
-			set.add(DateUtils.toLocalDate(slot));
-		}
-	}
-	return set;
-}
-
-function computeSlotsForDate(selectedVacancies, dateStr, durationMs, nowMs) {
-	if (durationMs <= 0 || !dateStr) return [];
-	const results = [];
-	for (const v of selectedVacancies) {
-		if (DateUtils.toLocalDate(new Date(v.startTime)) !== dateStr) continue;
-		for (const slot of slotsForVacancy(v, durationMs, nowMs)) {
-			results.push({
-				vacancyId: v.id,
-				employeeId: v.employeeId,
-				locationId: v.locationId,
-				startTime: slot,
-				endTime: new Date(slot.getTime() + durationMs),
-			});
-		}
-	}
-	results.sort((a, b) => a.startTime - b.startTime);
-	return results;
-}
+// All Date/Set arithmetic lives in the pure `BookingAvailability` class
+// (`$lib/bookingAvailability.js`), kept out of this .svelte.js module so it is
+// unit-testable and outside `eslint-plugin-svelte`'s prefer-svelte-reactivity
+// scope. None of those values are reactive state — each is a fresh,
+// immediately-consumed value — so the hook below just composes them in
+// `$derived`s.
 
 /**
  * Route-local availability hook for the customer booking wizard
@@ -124,9 +33,9 @@ function computeSlotsForDate(selectedVacancies, dateStr, durationMs, nowMs) {
 export function useBookingData(getParams) {
 	const vacanciesQuery = useResourceQuery(() => {
 		const { serviceId, month } = getParams();
-		const anchor = monthStart(month);
-		const from = addMonths(anchor, -1);
-		const to = addMonths(anchor, HORIZON_MONTHS_AHEAD + 1);
+		const anchor = BookingAvailability.monthStart(month);
+		const from = BookingAvailability.addMonths(anchor, -1);
+		const to = BookingAvailability.addMonths(anchor, HORIZON_MONTHS_AHEAD + 1);
 		return {
 			queryKey: queryKeys.vacancies.month(serviceId, month),
 			enabled: !!serviceId,
@@ -158,10 +67,12 @@ export function useBookingData(getParams) {
 	const serviceDurationSeconds = $derived(DateUtils.parseDurationSeconds(service?.duration));
 	const durationMs = $derived(serviceDurationSeconds * 1000);
 
-	const serviceEmployees = $derived.by(() => computeServiceEmployees(service, employeesQuery.items));
+	const serviceEmployees = $derived.by(() =>
+		BookingAvailability.computeServiceEmployees(service, employeesQuery.items),
+	);
 
 	const candidateVacancies = $derived.by(() =>
-		computeCandidateVacancies(service, vacanciesQuery.items, durationMs, Date.now()),
+		BookingAvailability.computeCandidateVacancies(service, vacanciesQuery.items, durationMs, Date.now()),
 	);
 
 	// Narrowed to the user's chosen location/employee — drives the day and
@@ -177,19 +88,21 @@ export function useBookingData(getParams) {
 
 	// Drives the month grid AND, via `sortedAvailableDates`, which day
 	// Prev/Next jump to.
-	const daysWithSlots = $derived.by(() => computeDaysWithSlots(selectedVacancies, durationMs, Date.now()));
+	const daysWithSlots = $derived.by(() =>
+		BookingAvailability.computeDaysWithSlots(selectedVacancies, durationMs, Date.now()),
+	);
 
 	const sortedAvailableDates = $derived(Array.from(daysWithSlots).sort());
 
 	const nextAvailableDate = $derived.by(() => {
 		const { date } = getParams();
-		const reference = date || todayStr();
+		const reference = date || BookingAvailability.todayStr();
 		return sortedAvailableDates.find((d) => d > reference) ?? null;
 	});
 
 	const previousAvailableDate = $derived.by(() => {
 		const { date } = getParams();
-		const today = todayStr();
+		const today = BookingAvailability.todayStr();
 		const reference = date || today;
 		let result = null;
 		for (const d of sortedAvailableDates) {
@@ -207,7 +120,7 @@ export function useBookingData(getParams) {
 	});
 
 	function slotsForDate(dateStr) {
-		return computeSlotsForDate(selectedVacancies, dateStr, durationMs, Date.now());
+		return BookingAvailability.computeSlotsForDate(selectedVacancies, dateStr, durationMs, Date.now());
 	}
 
 	return {

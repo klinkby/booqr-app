@@ -82,15 +82,42 @@ function currentMonthBookings() {
 	while (future1.getDay() !== 3 /* Wednesday */) {
 		future1.setDate(future1.getDate() + 1);
 	}
-	// Second manageable booking: the following day at 14:00 (still >24h).
+	// The profile list is a year-scoped `listYear` view, so both future bookings
+	// must stay in `now`'s year — otherwise they vanish from the initial view and
+	// the row-count / kebab-index assertions break. Near year-end the forward
+	// Wednesday rolls into January, so step the pair back one whole week at a time
+	// (preserving the Wednesday weekday) until the *second* booking is still
+	// in-year and both remain comfortably >24h out. (Dec 30–31 is the one
+	// irreducible gap — year-end leaves no room for two in-year >24h bookings;
+	// the booking-menu row-count tests can't hold on those two days.)
+	while (true) {
+		const f2 = new Date(future1.getTime());
+		f2.setDate(f2.getDate() + 1);
+		const inYear = f2.getFullYear() === now.getFullYear();
+		const over24h = future1.getTime() - now.getTime() >= 24 * 60 * 60 * 1000;
+		if (inYear && over24h) break;
+		if (!over24h) break; // can't go earlier without dropping under the cutoff
+		future1.setDate(future1.getDate() - 7); // shift back a week, stay on Wednesday
+	}
+	// Second manageable booking: the following day at 14:00 (still >24h, same year).
 	const future2 = new Date(future1.getTime());
 	future2.setDate(future2.getDate() + 1);
 	future2.setHours(14, 0, 0, 0);
 
-	// Non-manageable booking: ~2 hours from now, inside the 24-hour cutoff.
-	const soon = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-
 	const half = 30 * 60 * 1000;
+
+	// Non-manageable booking: inside the 24-hour cutoff. Normally ~2 hours out,
+	// but clamped so its 30-minute span never crosses midnight — @event-calendar
+	// splits a midnight-spanning event into two list rows, which would add a
+	// phantom next-day row and throw off the row-count / kebab-index assertions.
+	// When ~2h from now would spill past 23:30, anchor it a few minutes ahead of
+	// now instead (still in the future, still <24h, still the earliest row).
+	const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 30, 0, 0);
+	let soonStart = now.getTime() + 2 * 60 * 60 * 1000;
+	if (soonStart + half > endOfDay.getTime()) {
+		soonStart = Math.min(now.getTime() + 5 * 60 * 1000, endOfDay.getTime() - half);
+	}
+	const soon = new Date(soonStart);
 	const booking = (id, start) => ({
 		id,
 		startTime: start.toISOString(),
@@ -178,4 +205,13 @@ export async function setupAuthToken(page) {
 	await page.addInitScript((token) => {
 		sessionStorage.setItem('access_token', token);
 	}, FAKE_TOKEN);
+}
+
+/**
+ * Captures a full-page screenshot under e2e/screenshots/ with the shared
+ * format/quality so individual tests only name the shot. `name` is the base
+ * filename without extension (e.g. 'admin-services-edit').
+ */
+export function pageScreenshot(page, name) {
+	return page.screenshot({ path: `e2e/screenshots/${name}.webp`, type: 'webp', quality: 80, fullPage: true });
 }

@@ -276,10 +276,11 @@ CI for regression detection.
 
 ## Verification & Code Quality
 
-- **E2E tests**: always `npm run test:e2e` — never `npx playwright test` or `npm test` directly. No unit tests.
+- **Tests**: `npm test` runs `test:unit` then `test:e2e`. Run halves directly — never `npx vitest`/`npx playwright`.
+- **E2E** (`npm run test:e2e`): Playwright; conventions in `e2e/AGENTS.md`.
+- **Unit** (`npm run test:unit`): Vitest (Node, `vitest.config.js`), files `src/**/*.test.js` colocated. Pure logic
+  only — extract it from `*.svelte.js` hooks into plain `.js` (e.g. `bookingAvailability.js`), don't test runes. Keep
+  assertions timezone-independent; `vi.mock('$lib/paraglide/messages.js', …)` for messages.
 - **Before committing**: `npm run lint` (ESLint + Prettier check) and `npm run format`.
 - **Linting rules**: `#each` blocks must have keys `(item.id)`; use `SvelteMap` instead of `new Map()` for reactive
   state; no useless mustaches.
-- **Playwright credentials**: use `TEST_EMAIL` and `TEST_PASSWORD` from `.env` — never hardcoded. Load via
-  `dotenv.config()` in `playwright.config.js`. Prefer semantic selectors (`nav a[href="/login"]`). Never log
-  tokens or passwords.
