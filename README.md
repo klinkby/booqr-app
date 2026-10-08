@@ -54,7 +54,7 @@ The application is organized following SvelteKit's file-based routing convention
 
 The app uses Paraglide JS for all interface text. Source messages live in `messages/en.json` and `messages/da.json`;
 the Vite plugin compiles them into `src/lib/paraglide/`. Import translated strings as `m` from
-`$lib/paraglide/messages.js`, for example `m.navSignIn()`. Do not edit the generated Paraglide output directly.
+`#lib/paraglide/messages.js`, for example `m.navSignIn()`. Do not edit the generated Paraglide output directly.
 
 Paraglide resolves the locale in this order: its `localStorage` preference, the browser's preferred language, then
 English. The footer language control uses `src/lib/locale.svelte.js` to call Paraglide's `setLocale()`. It intentionally

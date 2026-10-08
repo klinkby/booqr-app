@@ -1,7 +1,22 @@
 # Reusable Components (`src/lib/components/`)
 
-Import all from `'$lib'`. To add: create `.svelte` in `src/lib/components/` and add
+Import all from `'#lib'`. To add: create `.svelte` in `src/lib/components/` and add
 `export { default as Name } from './components/Name.svelte';` to `src/lib/index.js`.
+
+**Exception — `Calendar` and `ListCalendar`** are NOT exported from the `#lib` barrel.
+They pull the heavy `@event-calendar/core` dependency (whose CSS side-effect import
+defeats tree-shaking across the barrel), so they're lazy-loaded by direct path to keep
+them out of the shared bundle:
+
+```js
+let Calendar = $state(null);
+onMount(async () => {
+	Calendar = (await import('#lib/components/Calendar.svelte')).default;
+});
+```
+
+Render behind `{#if Calendar}` with a `role="status"` fallback. See `/admin/plan` and
+`/profile` pages.
 
 ### DataTable (`src/lib/components/DataTable.svelte`)
 
