@@ -277,9 +277,8 @@ CI for regression detection.
 ## Verification & Code Quality
 
 - **E2E tests**: always `npm run test:e2e` — never `npx playwright test` or `npm test` directly. No unit tests.
+  Playwright conventions (mocking, auth, screenshots, form-submission gotchas) live in `e2e/AGENTS.md`, loaded
+  automatically when working under that directory.
 - **Before committing**: `npm run lint` (ESLint + Prettier check) and `npm run format`.
 - **Linting rules**: `#each` blocks must have keys `(item.id)`; use `SvelteMap` instead of `new Map()` for reactive
   state; no useless mustaches.
-- **Playwright credentials**: use `TEST_EMAIL` and `TEST_PASSWORD` from `.env` — never hardcoded. Load via
-  `dotenv.config()` in `playwright.config.js`. Prefer semantic selectors (`nav a[href="/login"]`). Never log
-  tokens or passwords.
