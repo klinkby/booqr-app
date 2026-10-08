@@ -17,6 +17,11 @@ const executablePath = chromiumSymlink && existsSync(chromiumSymlink) ? chromium
 export default defineConfig({
 	webServer: { command: 'npm run build && npm run preview', port: 4173 },
 	testDir: 'e2e',
+	// These specs run against route mocks and settle in well under a second when
+	// healthy, so a hang means a real failure. Keep timeouts tight so the suite
+	// fails fast instead of stalling on the 30s default.
+	timeout: 15_000,
+	expect: { timeout: 5_000 },
 	use: {
 		baseURL: 'http://localhost:4173',
 	},
