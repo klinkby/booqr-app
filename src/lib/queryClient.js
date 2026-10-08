@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/svelte-query';
-import { ApiError, AuthenticationService } from '$lib/api';
+import { ApiError, AuthenticationService } from '#lib/api/index.js';
 import { auth } from './auth.svelte.js';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
@@ -42,7 +42,7 @@ export async function authedQueryFn(operation) {
 			auth.clear();
 			queryClient.clear();
 			const returnUrl = globalThis.location.pathname + globalThis.location.search;
-			await goto(resolve(`/login?returnUrl=${encodeURIComponent(returnUrl)}`));
+			await goto(resolve(`login?returnUrl=${encodeURIComponent(returnUrl)}`));
 			throw error;
 		}
 		if (!(error instanceof ApiError) || error.status !== 401) {
@@ -104,7 +104,7 @@ async function doRefresh() {
 		auth.clear();
 		// Capture current URL to return after re-authentication
 		const returnUrl = globalThis.location.pathname + globalThis.location.search;
-		await goto(resolve(`/login?returnUrl=${encodeURIComponent(returnUrl)}`));
+		await goto(resolve(`login?returnUrl=${encodeURIComponent(returnUrl)}`));
 		throw error;
 	}
 }

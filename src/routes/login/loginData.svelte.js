@@ -1,5 +1,5 @@
-import { AuthenticationService } from '$lib/api';
-import { usePublicMutation } from '$lib/resourceQuery.svelte.js';
+import { AuthenticationService } from '#lib/api/index.js';
+import { usePublicMutation } from '#lib/resourceQuery.svelte.js';
 
 /**
  * Route-local data hook for the login page. Wraps the login call in

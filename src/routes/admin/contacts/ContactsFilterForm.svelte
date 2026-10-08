@@ -1,5 +1,5 @@
 <script>
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	const ROLES = [
 		{ value: 'Customer', label: () => m.customer() },

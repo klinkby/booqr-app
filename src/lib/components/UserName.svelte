@@ -5,7 +5,10 @@
 	let { id = 0, name = '', email = '', iconOnly = false } = $props();
 </script>
 
-<a href={resolve('/admin/contacts/' + id)} class="flex items-center gap-1 text-indigo-600 hover:underline">
+<a
+	href={resolve('/admin/contacts/[id]', { id: String(id) })}
+	class="flex items-center gap-1 text-indigo-600 hover:underline"
+>
 	<Avatar {email} size="1rem" />
 	{#if !iconOnly}
 		{name}

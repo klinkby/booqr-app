@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 /**
  * The apex/reserved hosts that carry no tenant and serve the marketing /

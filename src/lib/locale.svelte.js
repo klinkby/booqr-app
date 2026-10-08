@@ -5,8 +5,8 @@
  * An explicit override is persisted by Paraglide and wins until cleared.
  */
 
-import { browser } from '$app/environment';
-import { getLocale, localStorageKey, setLocale } from '$lib/paraglide/runtime.js';
+import { browser } from '$app/env';
+import { getLocale, localStorageKey, setLocale } from '#lib/paraglide/runtime.js';
 
 const LEGACY_STORAGE_KEY = 'locale-override';
 const SUPPORTED = /** @type {const} */ (['da', 'en']);

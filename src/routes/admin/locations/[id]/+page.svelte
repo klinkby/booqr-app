@@ -1,13 +1,13 @@
 <script>
-	import { Form, apiErrorMessage } from '$lib';
+	import { Form, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useLocationData } from './locationData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
-	let id = $derived($page.params.id);
+	let id = $derived(page.params.id);
 	let isEdit = $derived(id !== 'new');
 
 	const location = useLocationData();
@@ -43,7 +43,7 @@
 		loading = true;
 		try {
 			await location.saveLocation({ id, isEdit, payload: { name, address1, address2, zip, city } });
-			await goto(resolve('/admin/locations'));
+			await goto(resolve('admin/locations'));
 		} catch (err) {
 			error = apiErrorMessage(err);
 		} finally {
@@ -52,7 +52,7 @@
 	}
 
 	function handleCancel() {
-		goto(resolve('/admin/locations'));
+		goto(resolve('admin/locations'));
 	}
 </script>
 

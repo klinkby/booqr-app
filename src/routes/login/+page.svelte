@@ -1,10 +1,10 @@
 <script>
-	import { auth, Form, apiErrorMessage } from '$lib';
+	import { auth, Form, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useLoginData } from './loginData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	const loginData = useLoginData();
 
@@ -32,7 +32,7 @@
 		return raw;
 	}
 
-	let returnUrl = $derived(normalizeReturnUrl($page.url.searchParams.get('returnUrl')));
+	let returnUrl = $derived(normalizeReturnUrl(page.url.searchParams.get('returnUrl')));
 
 	async function handleSubmit() {
 		error = null;
@@ -46,7 +46,7 @@
 			// Store access token (response should contain token)
 			if (auth.isLoggedIn) {
 				// Redirect to the page that triggered login, or home if none
-				// eslint-disable-next-line svelte/no-navigation-without-resolve -- returnUrl comes from URL query param and is already a fully-resolved path
+
 				await goto(returnUrl);
 			} else {
 				error = m.authenticationFailed();
@@ -98,7 +98,7 @@
 
 		<p class="mt-4 text-sm text-gray-600">
 			<a
-				href={resolve('/change-password')}
+				href={resolve('change-password')}
 				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 			>
 				{m.forgotPassword()}

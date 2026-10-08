@@ -2,8 +2,8 @@
 	import { Calendar, List } from '@event-calendar/core';
 	import '@event-calendar/core/index.css';
 	import { untrack } from 'svelte';
-	import { m } from '$lib/paraglide/messages.js';
-	import { getLocale } from '$lib/paraglide/runtime.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	let {
 		events = [],

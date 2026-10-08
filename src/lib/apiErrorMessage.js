@@ -1,5 +1,5 @@
-import { ApiError } from '$lib/api/core/ApiError';
-import { m } from '$lib/paraglide/messages.js';
+import { ApiError } from '#lib/api/core/ApiError.js';
+import { m } from '#lib/paraglide/messages.js';
 
 /**
  * Extracts a human-readable error message from an API error.

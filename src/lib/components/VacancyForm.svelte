@@ -1,7 +1,7 @@
 <script>
-	import { Form } from '$lib';
-	import { m } from '$lib/paraglide/messages.js';
-	import { getLocale } from '$lib/paraglide/runtime.js';
+	import { Form } from '#lib';
+	import { m } from '#lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	let {
 		mode = 'create', // 'create' or 'view'

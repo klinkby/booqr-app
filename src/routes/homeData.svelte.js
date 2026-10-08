@@ -1,6 +1,6 @@
-import { LocationService, ServiceService } from '$lib/api';
-import { queryKeys } from '$lib/queryKeys';
-import { useResourceQuery } from '$lib/resourceQuery.svelte.js';
+import { LocationService, ServiceService } from '#lib/api/index.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { useResourceQuery } from '#lib/resourceQuery.svelte.js';
 
 /**
  * Route-local data hook for the home page (step 1 of the customer booking

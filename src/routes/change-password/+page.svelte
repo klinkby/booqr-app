@@ -1,10 +1,10 @@
 <script>
 	import { resolve } from '$app/paths';
-	import { Form, PasswordReset, apiErrorMessage } from '$lib';
+	import { Form, PasswordReset, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { useChangePasswordData } from './changePasswordData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	const cp = useChangePasswordData();
 
@@ -20,8 +20,8 @@
 
 	const passwordPattern = /^(?=(.*[0-9]))(?=.*[!@#$%^&*()[{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z])).{8,}$/;
 
-	let action = $derived($page.url.searchParams.get('action'));
-	let expires = $derived($page.url.searchParams.get('expires'));
+	let action = $derived(page.url.searchParams.get('action'));
+	let expires = $derived(page.url.searchParams.get('expires'));
 
 	let expired = $derived.by(() => {
 		if (!expires) return true;
@@ -66,11 +66,11 @@
 
 		loading = true;
 		try {
-			await cp.changePassword({ password, query: Object.fromEntries($page.url.searchParams) });
+			await cp.changePassword({ password, query: Object.fromEntries(page.url.searchParams) });
 
 			password = '';
 			confirmPassword = '';
-			await goto(resolve('/login'));
+			await goto(resolve('login'));
 		} catch (err) {
 			if (import.meta.env.DEV) {
 				console.error('Failed to change password:', err);

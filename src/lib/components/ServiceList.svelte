@@ -1,6 +1,6 @@
 <script>
-	import { DateUtils } from '$lib/dateUtils.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { DateUtils } from '#lib/dateUtils.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let { services = [], onselect } = $props();
 </script>

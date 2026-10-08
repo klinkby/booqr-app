@@ -1,8 +1,8 @@
-import { EmployeeService, LocationService, ServiceService, VacancyService } from '$lib/api';
-import { BookingAvailability } from '$lib/bookingAvailability.js';
-import { DateUtils } from '$lib/dateUtils.js';
-import { queryKeys } from '$lib/queryKeys';
-import { fetchAllPages, useResourceQuery } from '$lib/resourceQuery.svelte.js';
+import { EmployeeService, LocationService, ServiceService, VacancyService } from '#lib/api/index.js';
+import { BookingAvailability } from '#lib/bookingAvailability.js';
+import { DateUtils } from '#lib/dateUtils.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { fetchAllPages, useResourceQuery } from '#lib/resourceQuery.svelte.js';
 
 // Bounded lookahead for "does any later month/day have availability" checks —
 // businesses publish vacancies a few months out at most in practice. Widening
@@ -10,7 +10,7 @@ import { fetchAllPages, useResourceQuery } from '$lib/resourceQuery.svelte.js';
 const HORIZON_MONTHS_AHEAD = 6;
 
 // All Date/Set arithmetic lives in the pure `BookingAvailability` class
-// (`$lib/bookingAvailability.js`), kept out of this .svelte.js module so it is
+// (`#lib/bookingAvailability.js`), kept out of this .svelte.js module so it is
 // unit-testable and outside `eslint-plugin-svelte`'s prefer-svelte-reactivity
 // scope. None of those values are reactive state — each is a fresh,
 // immediately-consumed value — so the hook below just composes them in

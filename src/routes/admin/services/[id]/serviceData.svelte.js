@@ -1,6 +1,6 @@
-import { ServiceService, UserService } from '$lib/api';
-import { queryKeys } from '$lib/queryKeys';
-import { fetchResource, useResourceMutation, useResourceQuery } from '$lib/resourceQuery.svelte.js';
+import { ServiceService, UserService } from '#lib/api/index.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { fetchResource, useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
 
 /**
  * Route-local data hook for the service create/edit form. Fetches the

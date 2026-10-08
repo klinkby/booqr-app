@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 // Mock the generated Paraglide messages so `formatDuration`'s branch choice is
 // what's asserted, not the generated locale output. The shapes mirror the real
 // templates in messages/en.json.
-vi.mock('$lib/paraglide/messages.js', () => ({
+vi.mock('#lib/paraglide/messages.js', () => ({
 	m: {
 		durationMinutes: ({ minutes }) => `${minutes} min`,
 		durationHours: ({ hours }) => `${hours} h`,

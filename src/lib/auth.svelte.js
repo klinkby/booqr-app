@@ -1,5 +1,5 @@
-import { OpenAPI } from '$lib/api/index.js';
-import { browser } from '$app/environment';
+import { OpenAPI } from '#lib/api/index.js';
+import { browser } from '$app/env';
 
 const tokenName = 'access_token';
 

@@ -1,3 +1,4 @@
+import adapter from '@sveltejs/adapter-static';
 import { connect } from 'node:http2';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
@@ -7,6 +8,7 @@ import { defineConfig } from 'vite';
 const API_TARGET = 'https://www.booqr.dk';
 const LOCAL_API_TARGET = 'http://localhost:8080';
 const USE_LOCAL_API = !!process.env.API_LOCAL;
+
 const H1_HEADERS = new Set(['host', 'connection', 'transfer-encoding', 'keep-alive', 'upgrade']);
 
 /** Proxies an incoming HTTP/1.1 request to the upstream over HTTP/2. */
@@ -53,7 +55,19 @@ export default defineConfig({
 					},
 				},
 		tailwindcss(),
-		sveltekit(),
+		sveltekit({
+			adapter: adapter({ fallback: 'index.html' }),
+			csp: {
+				directives: {
+					'default-src': ['self'],
+					'frame-src': ['none'],
+					'img-src': ['self', 'data:'],
+					'object-src': ['none'],
+					'script-src': ['self', 'unsafe-inline'],
+					'style-src': ['self', 'unsafe-inline', 'unsafe-hashes'],
+				},
+			},
+		}),
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',

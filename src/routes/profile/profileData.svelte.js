@@ -1,9 +1,9 @@
-import { BookingService, LocationService, ServiceService, UserService } from '$lib/api';
-import { auth } from '$lib/auth.svelte.js';
-import { authedQueryFn } from '$lib/queryClient.js';
-import { queryKeys } from '$lib/queryKeys';
-import { useResourceMutation, useResourceQuery } from '$lib/resourceQuery.svelte.js';
-import { DateUtils } from '$lib/dateUtils.js';
+import { BookingService, LocationService, ServiceService, UserService } from '#lib/api/index.js';
+import { auth } from '#lib/auth.svelte.js';
+import { authedQueryFn } from '#lib/queryClient.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
+import { DateUtils } from '#lib/dateUtils.js';
 import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
 

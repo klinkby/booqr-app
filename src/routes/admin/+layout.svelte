@@ -1,15 +1,15 @@
 <script>
-	import { auth } from '$lib';
+	import { auth } from '#lib';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let { children } = $props();
 
 	$effect(() => {
 		if (!auth.isLoggedIn) {
-			goto(resolve(`/login?returnUrl=${encodeURIComponent($page.url.pathname)}`));
+			goto(resolve(`login?returnUrl=${encodeURIComponent(page.url.pathname)}`));
 		}
 	});
 

@@ -1,13 +1,13 @@
 <script>
-	import { BookingSummary, Form, LimitedTextarea, apiErrorMessage, auth } from '$lib';
+	import { BookingSummary, Form, LimitedTextarea, apiErrorMessage, auth } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { DateUtils } from '$lib/dateUtils.js';
+	import { DateUtils } from '#lib/dateUtils.js';
 	import { onMount } from 'svelte';
 	import { useConfirmData } from './confirmData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
-	import { getLocale } from '$lib/paraglide/runtime.js';
+	import { m } from '#lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	const confirmData = useConfirmData();
 
@@ -144,12 +144,12 @@
 			const params = new URLSearchParams();
 			if (employeeName) params.set('employee', employeeName);
 			if (locationName) params.set('location', locationName);
-			// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic query string appended to a fixed path; resolve() covers the bare path only
-			goto(`${resolve('/book/done')}?${params.toString()}`);
+
+			goto(`${resolve('book/done')}?${params.toString()}`);
 		} catch (err) {
 			if (err.status === 409) {
 				const dateStr = startDate ? DateUtils.toLocalDate(startDate) : '';
-				// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic path segment combined with a query string
+
 				goto(`/book/${serviceId}/conflict?date=${dateStr}`);
 			} else {
 				bookError = apiErrorMessage(err);
@@ -195,16 +195,15 @@
 	<h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-4 outline-none">{m.bookingLinkInvalid()}</h1>
 	<p class="text-gray-600 mb-4">{m.bookingLinkInvalidMessage()}</p>
 	<a
-		href={resolve(`/book/${serviceId}`)}
+		href={resolve(`book/${serviceId}`)}
 		class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 	>
 		{m.chooseATime()}
 	</a>
 {:else if !auth.isLoggedIn}
 	<h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-2 outline-none">{m.signInOrSignUp()}</h1>
-	<p class="text-sm text-gray-600 mb-6">
-		{m.timeNotHeld()}
-	</p>
+
+	<p class="text-sm text-gray-600 mb-6">{m.timeNotHeld()}</p>
 
 	{#if authMode === 'login'}
 		<Form legend={m.signIn()} error={authError} loading={authLoading} onsubmit={handleLogin} submitLabel={m.signIn()}>
@@ -235,7 +234,7 @@
 		</Form>
 		<p class="mt-4 text-sm text-gray-600">
 			<a
-				href={resolve('/change-password')}
+				href={resolve('change-password')}
 				class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
 			>
 				{m.forgotPassword()}
@@ -270,7 +269,7 @@
 				<label for="acceptTerms" class="text-sm text-gray-700">
 					{m.iAcceptThe()}
 					<a
-						href={resolve('/terms-and-conditions')}
+						href={resolve('terms-and-conditions')}
 						target="_blank"
 						rel="noopener"
 						class="text-indigo-600 hover:text-indigo-500 underline"
@@ -358,7 +357,7 @@
 					<label for="acceptCancellation" class="text-sm text-gray-700">
 						{m.cancellationPolicyLabel()}
 						<a
-							href={resolve('/terms-and-conditions')}
+							href={resolve('terms-and-conditions')}
 							target="_blank"
 							rel="noopener"
 							class="text-indigo-600 hover:text-indigo-500 underline"

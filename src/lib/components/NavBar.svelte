@@ -1,7 +1,7 @@
 <script>
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	let { links = [], brandName = 'App', pageTitle = undefined, onlogout = undefined } = $props();
 	let isOpen = $state(false);

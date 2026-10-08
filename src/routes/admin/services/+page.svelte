@@ -1,9 +1,9 @@
 <script>
-	import { DataTable, UserName, apiErrorMessage } from '$lib';
+	import { DataTable, UserName, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useServicesData } from './servicesData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	const columns = [
 		{ key: 'name', label: m.labelName() },
@@ -14,10 +14,10 @@
 	const services = useServicesData();
 
 	function handleEdit(row) {
-		goto(resolve(`/admin/services/${row.id}`));
+		goto(resolve(`admin/services/${row.id}`));
 	}
 	function handleCreate() {
-		goto(resolve('/admin/services/new'));
+		goto(resolve('admin/services/new'));
 	}
 </script>
 
@@ -48,6 +48,7 @@
 				{row[column.key]}
 			{/if}
 		{/snippet}
+
 		<DataTable {columns} rows={services.rows} onedit={handleEdit} {cellContent} />
 	{/if}
 </div>

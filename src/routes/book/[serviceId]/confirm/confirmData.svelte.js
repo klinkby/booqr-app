@@ -7,10 +7,10 @@ import {
 	ServiceService,
 	UserService,
 	VacancyService,
-} from '$lib/api';
-import { authedQueryFn } from '$lib/queryClient.js';
-import { queryKeys } from '$lib/queryKeys';
-import { fetchResource, usePublicMutation, useResourceQuery } from '$lib/resourceQuery.svelte.js';
+} from '#lib/api/index.js';
+import { authedQueryFn } from '#lib/queryClient.js';
+import { queryKeys } from '#lib/queryKeys.js';
+import { fetchResource, usePublicMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
 import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 
 /**

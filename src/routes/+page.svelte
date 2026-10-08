@@ -1,10 +1,10 @@
 <script>
-	import { ServiceList, apiErrorMessage } from '$lib';
+	import { ServiceList, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { useHomeData } from './homeData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
 
 	const home = useHomeData();
 
@@ -25,7 +25,7 @@
 	});
 
 	function handleSelect(service) {
-		goto(resolve(`/book/${service.id}`));
+		goto(resolve(`book/${service.id}`));
 	}
 </script>
 
