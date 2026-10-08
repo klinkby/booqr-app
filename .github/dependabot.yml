@@ -12,3 +12,8 @@ updates:
       default-days: 7
     schedule:
       interval: 'weekly'
+    ignore:
+      # TypeScript 7+ is outside @sveltejs/kit's peer range (^5.3.3 || ^6.0.0).
+      # Only used transitively by the import-api codegen; revisit when kit supports TS 7.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
