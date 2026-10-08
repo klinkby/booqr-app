@@ -1,10 +1,19 @@
 <script>
-	import { auth, Calendar, VacancyForm, apiErrorMessage } from '$lib';
+	import { auth, VacancyForm, apiErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { DateUtils } from '$lib/dateUtils.js';
+	import { onMount } from 'svelte';
+	import { DateUtils } from '#lib/dateUtils.js';
 	import { usePlanData } from './planData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
+
+	// Lazy-load the calendar (and its heavy `@event-calendar/core` dependency) so it
+	// splits into its own chunk instead of the shared bundle. Import the component's
+	// own module directly — not the `#lib` barrel — or the bundler can't split it out.
+	let Calendar = $state(null);
+	onMount(async () => {
+		Calendar = (await import('#lib/components/Calendar.svelte')).default;
+	});
 
 	// Vacancy/location/employee data + mutations owned by the svelte-query hook.
 	// The range is read live from the URL inside the thunk so week navigation refetches.
@@ -91,11 +100,9 @@
 
 	// Week navigation: update URL params so the load function re-fetches for the new range
 	function handleDatesChange(info) {
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- Query params only; resolve() not needed for relative paths without route change
 		goto(`?from=${info.start.toISOString()}&to=${info.end.toISOString()}`, {
-			replaceState: true,
-			keepFocus: true,
-			noScroll: true,
+			replace: true,
+			reset: false,
 		});
 	}
 
@@ -227,14 +234,18 @@
 				</select>
 			</div>
 			<div class="[&_.ec-toolbar]:pr-48">
-				<Calendar
-					events={calendarEvents}
-					onDatesChange={handleDatesChange}
-					onDateClick={handleDateClick}
-					onEventClick={handleEventClick}
-					onEventResize={handleEventResize}
-					onEventDrop={handleEventDrop}
-				/>
+				{#if Calendar}
+					<Calendar
+						events={calendarEvents}
+						onDatesChange={handleDatesChange}
+						onDateClick={handleDateClick}
+						onEventClick={handleEventClick}
+						onEventResize={handleEventResize}
+						onEventDrop={handleEventDrop}
+					/>
+				{:else}
+					<p role="status" class="p-4 text-sm text-gray-500">{m.loading()}</p>
+				{/if}
 			</div>
 		</div>
 

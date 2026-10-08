@@ -1,9 +1,18 @@
 <script>
-	import { auth, Form, apiErrorMessage, ListCalendar, PhoneInput } from '$lib';
+	import { auth, Form, apiErrorMessage, PhoneInput } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 	import { useProfileData } from './profileData.svelte.js';
-	import { m } from '$lib/paraglide/messages.js';
+	import { m } from '#lib/paraglide/messages.js';
+
+	// Lazy-load the calendar (and its heavy `@event-calendar/core` dependency) so it
+	// splits into its own chunk instead of the shared bundle. Import the component's
+	// own module directly — not the `#lib` barrel — or the bundler can't split it out.
+	let ListCalendar = $state(null);
+	onMount(async () => {
+		ListCalendar = (await import('#lib/components/ListCalendar.svelte')).default;
+	});
 
 	const profile = useProfileData();
 
@@ -21,7 +30,7 @@
 	// Auth guard: redirect unauthenticated users
 	$effect(() => {
 		if (!auth.isLoggedIn) {
-			goto(resolve('/login?returnUrl=/profile'));
+			goto(resolve('login?returnUrl=/profile'));
 		}
 	});
 
@@ -71,7 +80,7 @@
 		params.set('employee', employeeId);
 		params.set('location', locationId);
 		params.set('rebook', nonce);
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic path segment combined with a query string
+
 		goto(`/book/${serviceId}?${params.toString()}`);
 	}
 
@@ -81,7 +90,7 @@
 		const params = new URLSearchParams();
 		params.set('employee', employeeId);
 		params.set('location', locationId);
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- dynamic path segment combined with a query string
+
 		goto(`/book/${serviceId}?${params.toString()}`);
 	}
 
@@ -132,13 +141,17 @@
 							<p class="text-sm text-red-700">{bookingError}</p>
 						</div>
 					{/if}
-					<ListCalendar
-						events={profile.bookingEvents}
-						onBookNew={handleBookNew}
-						onMoveEvent={handleMoveEvent}
-						onCancelEvent={handleCancelEvent}
-						onDuplicateEvent={handleDuplicateEvent}
-					/>
+					{#if ListCalendar}
+						<ListCalendar
+							events={profile.bookingEvents}
+							onBookNew={handleBookNew}
+							onMoveEvent={handleMoveEvent}
+							onCancelEvent={handleCancelEvent}
+							onDuplicateEvent={handleDuplicateEvent}
+						/>
+					{:else}
+						<p role="status" class="p-4 text-sm text-gray-500">{m.loading()}</p>
+					{/if}
 				</section>
 
 				<!-- Section 2: Profile Information Form (fixed narrower pane) -->
