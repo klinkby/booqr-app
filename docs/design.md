@@ -14,9 +14,10 @@ How the Booqr app looks, and the rules that keep it consistent. Agents get the m
 ## Principles
 
 - **Standards first**: semantic HTML5 and Tailwind utilities. No custom CSS beyond the `@theme` tokens.
-- **One source per class string**: shared class strings live in `src/lib/ui.js` (`label`, `input`, `groupHeading`,
-  `cardSection`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`, `buttonDanger`) and in components (`Form`, `RequiredInput`,
-  `NavBar`, `LanguageToggle`). Import them; never paste a copy into a page. A new pattern used twice becomes a token.
+- **One source per class string**: shared class strings live in `src/lib/ui.js` (`label`, `input`, `checkbox`, `radio`, `choiceLabel`,
+  `groupHeading`, `link`, `alert`, `card`, `cardSection`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`,
+  `buttonDanger`) and in components (`Form`, `RequiredInput`, `RequiredMark`, `PhoneInput`, `LimitedTextarea`,
+  `DataTable`, `PaginatedTable`, `NavBar`, `LanguageToggle`). Import them; never paste a copy into a page. A new pattern used twice becomes a token.
 - **Quiet by default**: a grey canvas, white surfaces and one accent colour (indigo). Decoration must carry meaning.
 - **Accessible by requirement**: WCAG AA, see [AGENTS.md › Semantic HTML5 & Accessibility](../AGENTS.md#semantic-html5--accessibility-required)
   and the [checklist](#accessibility-checklist) below.
@@ -77,8 +78,8 @@ for vertical spacing; horizontal gutters follow [Layout](#layout).
 
 ### Shape and depth
 
-Controls and buttons are `rounded-lg` with `shadow-xs`; cards are `rounded-xl` with `shadow-sm ring-1 ring-gray-900/5`.
-No other shadows.
+Controls and buttons are `rounded-lg` with `shadow-xs`; cards are `rounded-xl` with `shadow-sm ring-1 ring-gray-900/5`
+(`card`). Floating overlays (the filter panel) use `shadow-lg` to lift off the page. No other shadows.
 
 ## Layout
 
@@ -162,15 +163,23 @@ other neutral actions) and `buttonDanger` (destructive). All are `rounded-lg tex
 ### Top row
 
 Put the "Create" button and any filter toggle together in one `flex justify-between items-center` row above the table
-(not centered below it). Both are secondary buttons: `buttonSecondary` for "Create", `iconButtonSecondary` for the
+with `mb-4` (not centered below it). Both are secondary buttons: `buttonSecondary` for "Create", `iconButtonSecondary` for the
 icon-only filter toggle (`src/lib/ui.js`). Low emphasis; the solid indigo button is reserved for a form's submit.
+
+### Table
+
+`PaginatedTable` → `DataTable` renders the table as a `card`: grey header row (`bg-gray-50`, `text-sm font-semibold`),
+rows divided with `divide-gray-900/10`, cells `px-4 py-4 sm:px-6`, actions right-aligned (Edit uses `link`, Delete is red
+text). Previous/Next sit in a grey bar inside the card's bottom edge, like a form's action bar. Loading and empty
+states are a `card` with `text-sm text-gray-500`; errors use `alert`. Pages don't style tables themselves.
 
 ### Filter overlay
 
 Reference: `src/routes/admin/contacts/ContactsFilterForm.svelte` + `src/routes/admin/contacts/+page.svelte`.
 
 Icon-only funnel toggle button (`aria-label`/`aria-expanded`/`aria-controls`) in a `relative` wrapper; the filter
-renders as an `absolute right-0 top-full mt-2 z-10` overlay. Use a real form element with `onsubmit` calling
+renders as an `absolute right-0 top-full z-10 mt-2 w-72 rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-900/5` panel
+with `label`/`input`/`checkbox` fields spaced `space-y-4`. Use a real form element with `onsubmit` calling
 `preventDefault()` then an `onsubmit` prop, so Enter submits and closes the overlay. Debounce free-text inputs 500ms via
 a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately on submit.
 

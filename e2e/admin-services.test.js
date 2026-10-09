@@ -14,7 +14,7 @@ test.describe('Admin Services CRUD', () => {
 		await expect(table).toBeVisible();
 		await expect(table.getByRole('columnheader', { name: 'Name' })).toBeVisible();
 		await expect(page.getByText(SERVICES[0].name)).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Create Service' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Create service' })).toBeVisible();
 
 		await pageScreenshot(page, 'admin-services');
 	});
@@ -22,7 +22,7 @@ test.describe('Admin Services CRUD', () => {
 	test('create button navigates to the new-service form', async ({ page }) => {
 		await page.goto('/admin/services');
 
-		await page.getByRole('button', { name: 'Create Service' }).click();
+		await page.getByRole('button', { name: 'Create service' }).click();
 
 		await expect(page).toHaveURL('/admin/services/new');
 		await expect(page.locator('#name')).toBeVisible();

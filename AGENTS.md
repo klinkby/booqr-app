@@ -252,9 +252,9 @@ any visual change. Must-follow rules:
   owner first. Reuse Paraglide messages; English in sentence case; every string in both `en` and `da`.
 - **Look**: `bg-gray-50` canvas, white sticky `<header>`, forms as centred `max-w-2xl` cards, Nunito Variable
   (self-hosted; the CSP blocks font CDNs). Reference page: `src/routes/admin/locations/[id]/+page.svelte`.
-- **Reuse, don't copy**: class strings come from `src/lib/ui.js` (`label`, `input`, `groupHeading`, `cardSection`,
-  `button*`) and components (`<Form card>`, `RequiredInput`). Never paste class lists or invent variants; a pattern
-  used twice becomes a token in `ui.js` and the manual.
+- **Reuse, don't copy**: class strings come from `src/lib/ui.js` tokens and the shared components (`<Form card>`,
+  `RequiredInput`, `PhoneInput`, `LimitedTextarea`, `PaginatedTable`). Never paste class lists or invent variants; a
+  pattern used twice becomes a token in `ui.js` and the manual.
 - **Page `<h1>`**: rendered by the root layout from `titleFromPath()`; mapped pages must not add their own. Form
   routes are centred by the layout's `isFormPage`.
 - **Type**: `<h1>` and brand `text-xl font-bold tracking-tight`; labels `text-sm font-semibold`;

@@ -1,6 +1,7 @@
 <script>
 	import DataTable from './DataTable.svelte';
 	import { m } from '#lib/paraglide/messages.js';
+	import { alert as alertClass, card, cardSection } from '#lib/ui.js';
 
 	let {
 		columns,
@@ -14,19 +15,22 @@
 		onedit = undefined,
 		ondelete = undefined,
 		cellContent = undefined,
+		caption = undefined,
 	} = $props();
 </script>
 
 {#if isLoading}
-	<div role="status" aria-live="polite">
-		<p>{m.loading()}</p>
+	<div class="{card} {cardSection}" role="status" aria-live="polite">
+		<p class="text-sm text-gray-500">{m.loading()}</p>
 	</div>
 {:else if error}
-	<div role="alert" aria-live="assertive">
-		<p class="text-red-600">{error}</p>
+	<div role="alert" aria-live="assertive" class={alertClass}>
+		<p>{error}</p>
 	</div>
 {:else if rows.length === 0}
-	<p>{m.noItemsFound()}</p>
+	<div class="{card} {cardSection}">
+		<p class="text-sm text-gray-500">{m.noItemsFound()}</p>
+	</div>
 {:else}
 	<DataTable
 		{columns}
@@ -38,5 +42,6 @@
 		{onedit}
 		{ondelete}
 		{cellContent}
+		{caption}
 	/>
 {/if}

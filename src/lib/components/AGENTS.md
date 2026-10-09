@@ -20,7 +20,9 @@ Render behind `{#if Calendar}` with a `role="status"` fallback. See `/admin/plan
 
 ### DataTable (`src/lib/components/DataTable.svelte`)
 
-Generic accessible table with optional edit/delete row actions and pagination.
+Generic accessible table with optional edit/delete row actions and pagination. Renders inside a `card` token; header
+`bg-gray-50`, divided rows, actions right-aligned (Edit uses `link`, Delete is red); the paging bar is a `bg-gray-50`
+footer inside the card with `buttonSecondary` buttons.
 
 | Prop                              | Type                                   | Default     | Description                                                            |
 | --------------------------------- | -------------------------------------- | ----------- | ---------------------------------------------------------------------- |
@@ -30,11 +32,13 @@ Generic accessible table with optional edit/delete row actions and pagination.
 | `onedit` / `ondelete`             | `(row) => void`                        | `undefined` | Row callbacks; Actions column hidden if both omitted                   |
 | `onnextpage` / `onpreviouspage`   | `() => void`                           | `undefined` | Paging callbacks; nav hidden if both omitted                           |
 | `cellContent`                     | `snippet(column, row)`                 | `undefined` | Custom cell renderer; falls back to `row[column.key]` when omitted     |
+| `caption`                         | `string`                               | `undefined` | sr-only `<caption>`; pass the page title                               |
 
 ### PaginatedTable (`src/lib/components/PaginatedTable.svelte`)
 
-Wraps `DataTable` with loading, error, and empty states — render it (not `DataTable` directly) for query-backed
-lists. Forwards `columns`, `rows`, `cellContent`, the paging props, and `onedit`/`ondelete` straight through to
+Wraps `DataTable` with loading, error, and empty states. Loading and empty messages sit in a `card` + `cardSection`
+block (`text-sm text-gray-500`); the error uses the `alert` token — render it (not `DataTable` directly) for query-backed
+lists. Forwards `columns`, `rows`, `cellContent`, `caption`, the paging props, and `onedit`/`ondelete` straight through to
 `DataTable`; adds the two state props below. Pairs with `usePagedResourceQuery` (see the root `AGENTS.md`
 data-loading section).
 
@@ -47,6 +51,7 @@ data-loading section).
 | `onnextpage` / `onpreviouspage`   | `() => void`           | `undefined` | Forwarded to `DataTable`                                       |
 | `onedit` / `ondelete`             | `(row) => void`        | `undefined` | Forwarded to `DataTable`                                       |
 | `cellContent`                     | `snippet(column, row)` | `undefined` | Forwarded to `DataTable`                                       |
+| `caption`                         | `string`               | `undefined` | sr-only `<caption>`; pass the page title                       |
 
 When not loading and not errored, an empty `rows` renders a "No items found" message; otherwise it renders `DataTable`.
 
@@ -70,6 +75,11 @@ Accessible form wrapper handling submission, errors, and loading state. Children
 
 Required text input with the design-manual asterisk. Spreads all props onto the `<input>` (`id`, `name`, `type`,
 `autocomplete`…), always sets `required`, and supports `bind:value`. Pair it with a `<label for>`.
+
+### RequiredMark (`src/lib/components/RequiredMark.svelte`)
+
+The `aria-hidden` asterisk span (`text-indigo-400`, absolute right edge). Place it inside a `relative` wrapper beside
+an input; `RequiredInput` and `PhoneInput` (when `required`) render it.
 
 ### Calendar (`src/lib/components/Calendar.svelte`)
 
@@ -181,6 +191,7 @@ Presentational phone-number field: `type="tel"` input with the `+` country-code 
 | `value` (bindable) | `string`  | `''`    | Phone number, two-way bound to the input                             |
 | `required`         | `boolean` | `true`  | Drives the input's `required` attribute (pass `false` when optional) |
 
+Label and input use the `label`/`input` tokens; the input gets `pl-6` for the `+` (and `pr-8` when required).
 Renders `id="phone"`/`name="phone"` — render at most one per page (both consumers do).
 
 ### Password Validation

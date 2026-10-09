@@ -25,7 +25,7 @@
 </script>
 
 <div>
-	<div class="mb-4">
+	<div class="mb-4 flex items-center justify-between">
 		<button class={buttonSecondary} onclick={handleCreate} type="button">{m.createLocation()}</button>
 	</div>
 	<PaginatedTable
@@ -37,5 +37,6 @@
 		onnextpage={locations.nextPage}
 		onpreviouspage={locations.previousPage}
 		onedit={handleEdit}
+		caption={m.titleLocations()}
 	/>
 </div>

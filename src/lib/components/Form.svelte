@@ -1,6 +1,6 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
-	import { buttonDanger, buttonPrimary, buttonSecondary } from '#lib/ui.js';
+	import { buttonDanger, buttonPrimary, buttonSecondary, card as cardClass } from '#lib/ui.js';
 
 	let {
 		legend,
@@ -18,7 +18,7 @@
 
 	// Card mode is the design.md form card; the plain mode is kept for forms not yet migrated.
 	const CARD = {
-		form: 'overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5',
+		form: cardClass,
 		alert: 'bg-red-50 px-4 py-4 text-sm text-red-800 sm:px-6',
 		fieldset: 'min-w-0 divide-y divide-gray-900/10',
 		actions: 'flex items-center justify-end gap-3 border-t border-gray-900/10 bg-gray-50 px-4 py-4 sm:px-6',

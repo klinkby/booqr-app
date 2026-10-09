@@ -2,8 +2,14 @@
 
 export const label = 'mb-2 block text-sm/6 font-semibold text-gray-900';
 export const input =
-	'block w-full rounded-lg border-gray-300 px-3 py-1.5 text-base text-gray-900 shadow-xs placeholder:text-gray-400 focus:border-indigo-600 focus:ring-indigo-600 sm:text-sm/6';
+	'block w-full rounded-lg border-gray-300 px-3 py-1.5 text-base text-gray-900 shadow-xs placeholder:text-gray-400 focus:border-indigo-600 focus:ring-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 sm:text-sm/6';
 export const groupHeading = 'text-xl font-normal tracking-tight text-gray-500';
+export const radio = 'size-4 border-gray-300 text-indigo-600 focus:ring-indigo-600';
+export const checkbox = `${radio} rounded`;
+export const choiceLabel = 'text-sm text-gray-900';
+export const link = 'font-semibold text-indigo-600 hover:text-indigo-500';
+export const alert = 'rounded-lg bg-red-50 px-4 py-4 text-sm text-red-800';
+export const card = 'overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5';
 export const cardSection = 'px-4 py-4 sm:px-6';
 
 const button =

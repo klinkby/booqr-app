@@ -76,7 +76,10 @@
 				</svg>
 			</button>
 			{#if showFilters}
-				<div class="absolute right-0 top-full mt-2 z-10" id="contacts-filter-panel">
+				<div
+					class="absolute right-0 top-full z-10 mt-2 w-72 rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-900/5"
+					id="contacts-filter-panel"
+				>
 					<ContactsFilterForm
 						bind:name={nameFilter}
 						role={selectedRole}
@@ -100,5 +103,6 @@
 		onpreviouspage={contacts.previousPage}
 		onedit={handleEdit}
 		{cellContent}
+		caption={m.titleContacts()}
 	/>
 </div>

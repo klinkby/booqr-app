@@ -1,5 +1,6 @@
 <script>
-	import { Form, LimitedTextarea, apiErrorMessage } from '#lib';
+	import { Form, LimitedTextarea, RequiredInput, apiErrorMessage } from '#lib';
+	import { cardSection, checkbox, choiceLabel, groupHeading, label } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -74,10 +75,11 @@
 <div>
 	{#if service.isLoading || loadingData}
 		<div role="status" aria-live="polite">
-			<p>{m.loading()}</p>
+			<p class="text-sm text-gray-500">{m.loading()}</p>
 		</div>
 	{:else}
 		<Form
+			card
 			legend={isEdit ? m.legendEditService() : m.legendCreateService()}
 			{error}
 			{loading}
@@ -85,52 +87,52 @@
 			onsubmit={handleSubmit}
 			oncancel={handleCancel}
 		>
-			<div>
-				<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
-				<input
-					id="name"
-					name="name"
-					type="text"
-					required
-					bind:value={name}
-					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				/>
-			</div>
+			<div class={cardSection}>
+				<div class="grid grid-cols-6 gap-x-4 gap-y-4">
+					<div class="col-span-6 sm:col-span-4">
+						<label for="name" class={label}>{m.labelName()}</label>
+						<RequiredInput id="name" name="name" type="text" autocomplete="off" bind:value={name} />
+					</div>
 
-			<div>
-				<label for="duration" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelDuration()} </label>
-				<input
-					id="duration"
-					name="duration"
-					type="text"
-					required
-					bind:value={duration}
-					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					placeholder={m.durationPlaceholder()}
-				/>
-			</div>
-
-			<LimitedTextarea id="description" label={m.labelDescription()} bind:value={description} />
-
-			<fieldset>
-				<legend class="block text-sm font-medium text-gray-700 mb-1">{m.employees()}</legend>
-				<div class="space-y-2">
-					{#each service.employees as emp (emp.id)}
-						<div class="flex items-center gap-2">
-							<input
-								type="checkbox"
-								id="emp-{emp.id}"
-								checked={isSelected(emp.id)}
-								onchange={() => toggleEmployee(emp.id)}
-								class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-							/>
-							<label for="emp-{emp.id}" class="text-sm text-gray-700 flex">{emp.name || emp.email}</label>
-						</div>
-					{:else}
-						<p class="text-sm text-gray-500">{m.noEmployeesFound()}</p>
-					{/each}
+					<div class="col-span-6 sm:col-span-2">
+						<label for="duration" class={label}>{m.labelDuration()}</label>
+						<RequiredInput
+							id="duration"
+							name="duration"
+							type="text"
+							autocomplete="off"
+							placeholder={m.durationPlaceholder()}
+							bind:value={duration}
+						/>
+					</div>
 				</div>
-			</fieldset>
+
+				<div class="mt-4">
+					<LimitedTextarea id="description" label={m.labelDescription()} bind:value={description} />
+				</div>
+			</div>
+
+			<div class={cardSection}>
+				<fieldset>
+					<legend class={groupHeading}>{m.employees()}</legend>
+					<div class="mt-4 space-y-2">
+						{#each service.employees as emp (emp.id)}
+							<div class="flex items-center gap-2">
+								<input
+									type="checkbox"
+									id="emp-{emp.id}"
+									checked={isSelected(emp.id)}
+									onchange={() => toggleEmployee(emp.id)}
+									class={checkbox}
+								/>
+								<label for="emp-{emp.id}" class={choiceLabel}>{emp.name || emp.email}</label>
+							</div>
+						{:else}
+							<p class="text-sm text-gray-500">{m.noEmployeesFound()}</p>
+						{/each}
+					</div>
+				</fieldset>
+			</div>
 		</Form>
 	{/if}
 </div>
