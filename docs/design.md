@@ -1,0 +1,301 @@
+# Design Manual
+
+How the Booqr app looks, and the rules that keep it consistent. Agents get the must-follow summary in
+[AGENTS.md › Design System](../AGENTS.md#design-system); this document has the details and the reasons.
+
+> **Status:** approved 2026-10-09. The app shell (header, footer, font) and _Create location_ (`/admin/locations/[id]`)
+> are migrated and are the reference implementation. Other pages still use older classes; migrate them with
+> [Migrating a form](#migrating-a-form) rather than copying from them.
+
+![Create location on desktop](images/design-create-location-desktop.webp)
+
+<img src="images/design-create-location-mobile.png" alt="Create location on a phone (approved mockup)" width="320">
+
+## Principles
+
+- **Standards first**: semantic HTML5 and Tailwind utilities. No custom CSS beyond the `@theme` tokens.
+- **One source per class string**: shared class strings live in `src/lib/ui.js` (`label`, `input`, `checkbox`, `radio`, `choiceLabel`,
+  `groupHeading`, `sectionHeading`, `link`, `alert`, `success`, `card`, `cardSection`, `cardActions`, `cardAlert`,
+  `cardSuccess`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`,
+  `buttonDanger`) and in components (`Form`, `RequiredInput`, `RequiredMark`, `PhoneInput`, `LimitedTextarea`,
+  `DataTable`, `PaginatedTable`, `NavBar`, `LanguageToggle`). Import them; never paste a copy into a page. A new pattern used twice becomes a token.
+- **Quiet by default**: a grey canvas, white surfaces and one accent colour (indigo). Decoration must carry meaning.
+- **Accessible by requirement**: WCAG AA, see [AGENTS.md › Semantic HTML5 & Accessibility](../AGENTS.md#semantic-html5--accessibility-required)
+  and the [checklist](#accessibility-checklist) below.
+- **Words belong to the product owner**: no new interface text without approval, see [Content](#content).
+
+## Foundations
+
+### Font
+
+[Nunito](https://fonts.google.com/specimen/Nunito) Variable, self-hosted through the `@fontsource-variable/nunito`
+package and set as `--font-sans` in the `@theme` block of `src/routes/layout.css`. Never load fonts from a CDN: the
+Content-Security-Policy in `lighttpd.conf` is `default-src 'self'`, so the browser would block them.
+
+Weights: **400** body · **600** labels and navigation · **700** headings, buttons and brand. Don't use 500
+(`font-medium`): in Nunito it is too close to 400 to carry hierarchy.
+
+### Type scale
+
+| Role                          | Classes                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------ |
+| Page title (`<h1>`) and brand | `text-xl font-bold tracking-tight text-gray-900`                                     |
+| Section heading (`<h2>`)      | `text-base font-bold text-gray-900` (`sectionHeading`); never larger than the `<h1>` |
+| Group heading (`<legend>`)    | `text-xl font-normal tracking-tight text-gray-500`                                   |
+| Label                         | `text-sm/6 font-semibold text-gray-900`                                              |
+| Body and input text           | `text-base sm:text-sm/6` (16px on phones stops iOS from zooming into the field)      |
+| Navigation                    | `text-sm font-semibold`                                                              |
+| Buttons                       | `text-sm font-bold`                                                                  |
+| Footer                        | `text-xs text-gray-500`                                                              |
+
+### Colour roles
+
+Use Tailwind's palette directly; this table is the contract for what each colour means.
+
+| Role            | Classes                                                    | Notes                                                               |
+| --------------- | ---------------------------------------------------------- | ------------------------------------------------------------------- |
+| Canvas          | `bg-gray-50`                                               | Page background                                                     |
+| Surface         | `bg-white`                                                 | Header, cards, inputs                                               |
+| Hairlines       | `border-gray-200`, `ring-gray-900/5`, `divide-gray-900/10` | Borders, card rings, section dividers                               |
+| Text            | `text-gray-900`                                            | Primary text                                                        |
+| Secondary text  | `text-gray-600`                                            | Navigation, language toggle                                         |
+| Muted text      | `text-gray-500`                                            | Footer, group headings. Lightest text allowed (≈4.6:1 on `gray-50`) |
+| Accent          | `bg-indigo-600`, hover `bg-indigo-500`                     | Primary buttons                                                     |
+| Selected        | `bg-indigo-50 text-indigo-700`                             | Current navigation item                                             |
+| Required marker | `text-indigo-400`                                          | Lightest indigo that passes 3:1 for meaningful icons (3.13:1)       |
+| Error           | `bg-red-50 text-red-800`                                   | Form error alert (`Form.svelte`)                                    |
+| Success         | `bg-green-50 text-green-800`                               | Confirmation messages (`success`, `cardSuccess`)                    |
+
+### Spacing
+
+Vertical gaps use three steps only:
+
+| Step | Tailwind | Where                                                                                       |
+| ---- | -------- | ------------------------------------------------------------------------------------------- |
+| 8px  | `2`      | Label → its control (`mb-2` is part of the `label` token)                                   |
+| 16px | `4`      | Between fields, legend → its fields, toolbar → table, card section/action bar/alert padding |
+| 24px | `6`      | Page padding (`main`), page heading → content, between page-level blocks                    |
+
+Header and footer heights are fixed by the shell. Don't use `1.5`, `3`, `5`, `8` or `12` steps
+for vertical spacing; horizontal gutters follow [Layout](#layout).
+
+### Shape and depth
+
+Controls and buttons are `rounded-lg` with `shadow-xs`; cards are `rounded-xl` with `shadow-sm ring-1 ring-gray-900/5`
+(`card`). Floating overlays (the filter panel) use `shadow-lg` to lift off the page. No other shadows.
+
+### Favicon
+
+`src/lib/assets/favicon.svg` is the shared app mark: a white calendar and confirmation check on an indigo-600 tile.
+The mark represents booking without relying on a tenant name and uses bold, simple geometry so it remains legible at
+16×16 pixels. Keep it tenant-neutral unless the API gains explicit per-tenant favicon support.
+
+## Layout
+
+### App shell
+
+`src/routes/+layout.svelte` renders one full-height column, so the footer sits at the bottom of short pages:
+
+```html
+<div class="flex min-h-dvh flex-col bg-gray-50">
+	<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:z-[60] …">Skip to main content</a>
+	<header class="sticky top-0 z-50 border-b border-gray-200 bg-white">…</header>
+	<main id="main-content" class="flex-1">…</main>
+	<footer class="border-t border-gray-200">…</footer>
+</div>
+```
+
+- Content container: `mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8`; the header and footer share its gutters.
+- The skip link must be `fixed` with a z-index above the header. An `absolute` skip link without one is painted under
+  the sticky header and is invisible when focused. Its remaining focus styles:
+  `focus:top-3 focus:left-4 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-indigo-700 focus:shadow-lg focus:ring-1 focus:ring-gray-900/10`
+
+### Header
+
+`NavBar.svelte`; the root layout passes `brandName`, `links` and `onlogout`.
+
+- **Brand**: the Booqr app icon (`src/lib/assets/favicon.svg`, also the favicon) at `size-6`, 24px, 20% larger than the brand text's 20px font size, then the tenant's
+  `displayName` as text, `text-xl font-bold tracking-tight`, truncated when long (`min-w-0 truncate`), `gap-2` apart.
+  The icon is decorative (`alt=""`); the name is the link text. If the tenant API ever provides a logo, it replaces the
+  icon and the name stays.
+- **Navigation**: `<nav aria-label=…>` holding a `<ul>`. Links are
+  `rounded-md px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900`; the current page adds
+  `aria-current="page"` and swaps to `bg-indigo-50 text-indigo-700`.
+- **Sign out** is an action, so a `<button>`, set apart from the links by `ml-2 border-l border-gray-200 pl-3` and an
+  icon.
+- **Sign in** (signed out) is a normal nav link with the matching sign-in icon (arrow into the rectangle; sign out
+  points out of it). Both icons are `size-4`, `aria-hidden`, from NavBar's `ICONS` map, in the mobile menu too.
+- Below `md` the links collapse behind the menu button.
+
+### Page heading
+
+One `<h1>` per page, first in `<main>`, page-title style plus `mb-6`. No back link and no description line: the
+highlighted navigation item and the Cancel button already lead back.
+
+The root layout owns it: `titleFromPath()` in `src/routes/+layout.svelte` maps the route to a `title*` message, which
+becomes both the `<h1>` and the `<title>`. Pages it maps must not render their own `<h1>`; pages it doesn't map (home,
+booking wizard) render their own, styled with the `pageHeading` token. Form routes and the
+[booking flow](#booking-flow) (`isFormPage`: `admin/<resource>/<id>`, `login`, `change-password`, `/`, `book/**`) are
+wrapped in the centred `mx-auto max-w-2xl` column, heading included.
+
+## Forms
+
+Reference: `src/routes/admin/locations/[id]/+page.svelte` (screenshots at the top).
+
+- **Card**: `<Form card …>` renders the white card (`rounded-xl shadow-sm ring-1 ring-gray-900/5`), the error alert,
+  the divided sections and the action bar. Without `card`, `Form` keeps the old plain layout for forms not yet migrated.
+- **Sections**: each direct child of `Form` is a `<div class={cardSection}>`; `Form` draws the dividers between them.
+  Related fields go in a `<fieldset>` whose `<legend class={groupHeading}>` names the group.
+- **Fields**: `<label class={label}>` then `<input class={input}>`; the label's `mb-2` makes the gap.
+- **Required fields**: `<RequiredInput id=… name=… bind:value />` sets `required` and draws the `aria-hidden` asterisk
+  (`text-indigo-400`) inside the input's right edge; screen readers announce the attribute. Never write "Required" or
+  "Optional", and add hint lines only when the product owner supplies the text.
+- **Short values share a row**: `grid grid-cols-6 gap-x-3 gap-y-4 sm:gap-x-4` at every width, e.g. Zip code
+  (`col-span-2`, `inputmode="numeric" autocomplete="postal-code"`) next to City (`col-span-4`).
+- **Action bar** (drawn by `Form`): Cancel, then Delete when the form offers it, then the submit button: `m.create()`
+  when creating, `m.update()` when editing (the page heading already names the object). A view-only form has no submit
+  button. On phones the buttons split the width.
+
+### Buttons
+
+Use the tokens in `src/lib/ui.js`: `buttonPrimary` (one per form, the submit action), `buttonSecondary` (Cancel and
+other neutral actions) and `buttonDanger` (destructive actions that are not the call to action: secondary look with
+`text-red-700`, so Delete never out-shouts the primary action). All are `rounded-lg text-sm font-bold shadow-xs` with a
+`focus-visible` outline, so keyboard users get a ring and mouse clicks don't leave one behind.
+
+### Migrating a form
+
+1. Pass `card` to `Form`; drop the page's own width wrapper (the layout centres form routes) and any `mt-*` above it.
+2. Wrap each group of fields in `<div class={cardSection}>`; use a `<fieldset>` + `groupHeading` legend for groups
+   the old page already labels (reuse its message, don't invent a heading).
+3. Swap label/input class lists for `label` / `input`, and required inputs for `RequiredInput`.
+4. Put short related values in the six-column grid.
+5. Submit label: `m.create()` / `m.update()`; for anything else, keep the current label.
+6. Update e2e selectors and screenshots (`npm run test:e2e`) and compare with the reference page.
+
+## List pages
+
+### Top row
+
+Put the "Create" button and any filter toggle together in one `flex justify-between items-center` row above the table
+with `mb-4` (not centered below it). Both are secondary buttons: `buttonSecondary` for "Create", `iconButtonSecondary` for the
+icon-only filter toggle (`src/lib/ui.js`). Low emphasis; the solid indigo button is reserved for a form's submit.
+
+### Table
+
+`PaginatedTable` → `DataTable` renders the table as a `card`: grey header row (`bg-gray-50`, `text-sm font-semibold`),
+rows divided with `divide-gray-900/10`, cells `px-4 py-4 sm:px-6`, actions right-aligned (Edit uses `link`, Delete is red
+text). Previous/Next sit in a grey bar inside the card's bottom edge, like a form's action bar. Loading and empty
+states are a `card` with `text-sm text-gray-500`; errors use `alert`. Pages don't style tables themselves.
+
+### Filter overlay
+
+Reference: `src/routes/admin/contacts/ContactsFilterForm.svelte` + `src/routes/admin/contacts/+page.svelte`.
+
+Icon-only funnel toggle button (`aria-label`/`aria-expanded`/`aria-controls`) in a `relative` wrapper; the filter
+renders as an `absolute right-0 top-full z-10 mt-2 w-72 rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-900/5` panel
+with `label`/`input`/`checkbox` fields spaced `space-y-4`. Use a real form element with `onsubmit` calling
+`preventDefault()` then an `onsubmit` prop, so Enter submits and closes the overlay. Debounce free-text inputs 500ms via
+a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately on submit.
+
+## Booking flow
+
+The customer path: home (`/`, pick a service), the wizard (`/book/[serviceId]`: location, employee, month, time),
+confirm (sign-in gate, then confirm and book), and the conflict and done pages. It is the most visited part of the app,
+so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isFormPage` covers `/` and `/book/**`).
+
+- **Heading.** These pages render their own `<h1>` (it receives focus on each step); it uses the `pageHeading` token
+  plus `mb-6 outline-none`, the same look as the layout's heading.
+- **Selection and back.** The `BookingSummary` line (`text-sm text-gray-500`) sits above a text-sized `link`
+  "Back"; both `mb-4`.
+- **Choice lists** (`ServiceList`, `ChoiceList`): one `card` holding a `divide-y` list. Each option is a full-width
+  `choiceRow` button: the name in `text-sm font-semibold text-gray-900`, secondary lines `text-sm text-gray-500`, and a
+  decorative chevron on the right. A service's duration sits right-aligned before the chevron.
+- **Month and day.** Prev/next are `iconButtonSecondary` chevrons around the heading. The month grid is a `card`
+  (`p-4 sm:p-6`); bookable days are round `indigo-50` buttons with `indigo-700` bold numbers, other days plain
+  `gray-400` text (disabled).
+- **Times.** Slots are `buttonSecondary` buttons with tabular numbers in a `card` grid.
+- **Confirm.** The appointment details are a `card` with a `divide-y` description list (term `text-sm font-semibold`,
+  value `text-sm text-gray-700`), followed by a `<Form card>` with the cancellation checkbox, notes and "Book now".
+  The sign-in gate uses the same card form as `/login`: "Forgot your password?" sits right of the Password label
+  (`link text-sm`), and the switch between sign-in and sign-up is one centred `text-sm text-gray-500` line under the
+  card (`mt-6`).
+- **Messages.** Errors use `alert`; "sign-up sent" uses `success`; explanatory text `text-sm text-gray-500`.
+  The conflict page keeps its links, styled with `link`. The done page celebrates: a centred `card` with an emerald
+  check badge that pops in plus a short confetti burst (both `prefers-reduced-motion: no-preference` only, decorative
+  and `aria-hidden`), the heading and message (with the booked date and time as an `indigo-50` pill under the heading),
+  then "My bookings" (`buttonSecondary`) and "Book another appointment" (`buttonPrimary`).
+
+## Calendar
+
+> **Status:** implemented 2026-10-09.
+
+The staff week view (`Calendar.svelte`, `/admin/plan`) wraps `@event-calendar/core`. Style it through the library's
+own hooks, never with `!important` utilities or overrides of its `.ec-*` classes:
+
+1. **Cascade layer.** `src/lib/components/calendar.css` imports the library CSS with
+   `@import '@event-calendar/core/index.css' layer(components);`; `Calendar.svelte` imports that file instead of the
+   library's, and so does `ListCalendar.svelte`. Unlayered library CSS beats Tailwind v4's layered utilities; inside
+   `components` it loses to them, so plain utilities (and `ui.js` tokens) apply. The import stays in the lazily loaded
+   calendar chunk. The library's Svelte entry imports its own CSS unlayered, so a `vite.config.js` plugin
+   (`layered-event-calendar-css`) resolves that import to `calendar.css`.
+2. **Colour variables.** The same file sets the library's `--ec-*` custom properties on `.ec` to the
+   [colour roles](#colour-roles): borders `gray-200`, background white, text `gray-900`, today column and highlight
+   `indigo-50` (Selected), now-indicator `indigo-600`, buttons the secondary-button colours.
+3. **`theme` option.** Extend the default theme object to add tokens to the library's parts: toolbar buttons
+   `buttonSecondary`, button groups `gap-2`, title `sectionHeading`, the grid wrapped as a `card`. The theme lives in
+   `ui.js` as `calendarTheme`, shared by both calendars.
+
+Event colours have fixed meanings. White text on a mid-tone fill (`green-500`, `red-500`) fails AA, and red means
+error, so use:
+
+| Event                       | Classes                                                          | Contrast |
+| --------------------------- | ---------------------------------------------------------------- | -------- |
+| Booked                      | `bg-indigo-600 text-white`                                       | 6.3:1    |
+| Free (vacancy)              | `border-l-4 border-emerald-500 bg-emerald-50 text-emerald-800`   | ≥ 6:1    |
+| Appointment overlay         | `border-l-4 border-sky-500 bg-sky-50 text-sky-800`               | ≥ 6:1    |
+| Pending selection (unsaved) | `border border-dashed border-gray-400 bg-gray-100 text-gray-700` | ≥ 7:1    |
+
+Each is a token in `ui.js` passed through the event's `classNames`. Event text ("Booked", names, times) carries the
+meaning too, so colour is never the only signal. Around the calendar, the employee picker uses `input` and the
+"extend hours" button `buttonSecondary`; spacing follows the [scale](#spacing).
+
+**Phones.** Below `sm` the week view switches to a single day (`timeGridDay`, prev/next labelled with the generic
+`m.previous()` / `m.next()`), and the employee picker sits full width above the calendar instead of overlaying the
+toolbar. Below `lg` the vacancy panel stacks under the calendar; from `lg` up it is a `w-80` column beside it.
+
+The customer bookings list on `/profile` (`ListCalendar.svelte`) is our own markup: it uses the same tokens directly,
+and its today row uses the Selected role (`bg-indigo-50`), not yellow.
+
+## Footer
+
+One centred line, `text-xs text-gray-500`, with a `border-t border-gray-200` and no background:
+
+> © 2026 Klinkby · Terms and conditions · 🌐 Dansk
+
+- **© 2026 Klinkby** links to the license on GitHub (`https://github.com/klinkby/booqr-app?tab=AGPL-3.0-1-ov-file`).
+- **Terms and conditions** (`m.termsAndConditions()`) links to `` `${MARKETING_URL}/terms` ``, as does the sign-up
+  checkbox on the booking confirm page.
+- **Language toggle**: globe icon plus the other language's name in that language (`LanguageToggle`).
+- Links are underlined (`underline decoration-gray-300 underline-offset-2`) because they sit next to plain text, where
+  colour alone wouldn't mark them. Separators are `·` in `text-gray-300` with `aria-hidden="true"`.
+
+## Content
+
+- **Never invent interface text.** New labels, hints, descriptions, link texts, even screen-reader-only text, need the
+  product owner's approval before they go in.
+- Reuse existing Paraglide messages in `messages/en.json` and `messages/da.json`; every new string needs both languages.
+- English uses sentence case ("My profile", "Zip code", "Create location"). Danish already does.
+- Buttons are verbs. Form submits use `m.create()` / `m.update()`; list-page buttons that stand alone name their
+  object (`m.createLocation()`).
+
+## Accessibility checklist
+
+[AGENTS.md › Semantic HTML5 & Accessibility](../AGENTS.md#semantic-html5--accessibility-required) is binding. On top of
+it, the design adds these floors:
+
+- Text contrast ≥ 4.5:1, so nothing lighter than `text-gray-500`.
+- Meaningful icons ≥ 3:1 (WCAG 1.4.11), so on white nothing lighter than `text-indigo-400` or `text-gray-500/80`.
+- Never rely on colour alone: the current navigation item also has `aria-current`, and links next to text are
+  underlined.
+- Focus must stay visible: `focus-visible:outline-*` on controls, and the skip link stacks above the sticky header.

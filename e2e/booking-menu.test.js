@@ -20,7 +20,7 @@ test.describe('My Bookings overflow menu', () => {
 		// The mock returns three bookings: two comfortably in the future and one
 		// ~2h out. Every booking can be duplicated, so the kebab is now visible and
 		// operable on all three rows.
-		await expect(page.getByRole('listitem')).toHaveCount(3);
+		await expect(page.locator('main').getByRole('listitem')).toHaveCount(3);
 		const kebabs = page.getByRole('button', { name: 'Booking actions', exact: true });
 		await expect(kebabs).toHaveCount(3);
 		for (let i = 0; i < 3; i++) {

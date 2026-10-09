@@ -7,6 +7,7 @@
 	import { useBookingData } from './bookingData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { alert, iconButtonSecondary, link, pageHeading } from '#lib/ui.js';
 
 	const todayStr = DateUtils.toLocalDate(new Date());
 	const currentMonthStr = todayStr.slice(0, 7);
@@ -222,67 +223,75 @@
 <BookingSummary items={breadcrumbItems} />
 
 {#if booking.isLoading && !booking.service}
-	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.loading()}</h1>
-	<div role="status" aria-live="polite"><p>{m.loading()}</p></div>
+	<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.loading()}</h1>
+	<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loading()}</p>
 {:else if booking.error}
-	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.somethingWentWrong()}</h1>
-	<div role="alert" aria-live="assertive">
-		<p class="text-red-600">{apiErrorMessage(booking.error, m.errorLoadAvailability())}</p>
+	<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.somethingWentWrong()}</h1>
+	<div role="alert" aria-live="assertive" class={alert}>
+		{apiErrorMessage(booking.error, m.errorLoadAvailability())}
 	</div>
 {:else if !booking.service}
-	<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.serviceNotFound()}</h1>
-	<p class="text-red-600">{m.serviceNotFoundMessage()}</p>
-	<a href={resolve('/')} class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline">
+	<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.serviceNotFound()}</h1>
+	<p class="{alert} mb-4">{m.serviceNotFoundMessage()}</p>
+	<a href={resolve('/')} class="{link} text-sm">
 		{m.backToServices()}
 	</a>
 {:else}
-	<button
-		type="button"
-		onclick={handleBack}
-		class="text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline mb-4"
-	>
+	<button type="button" onclick={handleBack} class="{link} mb-4 text-sm">
 		{m.back()}
 	</button>
 
 	{#if showLocationStep}
-		<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.where()}</h1>
+		<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.where()}</h1>
 		<ChoiceList options={locationOptions} onselect={selectLocation} emptyMessage={m.noLocationsAvailable()} />
 	{:else if showEmployeeStep}
-		<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.withWhom()}</h1>
+		<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.withWhom()}</h1>
 		<ChoiceList options={employeeOptions} onselect={selectEmployee} emptyMessage={m.noOneAvailable()} />
 	{:else if showMonthStep}
 		{#if booking.isLoading}
-			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{monthLabel}</h1>
-			<div role="status" aria-live="polite"><p>{m.loadingAvailability()}</p></div>
+			<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{monthLabel}</h1>
+			<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loadingAvailability()}</p>
 		{:else if booking.daysWithSlots.size === 0}
-			<h1 tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.noDatesAvailable()}</h1>
-			<p class="text-gray-600">{m.noDatesMessage()}</p>
+			<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.noDatesAvailable()}</h1>
+			<p class="text-sm text-gray-500">{m.noDatesMessage()}</p>
 		{:else}
-			<div class="flex items-center justify-between mb-6">
+			<div class="mb-6 flex items-center justify-between gap-4">
 				<button
 					type="button"
 					disabled={disablePrevMonth}
 					onclick={() => goToMonth(addMonthsStr(effectiveMonth, -1))}
 					aria-label={m.previousMonth()}
-					class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+					class={iconButtonSecondary}
 				>
-					‹
+					<svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+						><path
+							fill-rule="evenodd"
+							d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+							clip-rule="evenodd"
+						/></svg
+					>
 				</button>
-				<h1 tabindex="-1" class="text-2xl font-semibold outline-none">{monthLabel}</h1>
+				<h1 tabindex="-1" class="{pageHeading} outline-none">{monthLabel}</h1>
 				<button
 					type="button"
 					disabled={disableNextMonth}
 					onclick={() => goToMonth(addMonthsStr(effectiveMonth, 1))}
 					aria-label={m.nextMonth()}
-					class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+					class={iconButtonSecondary}
 				>
-					›
+					<svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+						><path
+							fill-rule="evenodd"
+							d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+							clip-rule="evenodd"
+						/></svg
+					>
 				</button>
 			</div>
 			<MonthPicker days={monthDays} onSelectDay={selectDay} />
 		{/if}
 	{:else if showTimeStep}
-		<div class="flex items-center justify-between mb-6">
+		<div class="mb-6 flex items-center justify-between gap-4">
 			<button
 				type="button"
 				disabled={!booking.previousAvailableDate}
@@ -293,11 +302,17 @@
 				aria-label={booking.previousAvailableDate
 					? m.previousAvailable({ date: targetDayLabel(booking.previousAvailableDate) })
 					: m.previousAvailableNone()}
-				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+				class={iconButtonSecondary}
 			>
-				‹
+				<svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+					><path
+						fill-rule="evenodd"
+						d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+						clip-rule="evenodd"
+					/></svg
+				>
 			</button>
-			<h1 tabindex="-1" class="text-2xl font-semibold outline-none">{dateLabel}</h1>
+			<h1 tabindex="-1" class="{pageHeading} outline-none">{dateLabel}</h1>
 			<button
 				type="button"
 				disabled={!booking.nextAvailableDate}
@@ -308,9 +323,15 @@
 				aria-label={booking.nextAvailableDate
 					? m.nextAvailable({ date: targetDayLabel(booking.nextAvailableDate) })
 					: m.nextAvailableNone()}
-				class="px-3 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+				class={iconButtonSecondary}
 			>
-				›
+				<svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+					><path
+						fill-rule="evenodd"
+						d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+						clip-rule="evenodd"
+					/></svg
+				>
 			</button>
 		</div>
 		<TimeSlotList {slots} onSelectSlot={selectSlot} />

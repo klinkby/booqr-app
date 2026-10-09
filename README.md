@@ -46,9 +46,26 @@ The application is organized following SvelteKit's file-based routing convention
 - [static](static): Static assets served at root
 - [Dockerfile](Dockerfile): Multi-stage build configuration
 - [lighttpd.conf](lighttpd.conf): Production web server configuration
+- [docs/design.md](docs/design.md): Design manual (look, patterns, content rules)
 - [AGENTS.md](AGENTS.md): Development guidelines for AI agents
 
 **Note**: Never manually edit files in `src/lib/api/` as they are auto-generated.
+
+## Design
+
+The visual design and its rules are documented in the [design manual](docs/design.md). In short:
+
+- **Calm and consistent**: a light grey canvas with a white header, cards and inputs. One accent colour (indigo) marks
+  primary actions, the current page and required fields ([colour roles](docs/design.md#colour-roles)).
+- **Typography**: [Nunito](https://fonts.google.com/specimen/Nunito), self-hosted because the Content-Security-Policy
+  only allows same-origin fonts, on a small type scale ([type scale](docs/design.md#type-scale)).
+- **Layout**: a full-height shell with a sticky header and a footer that stays at the bottom
+  ([layout](docs/design.md#layout)); forms are centred cards with grouped fields and an action bar
+  ([forms](docs/design.md#forms)).
+- **Content**: sentence case, every string in English and Danish, and no new interface text without the product
+  owner's approval ([content](docs/design.md#content)).
+- **Accessibility**: WCAG AA, with contrast floors and focus rules on top
+  ([accessibility checklist](docs/design.md#accessibility-checklist)).
 
 ## Internationalization
 

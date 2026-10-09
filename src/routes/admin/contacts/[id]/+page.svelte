@@ -1,5 +1,6 @@
 <script>
-	import { Form, apiErrorMessage, PhoneInput } from '#lib';
+	import { Form, RequiredInput, apiErrorMessage, PhoneInput } from '#lib';
+	import { cardSection, input, label, link } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -56,70 +57,52 @@
 
 <div>
 	{#if loadingData}
-		<div role="status" aria-live="polite">
-			<p>{m.loading()}</p>
-		</div>
+		<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loading()}</p>
 	{:else}
-		<div class="max-w-2xl">
-			<Form
-				legend={isEdit ? m.legendEditContact() : m.legendCreateContact()}
-				{error}
-				{loading}
-				submitLabel={isEdit ? m.update() : m.create()}
-				onsubmit={handleSubmit}
-				oncancel={handleCancel}
-			>
-				<div>
+		<Form
+			card
+			legend={isEdit ? m.legendEditContact() : m.legendCreateContact()}
+			{error}
+			{loading}
+			submitLabel={isEdit ? m.update() : m.create()}
+			onsubmit={handleSubmit}
+			oncancel={handleCancel}
+		>
+			<div class={cardSection}>
+				<div class="space-y-4">
+					<div>
+						{#if isEdit}
+							<span id="email-label" class={label}>{m.labelEmail()}</span>
+							<a href="mailto:{email}" aria-labelledby="email-label" class={link}>{email}</a>
+						{:else}
+							<label for="email" class={label}>{m.labelEmail()}</label>
+							<RequiredInput id="email" name="email" type="email" bind:value={email} />
+						{/if}
+					</div>
+
 					{#if isEdit}
-						<span id="email-label" class="block text-sm font-medium text-gray-700 mb-1">{m.labelEmail()}</span>
-						<a
-							href="mailto:{email}"
-							aria-labelledby="email-label"
-							class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 sm:text-sm text-indigo-600 hover:underline"
-						>
-							{email}
-						</a>
-					{:else}
-						<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelEmail()} </label>
-						<input
-							id="email"
-							name="email"
-							type="email"
-							required
-							bind:value={email}
-							class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-						/>
+						<div>
+							<label for="name" class={label}>{m.labelName()}</label>
+							<input id="name" name="name" type="text" bind:value={name} class={input} />
+						</div>
+
+						<PhoneInput bind:value={phone} required={false} />
+
+						<div>
+							<label for="role" class={label}>{m.labelRole()}</label>
+							<input
+								id="role"
+								name="role"
+								type="text"
+								disabled
+								bind:value={role}
+								class={input}
+								title={m.roleCannotBeChanged()}
+							/>
+						</div>
 					{/if}
 				</div>
-
-				{#if isEdit}
-					<div>
-						<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
-						<input
-							id="name"
-							name="name"
-							type="text"
-							bind:value={name}
-							class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-						/>
-					</div>
-
-					<PhoneInput bind:value={phone} required={false} />
-
-					<div>
-						<label for="role" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelRole()} </label>
-						<input
-							id="role"
-							name="role"
-							type="text"
-							disabled
-							bind:value={role}
-							class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed sm:text-sm"
-							title={m.roleCannotBeChanged()}
-						/>
-					</div>
-				{/if}
-			</Form>
-		</div>
+			</div>
+		</Form>
 	{/if}
 </div>

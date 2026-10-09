@@ -5,7 +5,6 @@
 	"submit": "Send",
 	"update": "Opdater",
 	"create": "Opret",
-	"close": "Luk",
 	"delete": "Slet",
 	"edit": "Rediger",
 	"back": "← Tilbage",
@@ -16,7 +15,6 @@
 	"signIn": "Log ind",
 	"signOut": "Log ud",
 	"signUp": "Opret konto",
-	"book": "Bestil",
 	"bookNow": "Bestil nu",
 
 	"labelEmail": "E-mail",
@@ -34,10 +32,9 @@
 	"labelDate": "Dato",
 	"labelStart": "Start",
 	"labelEnd": "Slut",
-	"labelNotes": "Noter",
 	"labelAddress": "Adresse",
-	"labelAddress1": "Adresse 1",
-	"labelAddress2": "Adresse 2",
+	"labelAddress1": "Vejnavn og husnummer",
+	"labelAddress2": "Adresselinje 2",
 	"labelZipCode": "Postnummer",
 	"labelZip": "Postnr.",
 	"labelCity": "By",
@@ -117,16 +114,6 @@
 
 	"selectionsLabel": "Dine valg indtil videre",
 
-	"myAppointment": "Min aftale",
-	"bookAppointment": "Bestil tid",
-	"legendViewAppointment": "Vis aftale",
-	"legendBookAppointment": "Bestil tid",
-	"cancelAppointment": "Aflys aftale",
-	"availableInfo": "Ledig: {start} – {end} hos {employee} på {location}",
-	"selectAService": "Vælg en ydelse",
-	"durationDisplay": "Varighed: {duration}",
-	"notesForEmployee": "Noter til {name}",
-
 	"selectAServiceHeading": "Vælg en ydelse",
 
 	"forgotPassword": "Glemt din adgangskode?",
@@ -156,7 +143,6 @@
 	"bookingCancelled": "Booking annulleret.",
 
 	"termsAndConditions": "Vilkår og betingelser",
-	"termsPlaceholder": "Disse vilkår og betingelser kommer snart. Ved at oprette en konto accepterer du at bruge denne tjeneste ansvarligt.",
 
 	"somethingWentWrong": "Noget gik galt",
 	"serviceNotFound": "Ydelse ikke fundet",

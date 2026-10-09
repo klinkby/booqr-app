@@ -1,5 +1,6 @@
 <script>
-	import { Form, apiErrorMessage } from '#lib';
+	import { Form, RequiredInput, apiErrorMessage } from '#lib';
+	import { cardSection, groupHeading, input, label } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -62,71 +63,54 @@
 			<p>{m.loading()}</p>
 		</div>
 	{:else}
-		<div class="max-w-2xl">
-			<Form
-				legend={isEdit ? m.legendEditLocation() : m.legendCreateLocation()}
-				{error}
-				{loading}
-				submitLabel={isEdit ? m.update() : m.create()}
-				onsubmit={handleSubmit}
-				oncancel={handleCancel}
-			>
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
-					<input
-						id="name"
-						name="name"
-						type="text"
-						required
-						bind:value={name}
-						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					/>
-				</div>
+		<Form
+			card
+			legend={isEdit ? m.legendEditLocation() : m.legendCreateLocation()}
+			{error}
+			{loading}
+			submitLabel={isEdit ? m.update() : m.create()}
+			onsubmit={handleSubmit}
+			oncancel={handleCancel}
+		>
+			<div class={cardSection}>
+				<label for="name" class={label}>{m.labelName()}</label>
+				<RequiredInput id="name" name="name" type="text" autocomplete="off" bind:value={name} />
+			</div>
 
-				<div>
-					<label for="address1" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelAddress1()} </label>
-					<input
-						id="address1"
-						name="address1"
-						type="text"
-						bind:value={address1}
-						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					/>
-				</div>
+			<div class={cardSection}>
+				<fieldset>
+					<legend class={groupHeading}>{m.labelAddress()}</legend>
+					<div class="mt-4 grid grid-cols-6 gap-x-3 gap-y-4 sm:gap-x-4">
+						<div class="col-span-6">
+							<label for="address1" class={label}>{m.labelAddress1()}</label>
+							<input id="address1" name="address1" type="text" bind:value={address1} class={input} />
+						</div>
 
-				<div>
-					<label for="address2" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelAddress2()} </label>
-					<input
-						id="address2"
-						name="address2"
-						type="text"
-						bind:value={address2}
-						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					/>
-				</div>
+						<div class="col-span-6">
+							<label for="address2" class={label}>{m.labelAddress2()}</label>
+							<input id="address2" name="address2" type="text" bind:value={address2} class={input} />
+						</div>
 
-				<div>
-					<label for="zip" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelZipCode()} </label>
-					<input
-						id="zip"
-						name="zip"
-						type="text"
-						bind:value={zip}
-						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					/>
-				</div>
+						<div class="col-span-2">
+							<label for="zip" class={label}>{m.labelZipCode()}</label>
+							<input
+								id="zip"
+								name="zip"
+								type="text"
+								inputmode="numeric"
+								autocomplete="postal-code"
+								bind:value={zip}
+								class={input}
+							/>
+						</div>
 
-				<div>
-					<label for="city" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelCity()} </label>
-					<input
-						id="city"
-						name="city"
-						type="text"
-						bind:value={city}
-						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					/>
-				</div>
-			</Form>
-		</div>
+						<div class="col-span-4">
+							<label for="city" class={label}>{m.labelCity()}</label>
+							<input id="city" name="city" type="text" bind:value={city} class={input} />
+						</div>
+					</div>
+				</fieldset>
+			</div>
+		</Form>
 	{/if}
 </div>

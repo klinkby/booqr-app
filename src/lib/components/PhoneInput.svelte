@@ -1,12 +1,14 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
+	import { input, label } from '#lib/ui.js';
+	import RequiredMark from './RequiredMark.svelte';
 
 	let { value = $bindable(''), required = true } = $props();
 </script>
 
 <!-- Phone: editable -->
 <div>
-	<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">{m.labelPhone()}</label>
+	<label for="phone" class={label}>{m.labelPhone()}</label>
 	<div class="relative">
 		<span
 			aria-hidden="true"
@@ -21,7 +23,10 @@
 			title={m.phoneValidation()}
 			placeholder={m.phonePlaceholder()}
 			bind:value
-			class="block w-full px-3 py-2 pl-5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+			class="{input} pl-6 {required ? 'pr-8' : ''}"
 		/>
+		{#if required}
+			<RequiredMark />
+		{/if}
 	</div>
 </div>

@@ -1,6 +1,7 @@
 import { LocationService, ServiceService, UserService, VacancyService } from '#lib/api/index.js';
 import { DateUtils } from '#lib/dateUtils.js';
 import { m } from '#lib/paraglide/messages.js';
+import { eventAppointment } from '#lib/ui.js';
 import { queryKeys } from '#lib/queryKeys.js';
 import { useResourceQuery, useResourceMutation, fetchResource } from '#lib/resourceQuery.svelte.js';
 import { authedQueryFn } from '#lib/queryClient.js';
@@ -96,7 +97,7 @@ export function usePlanData(getRange, getEmployeeId) {
 		},
 		get appointmentEvents() {
 			// Join each booking's serviceId → name and customerId → name, then map
-			// to a blue calendar event. Mirrors profileData's `bookingEvents`.
+			// to a calendar event. Mirrors profileData's `bookingEvents`.
 			const serviceMap = new SvelteMap(services.items.map((s) => [s.id, s.name]));
 			// customerIds and customerQueries share an index, so zip them into a map.
 			const customerMap = new SvelteMap(customerIds.map((id, i) => [id, customerQueries[i]?.data?.name ?? '']));
@@ -110,7 +111,7 @@ export function usePlanData(getRange, getEmployeeId) {
 					title: m.appointmentTitle({ customer: customerName, service: serviceName }),
 					startEditable: false,
 					durationEditable: false,
-					classNames: ['!bg-blue-500', '!text-white', '!border-blue-600'],
+					classNames: eventAppointment,
 					extendedProps: {
 						eventType: 'appointment',
 						bookingId: b.id,

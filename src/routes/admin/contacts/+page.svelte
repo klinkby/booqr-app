@@ -5,6 +5,7 @@
 	import { useContactsData } from './contactsData.svelte.js';
 	import ContactsFilterForm from './ContactsFilterForm.svelte';
 	import { m } from '#lib/paraglide/messages.js';
+	import { buttonSecondary, iconButtonSecondary } from '#lib/ui.js';
 
 	const columns = [
 		{ key: 'name', label: m.labelName() },
@@ -49,24 +50,19 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			<UserName id={row.id} name={row.name} email={row.email} />
+			<UserName id={row.id} name={row.name} />
 		{:else}
 			{row[column.key]}
 		{/if}
 	{/snippet}
 	<div class="mb-4 flex justify-between items-center">
-		<button
-			class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-			onclick={handleCreate}
-			type="button"
-			>{m.createContact()}
-		</button>
+		<button class={buttonSecondary} onclick={handleCreate} type="button">{m.createContact()}</button>
 		<div class="relative">
 			<button
 				aria-controls="contacts-filter-panel"
 				aria-expanded={showFilters}
 				aria-label={m.toggleContactFilters()}
-				class="p-2 bg-transparent border border-gray-300 hover:bg-gray-50 rounded-md transition-colors"
+				class={iconButtonSecondary}
 				onclick={toggleFilters}
 				type="button"
 			>
@@ -80,7 +76,10 @@
 				</svg>
 			</button>
 			{#if showFilters}
-				<div class="absolute right-0 top-full mt-2 z-10" id="contacts-filter-panel">
+				<div
+					class="absolute right-0 top-full z-10 mt-2 w-72 rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-900/5"
+					id="contacts-filter-panel"
+				>
 					<ContactsFilterForm
 						bind:name={nameFilter}
 						role={selectedRole}
@@ -104,5 +103,6 @@
 		onpreviouspage={contacts.previousPage}
 		onedit={handleEdit}
 		{cellContent}
+		caption={m.titleContacts()}
 	/>
 </div>

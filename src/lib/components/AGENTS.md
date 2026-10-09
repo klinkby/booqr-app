@@ -20,7 +20,9 @@ Render behind `{#if Calendar}` with a `role="status"` fallback. See `/admin/plan
 
 ### DataTable (`src/lib/components/DataTable.svelte`)
 
-Generic accessible table with optional edit/delete row actions and pagination.
+Generic accessible table with optional edit/delete row actions and pagination. Renders inside a `card` token; header
+`bg-gray-50`, divided rows, actions right-aligned (Edit uses `link`, Delete is red); the paging bar is a `bg-gray-50`
+footer inside the card with `buttonSecondary` buttons.
 
 | Prop                              | Type                                   | Default     | Description                                                            |
 | --------------------------------- | -------------------------------------- | ----------- | ---------------------------------------------------------------------- |
@@ -30,11 +32,13 @@ Generic accessible table with optional edit/delete row actions and pagination.
 | `onedit` / `ondelete`             | `(row) => void`                        | `undefined` | Row callbacks; Actions column hidden if both omitted                   |
 | `onnextpage` / `onpreviouspage`   | `() => void`                           | `undefined` | Paging callbacks; nav hidden if both omitted                           |
 | `cellContent`                     | `snippet(column, row)`                 | `undefined` | Custom cell renderer; falls back to `row[column.key]` when omitted     |
+| `caption`                         | `string`                               | `undefined` | sr-only `<caption>`; pass the page title                               |
 
 ### PaginatedTable (`src/lib/components/PaginatedTable.svelte`)
 
-Wraps `DataTable` with loading, error, and empty states — render it (not `DataTable` directly) for query-backed
-lists. Forwards `columns`, `rows`, `cellContent`, the paging props, and `onedit`/`ondelete` straight through to
+Wraps `DataTable` with loading, error, and empty states. Loading and empty messages sit in a `card` + `cardSection`
+block (`text-sm text-gray-500`); the error uses the `alert` token — render it (not `DataTable` directly) for query-backed
+lists. Forwards `columns`, `rows`, `cellContent`, `caption`, the paging props, and `onedit`/`ondelete` straight through to
 `DataTable`; adds the two state props below. Pairs with `usePagedResourceQuery` (see the root `AGENTS.md`
 data-loading section).
 
@@ -47,6 +51,7 @@ data-loading section).
 | `onnextpage` / `onpreviouspage`   | `() => void`           | `undefined` | Forwarded to `DataTable`                                       |
 | `onedit` / `ondelete`             | `(row) => void`        | `undefined` | Forwarded to `DataTable`                                       |
 | `cellContent`                     | `snippet(column, row)` | `undefined` | Forwarded to `DataTable`                                       |
+| `caption`                         | `string`               | `undefined` | sr-only `<caption>`; pass the page title                       |
 
 When not loading and not errored, an empty `rows` renders a "No items found" message; otherwise it renders `DataTable`.
 
@@ -54,16 +59,27 @@ When not loading and not errored, an empty `rows` renders a "No items found" mes
 
 Accessible form wrapper handling submission, errors, and loading state. Children are injected as the fieldset body.
 
-| Prop                    | Type              | Default     | Description                                              |
-| ----------------------- | ----------------- | ----------- | -------------------------------------------------------- |
-| `legend`                | `string`          | required    | Fieldset label (`sr-only`)                               |
-| `error`                 | `string \| null`  | `null`      | Error message (kept in DOM for `aria-live`)              |
-| `loading`               | `boolean`         | `false`     | Disables fieldset; shows "Please wait…" on submit button |
-| `submitLabel`           | `string`          | `'Submit'`  | Submit button label                                      |
-| `deleteLabel`           | `string`          | `undefined` | Delete button label; hidden if omitted                   |
-| `onsubmit`              | `(event) => void` | required    | `preventDefault` called automatically                    |
-| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; delete is left-aligned in red |
-| `children`              | snippet           | required    | Form fields                                              |
+| Prop                    | Type              | Default     | Description                                                              |
+| ----------------------- | ----------------- | ----------- | ------------------------------------------------------------------------ |
+| `legend`                | `string`          | required    | Fieldset label (`sr-only`)                                               |
+| `error`                 | `string \| null`  | `null`      | Error message (kept in DOM for `aria-live`)                              |
+| `loading`               | `boolean`         | `false`     | Disables fieldset; shows "Please wait…" on submit button                 |
+| `card`                  | `boolean`         | `false`     | Design-manual card: children are `cardSection` divs, `Form` divides them |
+| `submitLabel`           | `string \| null`  | `'Submit'`  | Submit button label; `null` hides it (view-only forms)                   |
+| `deleteLabel`           | `string`          | `undefined` | Delete button label; hidden if omitted                                   |
+| `onsubmit`              | `(event) => void` | required    | `preventDefault` called automatically                                    |
+| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; order Cancel, Delete, submit                  |
+| `children`              | snippet           | required    | Form fields                                                              |
+
+### RequiredInput (`src/lib/components/RequiredInput.svelte`)
+
+Required text input with the design-manual asterisk. Spreads all props onto the `<input>` (`id`, `name`, `type`,
+`autocomplete`…), always sets `required`, and supports `bind:value`. Pair it with a `<label for>`.
+
+### RequiredMark (`src/lib/components/RequiredMark.svelte`)
+
+The `aria-hidden` asterisk span (`text-indigo-400`, absolute right edge). Place it inside a `relative` wrapper beside
+an input; `RequiredInput` and `PhoneInput` (when `required`) render it.
 
 ### Calendar (`src/lib/components/Calendar.svelte`)
 
@@ -96,11 +112,12 @@ DateUtils.toLocalTime(new Date()); // → "10:00"
 - **Never** `.toISOString().slice()` for form date/time extraction — gives UTC, not local
 
 Config: 6 AM–6 PM default (expandable to midnight), Monday week start, no all-day slot, `p`/`n`/`t` keyboard
-shortcuts. Event styling via `classNames: ['!bg-red-500', '!text-white']`.
+shortcuts. Event colours come from the `ui.js` event tokens passed as `classNames` (docs/design.md › Calendar).
 
 ### VacancyForm (`src/lib/components/VacancyForm.svelte`)
 
 Side-panel form for creating and viewing vacancies. Uses `$bindable` props (Svelte 5 two-way binding).
+Renders a section heading above a `<Form card>`; the parent sets the panel width.
 
 | Prop                        | Type                       | Default        | Description                                             |
 | --------------------------- | -------------------------- | -------------- | ------------------------------------------------------- |
@@ -114,7 +131,7 @@ Side-panel form for creating and viewing vacancies. Uses `$bindable` props (Svel
 | `onsubmit` / `oncancel`     | callbacks                  | required       | Submit (not called in view mode) / cancel               |
 | `ondelete`                  | `() => void`               | `undefined`    | Shown only in view mode                                 |
 
-In view mode submit becomes "Close". Validates end > start. Panel: `w-80`, `sticky top-4`.
+In view mode the action bar is Cancel, then Delete; there is no submit button. Validates end > start. Panel: `sticky top-20` (clears the sticky header).
 
 ### Customer booking wizard components
 
@@ -130,15 +147,21 @@ apply.
 | `TimeSlotList`   | `slots: Array<{vacancyId,startTime,endTime,...}>`, `onSelectSlot`        | `startTime`/`endTime` are local `Date` objects; "No available times" when empty |
 | `BookingSummary` | `items: string[]`                                                        | Breadcrumb, pre-formatted segments joined with " · "                            |
 
+`ServiceList` and `ChoiceList` render one `card` holding a `divide-y` list of `choiceRow` buttons.
+
 ### NavBar (`src/lib/components/NavBar.svelte`)
 
-Responsive sticky header with brand, nav links, hamburger on mobile, and optional Logout button.
+Responsive sticky header with brand, nav links, hamburger on mobile, and optional Sign out button. The brand link shows the app icon (`#lib/assets/favicon.svg`, decorative `alt=""`) before the tenant name. The page title is
+rendered by the root layout (`<h1>` in `<main>`), not by the header.
 
-| Prop        | Type                    | Default     |
-| ----------- | ----------------------- | ----------- |
-| `links`     | `Array<{ name, href }>` | `[]`        |
-| `brandName` | `string`                | `'App'`     |
-| `onlogout`  | `() => void`            | `undefined` |
+| Prop        | Type                           | Default     |
+| ----------- | ------------------------------ | ----------- |
+| `links`     | `Array<{ name, href, icon? }>` | `[]`        |
+| `brandName` | `string`                       | `'App'`     |
+| `onlogout`  | `() => void`                   | `undefined` |
+
+A link may set an optional `icon` key (currently `'signIn'`); NavBar draws it before the label from its `ICONS` map of
+Heroicons outline paths. Sign out uses the `signOut` entry from the same map.
 
 Active link: exact match for `/`, `startsWith` for all other routes. Typical usage:
 
@@ -153,7 +176,7 @@ let links = $derived([
 
 ### PasswordReset (`src/lib/components/PasswordReset.svelte`)
 
-Presentational password reset email request form. Parent owns all state and API logic.
+Presentational password reset email request form, rendered as a `card`. Parent owns all state and API logic.
 
 | Prop                | Type             | Default  |
 | ------------------- | ---------------- | -------- |
@@ -174,6 +197,7 @@ Presentational phone-number field: `type="tel"` input with the `+` country-code 
 | `value` (bindable) | `string`  | `''`    | Phone number, two-way bound to the input                             |
 | `required`         | `boolean` | `true`  | Drives the input's `required` attribute (pass `false` when optional) |
 
+Label and input use the `label`/`input` tokens; the input gets `pl-6` for the `+` (and `pr-8` when required).
 Renders `id="phone"`/`name="phone"` — render at most one per page (both consumers do).
 
 ### Password Validation

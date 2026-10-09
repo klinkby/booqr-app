@@ -20,7 +20,7 @@ test.describe('Calendar UX Adjustments', () => {
 		await pageScreenshot(page, 'admin-plan');
 	});
 
-	test('form panel width is narrower (w-80 instead of w-96)', async ({ page }) => {
+	test('form panel is 320px wide next to the calendar', async ({ page }) => {
 		await page.goto('/admin/plan');
 
 		// Wait for the calendar component to be visible
@@ -37,9 +37,10 @@ test.describe('Calendar UX Adjustments', () => {
 		// Wait for form to appear
 		await expect(page.locator('text=Create New Vacancy')).toBeVisible({ timeout: 3000 });
 
-		// Verify the form panel has the w-80 class (320px width)
-		const formPanel = page.locator('.w-80').first();
-		await expect(formPanel).toBeVisible();
+		// The side panel is 320px (lg:w-80) next to the calendar at desktop widths.
+		const formPanel = page.locator('div', { has: page.getByRole('heading', { name: 'Create new vacancy' }) }).last();
+		const box = await formPanel.boundingBox();
+		expect(Math.round(box.width)).toBe(320);
 
 		// Capture screenshot
 		await pageScreenshot(page, 'admin-plan-create-vacancy');

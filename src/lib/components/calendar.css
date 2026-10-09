@@ -1,0 +1,18 @@
+/* Library CSS in the components layer so Tailwind utilities (ui.js tokens) win over it. docs/design.md › Calendar */
+@reference '../../routes/layout.css';
+@import '@event-calendar/core/index.css' layer(components);
+
+.ec {
+	--ec-bg-color: #fff;
+	--ec-text-color: --theme(--color-gray-900 inline);
+	--ec-border-color: --theme(--color-gray-200 inline);
+	--ec-button-bg-color: #fff;
+	/* The buttonSecondary ring draws the edge; a library border would double it. */
+	--ec-button-border-color: transparent;
+	--ec-button-text-color: --theme(--color-gray-900 inline);
+	--ec-button-active-bg-color: --theme(--color-gray-50 inline);
+	--ec-button-active-border-color: transparent;
+	--ec-today-bg-color: --theme(--color-indigo-50 inline);
+	--ec-highlight-color: --theme(--color-indigo-50 inline);
+	--ec-now-indicator-color: --theme(--color-indigo-600 inline);
+}
