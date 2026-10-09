@@ -148,7 +148,7 @@ apply.
 
 ### NavBar (`src/lib/components/NavBar.svelte`)
 
-Responsive sticky header with brand, nav links, hamburger on mobile, and optional Sign out button. The page title is
+Responsive sticky header with brand, nav links, hamburger on mobile, and optional Sign out button. The brand link shows the app icon (`#lib/assets/favicon.svg`, decorative `alt=""`) before the tenant name. The page title is
 rendered by the root layout (`<h1>` in `<main>`), not by the header.
 
 | Prop        | Type                    | Default     |

@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { m } from '#lib/paraglide/messages.js';
+	import favicon from '#lib/assets/favicon.svg';
 
 	let { links = [], brandName = 'App', onlogout = undefined } = $props();
 	let isOpen = $state(false);
@@ -23,8 +24,9 @@
 		<div class="flex h-16 items-center justify-between gap-6">
 			<a
 				href={resolve('/')}
-				class="flex min-w-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-600"
+				class="flex min-w-0 items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-600"
 			>
+				<img src={favicon} alt="" class="size-8 shrink-0" />
 				<span class="min-w-0 truncate text-xl font-bold tracking-tight text-gray-900">{brandName}</span>
 			</a>
 

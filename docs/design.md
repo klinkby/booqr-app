@@ -81,6 +81,12 @@ for vertical spacing; horizontal gutters follow [Layout](#layout).
 Controls and buttons are `rounded-lg` with `shadow-xs`; cards are `rounded-xl` with `shadow-sm ring-1 ring-gray-900/5`
 (`card`). Floating overlays (the filter panel) use `shadow-lg` to lift off the page. No other shadows.
 
+### Favicon
+
+`src/lib/assets/favicon.svg` is the shared app mark: a white calendar and confirmation check on an indigo-600 tile.
+The mark represents booking without relying on a tenant name and uses bold, simple geometry so it remains legible at
+16×16 pixels. Keep it tenant-neutral unless the API gains explicit per-tenant favicon support.
+
 ## Layout
 
 ### App shell
@@ -105,9 +111,10 @@ Controls and buttons are `rounded-lg` with `shadow-xs`; cards are `rounded-xl` w
 
 `NavBar.svelte`; the root layout passes `brandName`, `links` and `onlogout`.
 
-- **Brand**: the tenant's `displayName` as text, `text-xl font-bold tracking-tight`, truncated when long
-  (`min-w-0 truncate`). No monogram or placeholder logo; if the tenant API ever provides a logo, show it with the name
-  as `alt`.
+- **Brand**: the Booqr app icon (`src/lib/assets/favicon.svg`, also the favicon) at `size-8`, then the tenant's
+  `displayName` as text, `text-xl font-bold tracking-tight`, truncated when long (`min-w-0 truncate`), `gap-2.5` apart.
+  The icon is decorative (`alt=""`); the name is the link text. If the tenant API ever provides a logo, it replaces the
+  icon and the name stays.
 - **Navigation**: `<nav aria-label=…>` holding a `<ul>`. Links are
   `rounded-md px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900`; the current page adds
   `aria-current="page"` and swaps to `bg-indigo-50 text-indigo-700`.
