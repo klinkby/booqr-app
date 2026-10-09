@@ -6,6 +6,7 @@
 	import { DateUtils } from '#lib/dateUtils.js';
 	import { usePlanData } from './planData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
+	import { alert, eventBooked, eventFree, eventPending, input } from '#lib/ui.js';
 
 	// Lazy-load the calendar (and its heavy `@event-calendar/core` dependency) so it
 	// splits into its own chunk instead of the shared bundle. Import the component's
@@ -64,7 +65,7 @@
 			title: m.newVacancy(),
 			startEditable: true,
 			durationEditable: true,
-			classNames: ['!bg-gray-300', '!text-gray-600', '!border-gray-400', '!border-dashed'],
+			classNames: eventPending,
 		};
 	});
 
@@ -84,9 +85,7 @@
 						.join(' @ ') || m.available(),
 			startEditable: false,
 			durationEditable: false,
-			classNames: vacancy.bookingId
-				? ['!bg-red-500', '!text-white', '!border-red-600']
-				: ['!bg-green-500', '!text-white', '!border-green-600'],
+			classNames: vacancy.bookingId ? eventBooked : eventFree,
 			extendedProps: {
 				eventType: 'vacancy',
 				employeeId: vacancy.employeeId,
@@ -210,7 +209,7 @@
 
 <div class="container mx-auto max-w-7xl">
 	{#if plan.error}
-		<div role="alert" class="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+		<div role="alert" class="{alert} mb-4">
 			{apiErrorMessage(plan.error, m.errorLoadVacancies())}
 		</div>
 	{/if}
@@ -223,11 +222,7 @@
 			     can't slide under this control on narrow widths. -->
 			<div class="absolute right-0 top-0 z-10 flex items-center min-h-[2.375rem] max-w-[11rem]">
 				<label for="plan-employee-select" class="sr-only">{m.selectEmployeeToView()}</label>
-				<select
-					id="plan-employee-select"
-					bind:value={selectedEmployeeId}
-					class="w-full truncate rounded-md border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm"
-				>
+				<select id="plan-employee-select" bind:value={selectedEmployeeId} class="{input} truncate pr-8">
 					{#each plan.employees as e (e.id)}
 						<option value={e.id}>{e.name}</option>
 					{/each}

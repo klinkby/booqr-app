@@ -1,5 +1,6 @@
 import adapter from '@sveltejs/adapter-static';
 import { connect } from 'node:http2';
+import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
@@ -54,6 +55,17 @@ export default defineConfig({
 						server.middlewares.use('/api', proxyToH2);
 					},
 				},
+		{
+			// The library's Svelte entry imports its CSS unlayered, which beats Tailwind utilities.
+			// Swap it for our copy in layer(components). docs/design.md › Calendar
+			name: 'layered-event-calendar-css',
+			enforce: 'pre',
+			resolveId(source, importer) {
+				if (source === './styles/index.css' && importer?.includes('/@event-calendar/core/src/')) {
+					return fileURLToPath(new URL('./src/lib/components/calendar.css', import.meta.url));
+				}
+			},
+		},
 		tailwindcss(),
 		sveltekit({
 			adapter: adapter({ fallback: 'index.html' }),

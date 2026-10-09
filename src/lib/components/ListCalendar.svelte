@@ -1,8 +1,9 @@
 <script>
 	import { Calendar, List } from '@event-calendar/core';
-	import '@event-calendar/core/index.css';
+	import './calendar.css';
 	import { untrack } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
+	import { calendarTheme } from '#lib/ui.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	let {
@@ -119,6 +120,7 @@
 		// December) stay reachable; validRange caps paging to the years that
 		// actually hold bookings.
 		view: 'listYear',
+		theme: calendarTheme,
 		// Seed the initial validRange only; the $effect above reactively pushes
 		// later values via setOption. untrack marks the one-time read as deliberate
 		// (this whole `options` object is built once, at construction).
@@ -207,7 +209,7 @@
 					toggleMenu(info.event.id, e.currentTarget);
 				}}
 				onkeydown={onKeydown}
-				class="px-2 py-0.5 text-lg leading-none text-gray-500 bg-transparent rounded hover:bg-gray-100"
+				class="rounded-lg px-2 py-0.5 text-lg leading-none text-gray-500 hover:bg-gray-100"
 			>
 				⋮
 			</button>
@@ -217,7 +219,7 @@
 					id="booking-menu-{info.event.id}"
 					role="menu"
 					aria-label={m.bookingActions()}
-					class="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+					class="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-xl bg-white py-1 shadow-lg ring-1 ring-gray-900/5"
 				>
 					<button
 						type="button"
@@ -228,7 +230,7 @@
 							closeMenu();
 						}}
 						onkeydown={onKeydown}
-						class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
+						class="block w-full px-3 py-1.5 text-left text-sm text-gray-900 hover:bg-gray-50"
 					>
 						{m.duplicateBooking()}
 					</button>
@@ -242,7 +244,7 @@
 								closeMenu();
 							}}
 							onkeydown={onKeydown}
-							class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 bg-transparent hover:bg-gray-100"
+							class="block w-full px-3 py-1.5 text-left text-sm text-gray-900 hover:bg-gray-50"
 						>
 							{m.rescheduleBooking()}
 						</button>
@@ -255,7 +257,7 @@
 								closeMenu();
 							}}
 							onkeydown={onKeydown}
-							class="block w-full px-3 py-1.5 text-left text-sm text-red-600 bg-transparent hover:bg-red-50"
+							class="block w-full px-3 py-1.5 text-left text-sm text-red-700 hover:bg-red-50"
 						>
 							{m.cancelBooking()}
 						</button>
@@ -267,19 +269,17 @@
 {/snippet}
 
 <style>
-	/* Color the "Book" custom toolbar button as the app's
-	   primary call-to-action (indigo-600), matching Form/PasswordReset submit
-	   buttons. Scoped to this component's calendar so the admin weekly Calendar
-	   is unaffected; :global reaches the child <Calendar>'s generated markup. */
+	/* Keep the "Book" custom toolbar button primary: the calendar theme makes all
+	   buttons secondary. Colours match buttonPrimary. The theme's secondary ring
+	   (--tw-ring-shadow) is zeroed; the shadow is kept. */
 	.list-calendar :global(.ec-button.ec-bookNew) {
-		background-color: #4f46e5; /* indigo-600 */
-		border-color: #4f46e5;
+		background-color: var(--color-indigo-600);
+		border-color: transparent;
 		color: #fff;
-		margin-left: 0.5rem;
+		--tw-ring-shadow: 0 0 #0000;
 	}
 	.list-calendar :global(.ec-button.ec-bookNew:hover) {
-		background-color: #4338ca; /* indigo-700 */
-		border-color: #4338ca;
+		background-color: var(--color-indigo-500);
 	}
 
 	/* Hide prev/next entirely at the year-paging boundaries rather than showing
@@ -288,12 +288,6 @@
 	.list-calendar :global(.ec-button.ec-prev:disabled),
 	.list-calendar :global(.ec-button.ec-next:disabled) {
 		display: none;
-	}
-
-	/* Bold the toolbar title. In the listYear view the title is just the year
-	   (titleFormat: {year}), so this emphasizes the year the list covers. */
-	.list-calendar :global(.ec-title) {
-		font-weight: 700;
 	}
 
 	/* Vertically centre the year against the prev/next buttons. The toolbar's

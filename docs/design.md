@@ -195,21 +195,23 @@ a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately o
 
 ## Calendar
 
-> **Status:** approved 2026-10-09, not yet implemented. `/admin/plan` still uses the library defaults and `!`-forced
-> event colours.
+> **Status:** implemented 2026-10-09.
 
 The staff week view (`Calendar.svelte`, `/admin/plan`) wraps `@event-calendar/core`. Style it through the library's
 own hooks, never with `!important` utilities or overrides of its `.ec-*` classes:
 
 1. **Cascade layer.** `src/lib/components/calendar.css` imports the library CSS with
-   `@import '@event-calendar/core/index.css' layer(components);` and `Calendar.svelte` imports that file instead of the
-   library's. Unlayered library CSS beats Tailwind v4's layered utilities; inside `components` it loses to them, so
-   plain utilities (and `ui.js` tokens) apply. The import stays in the lazily loaded calendar chunk.
+   `@import '@event-calendar/core/index.css' layer(components);`; `Calendar.svelte` imports that file instead of the
+   library's, and so does `ListCalendar.svelte`. Unlayered library CSS beats Tailwind v4's layered utilities; inside
+   `components` it loses to them, so plain utilities (and `ui.js` tokens) apply. The import stays in the lazily loaded
+   calendar chunk. The library's Svelte entry imports its own CSS unlayered, so a `vite.config.js` plugin
+   (`layered-event-calendar-css`) resolves that import to `calendar.css`.
 2. **Colour variables.** The same file sets the library's `--ec-*` custom properties on `.ec` to the
    [colour roles](#colour-roles): borders `gray-200`, background white, text `gray-900`, today column and highlight
    `indigo-50` (Selected), now-indicator `indigo-600`, buttons the secondary-button colours.
 3. **`theme` option.** Extend the default theme object to add tokens to the library's parts: toolbar buttons
-   `buttonSecondary`, title `sectionHeading`, the grid wrapped as a `card`.
+   `buttonSecondary`, button groups `gap-2`, title `sectionHeading`, the grid wrapped as a `card`. The theme lives in
+   `ui.js` as `calendarTheme`, shared by both calendars.
 
 Event colours have fixed meanings. White text on a mid-tone fill (`green-500`, `red-500`) fails AA, and red means
 error, so use:
