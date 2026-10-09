@@ -14,7 +14,6 @@ export { default as PhoneInput } from './components/PhoneInput.svelte';
 export { default as VacancyForm } from './components/VacancyForm.svelte';
 export { default as PasswordReset } from './components/PasswordReset.svelte';
 export { default as NavBar } from './components/NavBar.svelte';
-export { default as Avatar } from './components/Avatar.svelte';
 export { default as UserName } from './components/UserName.svelte';
 export { default as ServiceList } from './components/ServiceList.svelte';
 export { default as ChoiceList } from './components/ChoiceList.svelte';

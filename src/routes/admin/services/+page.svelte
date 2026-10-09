@@ -43,7 +43,7 @@
 			{#if column.key === 'employeeUsers'}
 				<span class="flex flex-col gap-2">
 					{#each row.employeeUsers as emp (emp.id)}
-						<UserName id={emp.id} name={emp.name || emp.email} email={emp.email} />
+						<UserName id={emp.id} name={emp.name || emp.email} />
 					{/each}
 				</span>
 			{:else}

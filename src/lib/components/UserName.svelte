@@ -1,16 +1,8 @@
 <script>
 	import { resolve } from '$app/paths';
-	import Avatar from './Avatar.svelte';
+	import { link } from '#lib/ui.js';
 
-	let { id = 0, name = '', email = '', iconOnly = false } = $props();
+	let { id = 0, name = '' } = $props();
 </script>
 
-<a
-	href={resolve('/admin/contacts/[id]', { id: String(id) })}
-	class="flex items-center gap-1 text-indigo-600 hover:underline"
->
-	<Avatar {email} size="1rem" />
-	{#if !iconOnly}
-		{name}
-	{/if}
-</a>
+<a href={resolve('/admin/contacts/[id]', { id: String(id) })} class={link}>{name}</a>
