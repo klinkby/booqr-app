@@ -12,7 +12,7 @@ It follows secure, accessible, and simply standards-first principles.
   derivation needs a function body. **Never** use `$derived(() => ...)` — that stores the function itself, not its
   return value.
 - **Event Handling**: Use Svelte 5 event attributes (e.g., `onclick={handler}`) instead of Svelte 4 `on:click`.
-- **Styling**: Tailwind CSS with the official `forms` plugin.
+- **Styling**: Tailwind CSS with the official `forms` plugin. Visual rules: [Design System](#design-system).
 - **Components**: Prefer small, composable, **presentational** components. Components in `src/lib/components/` MUST NOT
   import or call API services directly. They receive data via props and emit events via callbacks. Use snippets
   (`{#snippet name(args)}...{/snippet}`) for reusable UI fragments.
@@ -231,34 +231,43 @@ Shared (do not duplicate per route):
 button navigates to `.../new`.
 
 **Form page**: Dynamic `[id]` route; derive `isEdit = id !== 'new'`; use `Form` component with children fields; load
-existing data in `onMount` for edit mode; use `max-w-2xl` wrapper.
+existing data in `onMount` for edit mode; render it as a centred `mx-auto max-w-2xl` card
+([docs/design.md › Forms](docs/design.md#forms)).
 
-**List page top row**: put the "Create" button and any filter toggle together in one
-`flex justify-between items-center` row above the table (not centered below it). Style both as
-`bg-transparent border border-gray-300 hover:bg-gray-50` (thin gray border, no fill) rather than a solid color, for a
-consistent, low-emphasis action row.
-
-### Filter Overlay Pattern
-
-Reference: `src/routes/admin/contacts/ContactsFilterForm.svelte` + `src/routes/admin/contacts/+page.svelte`.
-
-Icon-only funnel toggle button (`aria-label`/`aria-expanded`/`aria-controls`) in a `relative` wrapper; the filter
-renders as an `absolute right-0 top-full mt-2 z-10` overlay. Use a real form element with `onsubmit` calling
-`preventDefault()` then an `onsubmit` prop, so Enter submits and closes the overlay. Debounce free-text
-inputs 500ms via a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately on submit.
+**List page top row** and **filter overlay**: "Create" button and filter toggle share one row above the table; the
+filter is an icon-only funnel toggle with an absolute overlay form (Enter submits, free text debounced 500ms).
+Classes and details: [docs/design.md › List pages](docs/design.md#list-pages); reference implementation
+`src/routes/admin/contacts/`.
 
 ## Reusable Components (`src/lib/components/`)
 
 Component reference (prop tables, usage, timezone handling, password validation) lives in
 `src/lib/components/AGENTS.md`, loaded automatically when working under that directory. Import all from `'#lib'`.
 
+## Design System
+
+The design manual is [`docs/design.md`](docs/design.md). Read it before changing UI, and update it in the same PR as
+any visual change. Must-follow rules:
+
+- **Copy**: never invent UI text (labels, hints, descriptions, link texts, screen-reader-only text). Ask the product
+  owner first. Reuse Paraglide messages; English in sentence case; every string in both `en` and `da`.
+- **Look**: `bg-gray-50` canvas, white sticky `<header>`, forms as centred `max-w-2xl` cards, Nunito Variable
+  (self-hosted; the CSP blocks font CDNs). Copy button, input and card classes from the manual; don't invent variants.
+- **Type**: `<h1>` and brand `text-xl font-bold tracking-tight`; labels `text-sm font-semibold`;
+  `<legend>` `text-xl font-normal tracking-tight text-gray-500`. No `font-medium` (Nunito 500 looks like 400).
+- **Required fields**: `required` attribute plus an `aria-hidden` asterisk SVG inside the input (`text-indigo-400`).
+  Never write "Required" or "Optional".
+- **Contrast floors**: text no lighter than `gray-500`; meaningful icons no lighter than `indigo-400`.
+- **Navigation**: the current item gets `aria-current="page"` and `bg-indigo-50 text-indigo-700`.
+
 ## Semantic HTML5 & Accessibility (required)
 
 All pages and components MUST use semantic HTML5 and meet WCAG AA. PRs removing semantics or introducing inaccessible
 patterns are blocked.
 
-- **Landmarks**: single `<main id="main">` per page; `<header>`, `<nav>`, `<footer>`/`<aside>` as appropriate
-- **Skip link**: `<a class="sr-only focus:not-sr-only" href="#main">Skip to content</a>` before `<header>`
+- **Landmarks**: single `<main id="main-content">` per page; `<header>`, `<nav>`, `<footer>`/`<aside>` as appropriate
+- **Skip link**: `<a class="sr-only focus:not-sr-only focus:fixed focus:z-[60] …" href="#main-content">` with
+  `m.skipToMainContent()`, before `<header>`; it must stack above the sticky header when focused
 - **Headings**: exactly one H1 per page; logical H1–H6 outline
 - **Links vs buttons**: `<a href>` for navigation; `<button>` for actions. Never `role="button"` on a non-button element.
 - **Forms**: every control MUST have `<label for="id">`; group related controls with `<fieldset>`/`<legend>`
