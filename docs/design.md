@@ -114,8 +114,8 @@ The mark represents booking without relying on a tenant name and uses bold, simp
 
 `NavBar.svelte`; the root layout passes `brandName`, `links` and `onlogout`.
 
-- **Brand**: the Booqr app icon (`src/lib/assets/favicon.svg`, also the favicon) at `size-8`, then the tenant's
-  `displayName` as text, `text-xl font-bold tracking-tight`, truncated when long (`min-w-0 truncate`), `gap-2.5` apart.
+- **Brand**: the Booqr app icon (`src/lib/assets/favicon.svg`, also the favicon) at `size-6`, 24px, 20% larger than the brand text's 20px font size, then the tenant's
+  `displayName` as text, `text-xl font-bold tracking-tight`, truncated when long (`min-w-0 truncate`), `gap-2` apart.
   The icon is decorative (`alt=""`); the name is the link text. If the tenant API ever provides a logo, it replaces the
   icon and the name stays.
 - **Navigation**: `<nav aria-label=…>` holding a `<ul>`. Links are
