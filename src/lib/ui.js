@@ -9,6 +9,13 @@ export const checkbox = `${radio} rounded`;
 export const choiceLabel = 'text-sm text-gray-900';
 export const link = 'font-semibold text-indigo-600 hover:text-indigo-500';
 export const alert = 'rounded-lg bg-red-50 px-4 py-4 text-sm text-red-800';
+export const success = 'rounded-lg bg-green-50 px-4 py-4 text-sm text-green-800';
+export const sectionHeading = 'text-base font-bold text-gray-900';
+export const cardActions =
+	'flex items-center justify-end gap-3 border-t border-gray-900/10 bg-gray-50 px-4 py-4 sm:px-6';
+// Full-width message bars inside a card (no rounding; the card clips them).
+export const cardAlert = 'bg-red-50 px-4 py-4 text-sm text-red-800 sm:px-6';
+export const cardSuccess = 'bg-green-50 px-4 py-4 text-sm text-green-800 sm:px-6';
 export const card = 'overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5';
 export const cardSection = 'px-4 py-4 sm:px-6';
 

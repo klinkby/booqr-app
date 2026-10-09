@@ -27,7 +27,7 @@ test.describe('Change Password Page', () => {
 		await page.goto('/change-password');
 
 		await expect(page.locator('#reset-email')).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Request Password Reset' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Request password reset' })).toBeVisible();
 		// The change form is not shown without a valid action link.
 		await expect(page.locator('#password')).toHaveCount(0);
 
@@ -44,7 +44,7 @@ test.describe('Change Password Page', () => {
 		await page.goto('/change-password');
 
 		await page.fill('#reset-email', 'forgot@example.com');
-		await page.getByRole('button', { name: 'Request Password Reset' }).click();
+		await page.getByRole('button', { name: 'Request password reset' }).click();
 
 		await expect(page.getByText('A password reset link has been sent to your email.')).toBeVisible();
 		expect(postBody).toMatchObject({ email: 'forgot@example.com' });
@@ -68,7 +68,7 @@ test.describe('Change Password Page', () => {
 	test('a valid action link shows the change-password form', async ({ page }) => {
 		await page.goto(`/change-password?action=change&expires=${futureExpires()}`);
 
-		await expect(page.getByRole('button', { name: 'Change Password' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Change password' })).toBeVisible();
 		await expect(page.locator('#password')).toBeVisible();
 		await expect(page.locator('#confirm-password')).toBeVisible();
 
@@ -86,7 +86,7 @@ test.describe('Change Password Page', () => {
 
 		await page.fill('#password', 'ValidPass1!');
 		await page.fill('#confirm-password', 'DifferentPass1!');
-		await page.getByRole('button', { name: 'Change Password' }).click();
+		await page.getByRole('button', { name: 'Change password' }).click();
 
 		await expect(page.getByText('Passwords do not match.')).toBeVisible();
 		expect(posted).toBe(false);
@@ -105,7 +105,7 @@ test.describe('Change Password Page', () => {
 		// fails the complexity pattern and surfaces the custom requirements error.
 		await page.fill('#password', 'weakpass');
 		await page.fill('#confirm-password', 'weakpass');
-		await page.getByRole('button', { name: 'Change Password' }).click();
+		await page.getByRole('button', { name: 'Change password' }).click();
 
 		await expect(
 			page.getByText(
@@ -129,7 +129,7 @@ test.describe('Change Password Page', () => {
 
 		await page.fill('#password', 'ValidPass1!');
 		await page.fill('#confirm-password', 'ValidPass1!');
-		await page.getByRole('button', { name: 'Change Password' }).click();
+		await page.getByRole('button', { name: 'Change password' }).click();
 
 		await expect(page).toHaveURL('/login');
 		expect(postBody).toMatchObject({ password: 'ValidPass1!' });

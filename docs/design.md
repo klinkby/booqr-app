@@ -15,7 +15,8 @@ How the Booqr app looks, and the rules that keep it consistent. Agents get the m
 
 - **Standards first**: semantic HTML5 and Tailwind utilities. No custom CSS beyond the `@theme` tokens.
 - **One source per class string**: shared class strings live in `src/lib/ui.js` (`label`, `input`, `checkbox`, `radio`, `choiceLabel`,
-  `groupHeading`, `link`, `alert`, `card`, `cardSection`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`,
+  `groupHeading`, `sectionHeading`, `link`, `alert`, `success`, `card`, `cardSection`, `cardActions`, `cardAlert`,
+  `cardSuccess`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`,
   `buttonDanger`) and in components (`Form`, `RequiredInput`, `RequiredMark`, `PhoneInput`, `LimitedTextarea`,
   `DataTable`, `PaginatedTable`, `NavBar`, `LanguageToggle`). Import them; never paste a copy into a page. A new pattern used twice becomes a token.
 - **Quiet by default**: a grey canvas, white surfaces and one accent colour (indigo). Decoration must carry meaning.
@@ -36,15 +37,16 @@ Weights: **400** body · **600** labels and navigation · **700** headings, butt
 
 ### Type scale
 
-| Role                          | Classes                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------- |
-| Page title (`<h1>`) and brand | `text-xl font-bold tracking-tight text-gray-900`                                |
-| Group heading (`<legend>`)    | `text-xl font-normal tracking-tight text-gray-500`                              |
-| Label                         | `text-sm/6 font-semibold text-gray-900`                                         |
-| Body and input text           | `text-base sm:text-sm/6` (16px on phones stops iOS from zooming into the field) |
-| Navigation                    | `text-sm font-semibold`                                                         |
-| Buttons                       | `text-sm font-bold`                                                             |
-| Footer                        | `text-xs text-gray-500`                                                         |
+| Role                          | Classes                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------ |
+| Page title (`<h1>`) and brand | `text-xl font-bold tracking-tight text-gray-900`                                     |
+| Section heading (`<h2>`)      | `text-base font-bold text-gray-900` (`sectionHeading`); never larger than the `<h1>` |
+| Group heading (`<legend>`)    | `text-xl font-normal tracking-tight text-gray-500`                                   |
+| Label                         | `text-sm/6 font-semibold text-gray-900`                                              |
+| Body and input text           | `text-base sm:text-sm/6` (16px on phones stops iOS from zooming into the field)      |
+| Navigation                    | `text-sm font-semibold`                                                              |
+| Buttons                       | `text-sm font-bold`                                                                  |
+| Footer                        | `text-xs text-gray-500`                                                              |
 
 ### Colour roles
 
@@ -62,6 +64,7 @@ Use Tailwind's palette directly; this table is the contract for what each colour
 | Selected        | `bg-indigo-50 text-indigo-700`                             | Current navigation item                                             |
 | Required marker | `text-indigo-400`                                          | Lightest indigo that passes 3:1 for meaningful icons (3.13:1)       |
 | Error           | `bg-red-50 text-red-800`                                   | Form error alert (`Form.svelte`)                                    |
+| Success         | `bg-green-50 text-green-800`                               | Confirmation messages (`success`, `cardSuccess`)                    |
 
 ### Spacing
 
@@ -189,6 +192,41 @@ renders as an `absolute right-0 top-full z-10 mt-2 w-72 rounded-xl bg-white p-4 
 with `label`/`input`/`checkbox` fields spaced `space-y-4`. Use a real form element with `onsubmit` calling
 `preventDefault()` then an `onsubmit` prop, so Enter submits and closes the overlay. Debounce free-text inputs 500ms via
 a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately on submit.
+
+## Calendar
+
+> **Status:** approved 2026-10-09, not yet implemented. `/admin/plan` still uses the library defaults and `!`-forced
+> event colours.
+
+The staff week view (`Calendar.svelte`, `/admin/plan`) wraps `@event-calendar/core`. Style it through the library's
+own hooks, never with `!important` utilities or overrides of its `.ec-*` classes:
+
+1. **Cascade layer.** `src/lib/components/calendar.css` imports the library CSS with
+   `@import '@event-calendar/core/index.css' layer(components);` and `Calendar.svelte` imports that file instead of the
+   library's. Unlayered library CSS beats Tailwind v4's layered utilities; inside `components` it loses to them, so
+   plain utilities (and `ui.js` tokens) apply. The import stays in the lazily loaded calendar chunk.
+2. **Colour variables.** The same file sets the library's `--ec-*` custom properties on `.ec` to the
+   [colour roles](#colour-roles): borders `gray-200`, background white, text `gray-900`, today column and highlight
+   `indigo-50` (Selected), now-indicator `indigo-600`, buttons the secondary-button colours.
+3. **`theme` option.** Extend the default theme object to add tokens to the library's parts: toolbar buttons
+   `buttonSecondary`, title `sectionHeading`, the grid wrapped as a `card`.
+
+Event colours have fixed meanings. White text on a mid-tone fill (`green-500`, `red-500`) fails AA, and red means
+error, so use:
+
+| Event                       | Classes                                                          | Contrast |
+| --------------------------- | ---------------------------------------------------------------- | -------- |
+| Booked                      | `bg-indigo-600 text-white`                                       | 6.3:1    |
+| Free (vacancy)              | `border-l-4 border-emerald-500 bg-emerald-50 text-emerald-800`   | ≥ 6:1    |
+| Appointment overlay         | `border-l-4 border-sky-500 bg-sky-50 text-sky-800`               | ≥ 6:1    |
+| Pending selection (unsaved) | `border border-dashed border-gray-400 bg-gray-100 text-gray-700` | ≥ 7:1    |
+
+Each is a token in `ui.js` passed through the event's `classNames`. Event text ("Booked", names, times) carries the
+meaning too, so colour is never the only signal. Around the calendar, the employee picker uses `input` and the
+"extend hours" button `buttonSecondary`; spacing follows the [scale](#spacing).
+
+The customer bookings list on `/profile` (`ListCalendar.svelte`) is our own markup: it uses the same tokens directly,
+and its today row uses the Selected role (`bg-indigo-50`), not yellow.
 
 ## Footer
 

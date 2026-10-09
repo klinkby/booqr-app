@@ -260,6 +260,8 @@ any visual change. Must-follow rules:
 - **Type**: `<h1>` and brand `text-xl font-bold tracking-tight`; labels `text-sm font-semibold`;
   `<legend>` `text-xl font-normal tracking-tight text-gray-500`. No `font-medium` (Nunito 500 looks like 400).
 - **Required fields**: `<RequiredInput>` (`required` + `aria-hidden` asterisk). Never write "Required" or "Optional".
+- **Calendar** (`@event-calendar/core`): load its CSS in `layer(components)`, theme it via `--ec-*` variables and the
+  `theme` option, and use the event colour tokens from the manual. Never `!`-prefixed utilities.
 - **Spacing**: vertical gaps are 8/16/24px only (`2`/`4`/`6`); see the manual's spacing table.
 - **Contrast floors**: text no lighter than `gray-500`; meaningful icons no lighter than `indigo-400`.
 - **Navigation**: the current item gets `aria-current="page"` and `bg-indigo-50 text-indigo-700`.

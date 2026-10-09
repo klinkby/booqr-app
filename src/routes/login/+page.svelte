@@ -1,5 +1,6 @@
 <script>
-	import { auth, Form, apiErrorMessage } from '#lib';
+	import { auth, Form, RequiredInput, apiErrorMessage } from '#lib';
+	import { cardSection, label, link } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -65,41 +66,36 @@
 </script>
 
 <div>
-	<Form {error} legend={m.signIn()} {loading} onsubmit={handleSubmit} submitLabel={m.signIn()}>
-		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="email"> {m.labelEmailAddress()} </label>
-			<input
-				autocomplete="email"
-				bind:value={email}
-				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				id="email"
-				name="email"
-				placeholder={m.labelEmailAddress()}
-				required
-				type="email"
-			/>
-		</div>
+	<Form card {error} legend={m.signIn()} {loading} onsubmit={handleSubmit} submitLabel={m.signIn()}>
+		<div class="{cardSection} space-y-4">
+			<div>
+				<label for="email" class={label}>{m.labelEmailAddress()}</label>
+				<RequiredInput
+					id="email"
+					name="email"
+					type="email"
+					autocomplete="email"
+					placeholder={m.labelEmailAddress()}
+					bind:value={email}
+				/>
+			</div>
 
-		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="password"> {m.labelPassword()} </label>
-			<input
-				autocomplete="current-password"
-				bind:value={password}
-				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				id="password"
-				name="password"
-				placeholder={m.labelPassword()}
-				required
-				type="password"
-			/>
+			<div>
+				<label for="password" class={label}>{m.labelPassword()}</label>
+				<RequiredInput
+					id="password"
+					name="password"
+					type="password"
+					autocomplete="current-password"
+					placeholder={m.labelPassword()}
+					bind:value={password}
+				/>
+			</div>
 		</div>
 	</Form>
 
-	<p class="mt-4 text-sm text-gray-600">
-		<a
-			href={resolve('change-password')}
-			class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline"
-		>
+	<p class="mt-4 text-sm">
+		<a href={resolve('change-password')} class={link}>
 			{m.forgotPassword()}
 		</a>
 	</p>

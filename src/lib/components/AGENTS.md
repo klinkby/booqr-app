@@ -170,7 +170,7 @@ let links = $derived([
 
 ### PasswordReset (`src/lib/components/PasswordReset.svelte`)
 
-Presentational password reset email request form. Parent owns all state and API logic.
+Presentational password reset email request form, rendered as a `card`. Parent owns all state and API logic.
 
 | Prop                | Type             | Default  |
 | ------------------- | ---------------- | -------- |
