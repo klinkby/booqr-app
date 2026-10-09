@@ -23,8 +23,29 @@
 	// Danish uses 24-hour time; English uses 12-hour.
 	const hour12 = locale !== 'da';
 
+	// Below Tailwind's `sm` breakpoint (640px) the week grid is unreadable, so show a
+	// single day and swap the week-based button labels for day-based ones.
+	const narrowQuery = window.matchMedia('(max-width: 639.98px)');
+	// Phones get a single day; a 7-column week is unreadable below `sm`.
+	const viewFor = (narrow) => (narrow ? 'timeGridDay' : 'timeGridWeek');
+	const buttonTextFor = (narrow) => ({
+		prev: narrow ? m.previous() : m.calendarPreviousWeek(),
+		next: narrow ? m.next() : m.calendarNextWeek(),
+		today: m.calendarToday(),
+	});
+
 	$effect(() => {
 		if (cal) cal.setOption('events', events);
+	});
+
+	$effect(() => {
+		const onChange = (e) => {
+			if (!cal) return;
+			cal.setOption('view', viewFor(e.matches));
+			cal.setOption('buttonText', buttonTextFor(e.matches));
+		};
+		narrowQuery.addEventListener('change', onChange);
+		return () => narrowQuery.removeEventListener('change', onChange);
 	});
 
 	$effect(() => {
@@ -51,7 +72,7 @@
 	}
 
 	const options = {
-		view: 'timeGridWeek',
+		view: viewFor(narrowQuery.matches),
 		theme: calendarTheme,
 		firstDay: 1,
 		allDaySlot: false,
@@ -67,7 +88,7 @@
 			center: 'title',
 			end: '',
 		},
-		buttonText: { prev: m.calendarPreviousWeek(), next: m.calendarNextWeek(), today: m.calendarToday() },
+		buttonText: buttonTextFor(narrowQuery.matches),
 		datesSet: (info) => onDatesChange?.(info),
 		dateClick: (info) => onDateClick?.(info),
 		eventClick: (info) => onEventClick?.(info),

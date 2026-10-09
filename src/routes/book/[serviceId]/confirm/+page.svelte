@@ -151,6 +151,8 @@
 			const params = new URLSearchParams();
 			if (employeeName) params.set('employee', employeeName);
 			if (locationName) params.set('location', locationName);
+			if (startDate) params.set('start', startDate.toISOString());
+			if (endDate) params.set('end', endDate.toISOString());
 
 			goto(`${resolve('book/done')}?${params.toString()}`);
 		} catch (err) {

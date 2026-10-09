@@ -214,13 +214,15 @@
 		</div>
 	{/if}
 
-	<div class="flex gap-6">
+	<div class="flex flex-col gap-6 lg:flex-row">
 		<div class="flex-1 min-w-0 relative" aria-busy={plan.isLoading}>
-			<!-- Employee selector overlaid at the top-right of the calendar's toolbar
-			     row, vertically centred against the < > today buttons. The calendar
-			     toolbar below reserves right padding (pr-48) so its centred title
-			     can't slide under this control on narrow widths. -->
-			<div class="absolute right-0 top-0 z-10 flex items-center min-h-[2.375rem] max-w-[11rem]">
+			<!-- Employee selector: from `sm` up it overlays the top-right of the calendar's toolbar
+			     row, vertically centred against the < > today buttons, and the toolbar reserves right
+			     padding (sm:pr-48) so its centred title can't slide under it. On phones it sits above
+			     the calendar, full width. -->
+			<div
+				class="mb-4 flex items-center sm:absolute sm:top-0 sm:right-0 sm:z-10 sm:mb-0 sm:min-h-[2.375rem] sm:max-w-[11rem]"
+			>
 				<label for="plan-employee-select" class="sr-only">{m.selectEmployeeToView()}</label>
 				<select id="plan-employee-select" bind:value={selectedEmployeeId} class="{input} truncate pr-8">
 					{#each plan.employees as e (e.id)}
@@ -228,7 +230,7 @@
 					{/each}
 				</select>
 			</div>
-			<div class="[&_.ec-toolbar]:pr-48">
+			<div class="sm:[&_.ec-toolbar]:pr-48">
 				{#if Calendar}
 					<Calendar
 						events={calendarEvents}
@@ -245,7 +247,7 @@
 		</div>
 
 		{#if showForm}
-			<div class="w-80 shrink-0">
+			<div class="w-full shrink-0 lg:w-80">
 				<VacancyForm
 					mode={formMode}
 					date={formData.date}

@@ -5,7 +5,6 @@
 	"submit": "Submit",
 	"update": "Update",
 	"create": "Create",
-	"close": "Close",
 	"delete": "Delete",
 	"edit": "Edit",
 	"back": "← Back",
@@ -16,7 +15,6 @@
 	"signIn": "Sign in",
 	"signOut": "Sign out",
 	"signUp": "Sign up",
-	"book": "Book",
 	"bookNow": "Book now",
 
 	"labelEmail": "Email",
@@ -34,7 +32,6 @@
 	"labelDate": "Date",
 	"labelStart": "Start",
 	"labelEnd": "End",
-	"labelNotes": "Notes",
 	"labelAddress": "Address",
 	"labelAddress1": "Street address",
 	"labelAddress2": "Address line 2",
@@ -116,16 +113,6 @@
 	"timeSlotLabel": "{start} to {end}",
 
 	"selectionsLabel": "Your selections so far",
-
-	"myAppointment": "My Appointment",
-	"bookAppointment": "Book Appointment",
-	"legendViewAppointment": "View appointment",
-	"legendBookAppointment": "Book appointment",
-	"cancelAppointment": "Cancel Appointment",
-	"availableInfo": "Available: {start} – {end} with {employee} at {location}",
-	"selectAService": "Select a service",
-	"durationDisplay": "Duration: {duration}",
-	"notesForEmployee": "Notes for {name}",
 
 	"selectAServiceHeading": "Select a service",
 

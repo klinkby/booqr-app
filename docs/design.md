@@ -220,8 +220,11 @@ so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isF
   The sign-in gate uses the same card form as `/login`: "Forgot your password?" sits right of the Password label
   (`link text-sm`), and the switch between sign-in and sign-up is one centred `text-sm text-gray-500` line under the
   card (`mt-6`).
-- **Messages.** Errors use `alert`; "sign-up sent" uses `success`; explanatory text `text-sm text-gray-500`. The
-  done and conflict pages keep their links, styled with `link`.
+- **Messages.** Errors use `alert`; "sign-up sent" uses `success`; explanatory text `text-sm text-gray-500`.
+  The conflict page keeps its links, styled with `link`. The done page celebrates: a centred `card` with an emerald
+  check badge that pops in plus a short confetti burst (both `prefers-reduced-motion: no-preference` only, decorative
+  and `aria-hidden`), the heading and message (with the booked date and time as an `indigo-50` pill under the heading),
+  then "My bookings" (`buttonSecondary`) and "Book another appointment" (`buttonPrimary`).
 
 ## Calendar
 
@@ -256,6 +259,10 @@ error, so use:
 Each is a token in `ui.js` passed through the event's `classNames`. Event text ("Booked", names, times) carries the
 meaning too, so colour is never the only signal. Around the calendar, the employee picker uses `input` and the
 "extend hours" button `buttonSecondary`; spacing follows the [scale](#spacing).
+
+**Phones.** Below `sm` the week view switches to a single day (`timeGridDay`, prev/next labelled with the generic
+`m.previous()` / `m.next()`), and the employee picker sits full width above the calendar instead of overlaying the
+toolbar. Below `lg` the vacancy panel stacks under the calendar; from `lg` up it is a `w-80` column beside it.
 
 The customer bookings list on `/profile` (`ListCalendar.svelte`) is our own markup: it uses the same tokens directly,
 and its today row uses the Selected role (`bg-indigo-50`), not yellow.
