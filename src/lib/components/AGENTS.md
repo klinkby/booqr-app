@@ -65,10 +65,10 @@ Accessible form wrapper handling submission, errors, and loading state. Children
 | `error`                 | `string \| null`  | `null`      | Error message (kept in DOM for `aria-live`)                              |
 | `loading`               | `boolean`         | `false`     | Disables fieldset; shows "Please wait…" on submit button                 |
 | `card`                  | `boolean`         | `false`     | Design-manual card: children are `cardSection` divs, `Form` divides them |
-| `submitLabel`           | `string`          | `'Submit'`  | Submit button label                                                      |
+| `submitLabel`           | `string \| null`  | `'Submit'`  | Submit button label; `null` hides it (view-only forms)                   |
 | `deleteLabel`           | `string`          | `undefined` | Delete button label; hidden if omitted                                   |
 | `onsubmit`              | `(event) => void` | required    | `preventDefault` called automatically                                    |
-| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; delete is left-aligned in red                 |
+| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; order Cancel, Delete, submit                  |
 | `children`              | snippet           | required    | Form fields                                                              |
 
 ### RequiredInput (`src/lib/components/RequiredInput.svelte`)
@@ -112,11 +112,12 @@ DateUtils.toLocalTime(new Date()); // → "10:00"
 - **Never** `.toISOString().slice()` for form date/time extraction — gives UTC, not local
 
 Config: 6 AM–6 PM default (expandable to midnight), Monday week start, no all-day slot, `p`/`n`/`t` keyboard
-shortcuts. Event styling via `classNames: ['!bg-red-500', '!text-white']`.
+shortcuts. Event colours come from the `ui.js` event tokens passed as `classNames` (docs/design.md › Calendar).
 
 ### VacancyForm (`src/lib/components/VacancyForm.svelte`)
 
 Side-panel form for creating and viewing vacancies. Uses `$bindable` props (Svelte 5 two-way binding).
+Renders a section heading above a `<Form card>`; the parent sets the panel width.
 
 | Prop                        | Type                       | Default        | Description                                             |
 | --------------------------- | -------------------------- | -------------- | ------------------------------------------------------- |
@@ -130,7 +131,7 @@ Side-panel form for creating and viewing vacancies. Uses `$bindable` props (Svel
 | `onsubmit` / `oncancel`     | callbacks                  | required       | Submit (not called in view mode) / cancel               |
 | `ondelete`                  | `() => void`               | `undefined`    | Shown only in view mode                                 |
 
-In view mode submit becomes "Close". Validates end > start. Panel: `w-80`, `sticky top-4`.
+In view mode the action bar is Cancel, then Delete; there is no submit button. Validates end > start. Panel: `sticky top-20` (clears the sticky header).
 
 ### Customer booking wizard components
 

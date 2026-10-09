@@ -89,11 +89,11 @@
 	"calendarToday": "Today",
 	"calendarExtendHours": "Extend hours (+6h)",
 
-	"vacancyDetails": "Vacancy Details",
-	"createNewVacancy": "Create New Vacancy",
+	"vacancyDetails": "Vacancy details",
+	"createNewVacancy": "Create new vacancy",
 	"legendViewVacancy": "View vacancy",
 	"legendCreateVacancy": "Create vacancy",
-	"createVacancy": "Create Vacancy",
+	"createVacancy": "Create vacancy",
 	"endTimeAfterStart": "End time must be after start time",
 	"selectALocation": "Select a location",
 	"selectAnEmployee": "Select an employee",
@@ -203,7 +203,7 @@
 	"theLocation": "the location",
 
 	"accessDenied": "Access denied. Redirecting to home page…",
-	"newVacancy": "New Vacancy",
+	"newVacancy": "New vacancy",
 	"booked": "Booked",
 	"available": "Available",
 	"appointmentTitle": "{customer}, {service}",

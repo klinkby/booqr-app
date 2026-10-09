@@ -2,6 +2,7 @@
 	import { Form } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { cardSection, input, label, sectionHeading } from '#lib/ui.js';
 
 	let {
 		mode = 'create', // 'create' or 'view'
@@ -35,92 +36,78 @@
 	);
 </script>
 
-<div class="sticky top-4 p-6 bg-gray-50 border border-gray-200 rounded-lg">
-	<h2 class="text-xl font-semibold mb-4">{isReadonly ? m.vacancyDetails() : m.createNewVacancy()}</h2>
+<div class="sticky top-20">
+	<h2 class="{sectionHeading} mb-4">{isReadonly ? m.vacancyDetails() : m.createNewVacancy()}</h2>
 
 	<Form
+		card
 		error={timeError || error}
 		legend={isReadonly ? m.legendViewVacancy() : m.legendCreateVacancy()}
 		{loading}
-		oncancel={isReadonly ? undefined : oncancel}
+		{oncancel}
 		onsubmit={(e) => {
-			if (isReadonly) {
-				// In readonly mode, submit button acts as close button
-				oncancel();
-			} else if (!timeError) {
+			if (!isReadonly && !timeError) {
 				onsubmit(e);
 			}
 		}}
-		submitLabel={isReadonly ? m.close() : m.createVacancy()}
+		submitLabel={isReadonly ? null : m.createVacancy()}
 		deleteLabel={isReadonly ? m.delete() : undefined}
 		{ondelete}
 	>
-		{#if formattedDate}
-			<p class="text-sm font-medium text-gray-700">{formattedDate}</p>
-		{/if}
+		<div class="{cardSection} space-y-4">
+			{#if formattedDate}
+				<p class="text-sm text-gray-500">{formattedDate}</p>
+			{/if}
 
-		<div class="flex gap-4">
-			<div class="flex-1">
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="startTime"> {m.labelStart()} </label>
-				<input
-					bind:value={startTime}
-					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
-					id="startTime"
-					name="startTime"
-					required
-					step="300"
-					type="time"
-					disabled={isReadonly}
-				/>
+			<div class="grid grid-cols-2 gap-4">
+				<div>
+					<label class={label} for="startTime">{m.labelStart()}</label>
+					<input
+						bind:value={startTime}
+						class={input}
+						id="startTime"
+						name="startTime"
+						required
+						step="300"
+						type="time"
+						disabled={isReadonly}
+					/>
+				</div>
+
+				<div>
+					<label class={label} for="endTime">{m.labelEnd()}</label>
+					<input
+						bind:value={endTime}
+						class={input}
+						id="endTime"
+						name="endTime"
+						required
+						step="300"
+						type="time"
+						disabled={isReadonly}
+					/>
+				</div>
 			</div>
 
-			<div class="flex-1">
-				<label class="block text-sm font-medium text-gray-700 mb-1" for="endTime"> {m.labelEnd()} </label>
-				<input
-					bind:value={endTime}
-					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
-					id="endTime"
-					name="endTime"
-					required
-					step="300"
-					type="time"
-					disabled={isReadonly}
-				/>
+			<div>
+				<label class={label} for="locationId">{m.labelLocation()}</label>
+				<select bind:value={locationId} class={input} id="locationId" name="locationId" required disabled={isReadonly}>
+					<option value="" disabled selected>{m.selectALocation()}</option>
+					{#each locations as location (location.id)}
+						<option value={String(location.id)}>{location.name}</option>
+					{/each}
+				</select>
 			</div>
-		</div>
 
-		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="locationId"> {m.labelLocation()} </label>
-			<select
-				bind:value={locationId}
-				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
-				id="locationId"
-				name="locationId"
-				required
-				disabled={isReadonly}
-			>
-				<option value="" disabled selected>{m.selectALocation()}</option>
-				{#each locations as location (location.id)}
-					<option value={String(location.id)}>{location.name}</option>
-				{/each}
-			</select>
-		</div>
-
-		<div>
-			<label class="block text-sm font-medium text-gray-700 mb-1" for="employeeId"> {m.labelEmployee()} </label>
-			<select
-				bind:value={employeeId}
-				class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed sm:text-sm"
-				id="employeeId"
-				name="employeeId"
-				required
-				disabled={isReadonly}
-			>
-				<option value="" disabled selected>{m.selectAnEmployee()}</option>
-				{#each employees as employee (employee.id)}
-					<option value={String(employee.id)}>{employee.name || employee.email}</option>
-				{/each}
-			</select>
+			<div>
+				<label class={label} for="employeeId">{m.labelEmployee()}</label>
+				<select bind:value={employeeId} class={input} id="employeeId" name="employeeId" required disabled={isReadonly}>
+					<option value="" disabled selected>{m.selectAnEmployee()}</option>
+					{#each employees as employee (employee.id)}
+						<option value={String(employee.id)}>{employee.name || employee.email}</option>
+					{/each}
+				</select>
+			</div>
 		</div>
 	</Form>
 </div>

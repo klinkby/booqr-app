@@ -149,13 +149,15 @@ Reference: `src/routes/admin/locations/[id]/+page.svelte` (screenshots at the to
   "Optional", and add hint lines only when the product owner supplies the text.
 - **Short values share a row**: `grid grid-cols-6 gap-x-3 gap-y-4 sm:gap-x-4` at every width, e.g. Zip code
   (`col-span-2`, `inputmode="numeric" autocomplete="postal-code"`) next to City (`col-span-4`).
-- **Action bar** (drawn by `Form`): Cancel, then the submit button: `m.create()` when creating,
-  `m.update()` when editing (the page heading already names the object). On phones both split the width.
+- **Action bar** (drawn by `Form`): Cancel, then Delete when the form offers it, then the submit button: `m.create()`
+  when creating, `m.update()` when editing (the page heading already names the object). A view-only form has no submit
+  button. On phones the buttons split the width.
 
 ### Buttons
 
 Use the tokens in `src/lib/ui.js`: `buttonPrimary` (one per form, the submit action), `buttonSecondary` (Cancel and
-other neutral actions) and `buttonDanger` (destructive). All are `rounded-lg text-sm font-bold shadow-xs` with a
+other neutral actions) and `buttonDanger` (destructive actions that are not the call to action: secondary look with
+`text-red-700`, so Delete never out-shouts the primary action). All are `rounded-lg text-sm font-bold shadow-xs` with a
 `focus-visible` outline, so keyboard users get a ring and mouse clicks don't leave one behind.
 
 ### Migrating a form

@@ -76,20 +76,24 @@
 	</fieldset>
 
 	<div class={cls.actions}>
-		{#if ondelete && deleteLabel}
-			<button type="button" disabled={loading} class="{buttonDanger} mr-auto" onclick={ondelete}>{deleteLabel}</button>
-		{/if}
 		{#if oncancel}
 			<button type="button" disabled={loading} class="{buttonSecondary} {cls.button}" onclick={oncancel}
 				>{m.cancel()}</button
 			>
 		{/if}
-		<button
-			class="{buttonPrimary} {cls.button}"
-			class:opacity-50={submitDisabled && !loading}
-			class:cursor-not-allowed={submitDisabled && !loading}
-			disabled={loading}
-			type="submit">{loading ? m.pleaseWait() : submitLabel}</button
-		>
+		{#if ondelete && deleteLabel}
+			<button type="button" disabled={loading} class="{buttonDanger} {cls.button}" onclick={ondelete}
+				>{deleteLabel}</button
+			>
+		{/if}
+		{#if submitLabel}
+			<button
+				class="{buttonPrimary} {cls.button}"
+				class:opacity-50={submitDisabled && !loading}
+				class:cursor-not-allowed={submitDisabled && !loading}
+				disabled={loading}
+				type="submit">{loading ? m.pleaseWait() : submitLabel}</button
+			>
+		{/if}
 	</div>
 </form>

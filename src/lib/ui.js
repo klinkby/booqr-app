@@ -30,7 +30,7 @@ const secondaryColours =
 	'bg-white text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus-visible:outline-indigo-600';
 export const buttonPrimary = `${button} px-3.5 py-2 bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600`;
 export const buttonSecondary = `${button} px-3.5 py-2 ${secondaryColours}`;
-export const buttonDanger = `${button} px-3.5 py-2 bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600`;
+export const buttonDanger = `${button} px-3.5 py-2 bg-white text-red-700 ring-1 ring-gray-300 ring-inset hover:bg-red-50 focus-visible:outline-red-600`;
 export const iconButtonSecondary = `${button} p-2 ${secondaryColours}`;
 
 // `theme` option for @event-calendar/core: adds tokens to the library's own classes.
