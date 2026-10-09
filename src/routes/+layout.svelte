@@ -3,7 +3,7 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import { AuthenticationService, TenantService, ApiError } from '#lib/api/index.js';
 	import { auth, NavBar, LanguageToggle, locale, tenant, MARKETING_URL } from '#lib';
-	import { pageHeading } from '#lib/ui.js';
+	import { buttonPrimary, pageHeading } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -140,12 +140,14 @@
 {#if tenant.isReserved}
 	<!-- Reserved/apex host (booqr.dk, www, status): marketing/onboarding view,
 	     not the booking app. Its own single <main>/<h1>. -->
-	<a class={SKIP_LINK} href="#main-content">{m.skipToMainContent()}</a>
-	<main class="container mx-auto px-4 py-16 max-w-2xl text-center" id="main-content">
-		<h1 class="text-4xl font-bold">{m.marketingHeading()}</h1>
-		<p class="mt-4 text-xl text-gray-700">{m.marketingTagline()}</p>
-		<p class="mt-6 text-gray-600">{m.marketingBody()}</p>
-	</main>
+	<div class="flex min-h-dvh flex-col bg-gray-50">
+		<a class={SKIP_LINK} href="#main-content">{m.skipToMainContent()}</a>
+		<main class="mx-auto w-full max-w-2xl flex-1 px-4 py-16 text-center sm:px-6" id="main-content">
+			<h1 class="text-4xl font-bold tracking-tight text-gray-900">{m.marketingHeading()}</h1>
+			<p class="mt-4 text-xl text-gray-700">{m.marketingTagline()}</p>
+			<p class="mt-6 text-gray-500">{m.marketingBody()}</p>
+		</main>
+	</div>
 {:else if tenant.isResolved}
 	<QueryClientProvider client={queryClient}>
 		<!-- Skip link for keyboard users -->
@@ -183,26 +185,26 @@
 	     error instead of hanging on the loading interstitial. Its own single
 	     <main>/<h1>. Retry resets tenant status to 'loading', re-triggering the
 	     bootstrap $effect above. -->
-	<a class={SKIP_LINK} href="#main-content">{m.skipToMainContent()}</a>
-	<main class="container mx-auto px-4 py-16 max-w-2xl text-center" id="main-content">
-		<h1 class="text-2xl font-bold">{m.tenantErrorHeading()}</h1>
-		<p role="alert" class="mt-4 text-gray-700">{m.tenantErrorBody()}</p>
-		<button
-			class="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-			type="button"
-			onclick={() => tenant.retry()}
-		>
-			{m.tenantRetry()}
-		</button>
-	</main>
+	<div class="flex min-h-dvh flex-col bg-gray-50">
+		<a class={SKIP_LINK} href="#main-content">{m.skipToMainContent()}</a>
+		<main class="mx-auto w-full max-w-2xl flex-1 px-4 py-16 text-center sm:px-6" id="main-content">
+			<h1 class={pageHeading}>{m.tenantErrorHeading()}</h1>
+			<p role="alert" class="mt-4 text-sm text-gray-500">{m.tenantErrorBody()}</p>
+			<button class="{buttonPrimary} mt-6" type="button" onclick={() => tenant.retry()}>
+				{m.tenantRetry()}
+			</button>
+		</main>
+	</div>
 {:else}
 	<!-- Resolving (loading) or redirecting after tenant-not-found. Guard the
 	     tenant app shell so it never flashes for an unknown subdomain. The
 	     status is announced accessibly via role="status" / aria-live. -->
-	<main class="container mx-auto px-4 py-16 max-w-2xl text-center" id="main-content">
-		<h1 class="sr-only">{tenant.isNotFound ? m.tenantRedirecting() : m.tenantResolving()}</h1>
-		<p role="status" aria-live="polite" class="text-gray-600">
-			{tenant.isNotFound ? m.tenantRedirecting() : m.tenantResolving()}
-		</p>
-	</main>
+	<div class="flex min-h-dvh flex-col bg-gray-50">
+		<main class="mx-auto w-full max-w-2xl flex-1 px-4 py-16 text-center sm:px-6" id="main-content">
+			<h1 class="sr-only">{tenant.isNotFound ? m.tenantRedirecting() : m.tenantResolving()}</h1>
+			<p role="status" aria-live="polite" class="text-sm text-gray-500">
+				{tenant.isNotFound ? m.tenantRedirecting() : m.tenantResolving()}
+			</p>
+		</main>
+	</div>
 {/if}

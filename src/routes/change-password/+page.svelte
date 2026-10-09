@@ -85,7 +85,7 @@
 
 <div>
 	{#if !action}
-		<p class="mb-6 text-sm text-gray-600">
+		<p class="mb-6 text-sm text-gray-500">
 			{m.changePasswordIntro()}
 		</p>
 		<PasswordReset

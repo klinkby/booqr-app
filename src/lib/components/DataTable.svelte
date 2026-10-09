@@ -59,7 +59,7 @@
 							{#if ondelete}
 								<button
 									type="button"
-									class="ml-3 font-semibold text-red-600 hover:text-red-500"
+									class="ml-3 font-semibold text-red-700 hover:text-red-600"
 									onclick={() => ondelete(row)}>{m.delete()}</button
 								>
 							{/if}

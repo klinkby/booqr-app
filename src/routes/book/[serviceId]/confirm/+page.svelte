@@ -22,6 +22,12 @@
 	const startDate = $derived(startIso ? new Date(startIso) : null);
 	const durationMs = $derived(DateUtils.parseDurationSeconds(service?.duration) * 1000);
 	const endDate = $derived(startDate && durationMs ? new Date(startDate.getTime() + durationMs) : null);
+	// Same long format as the wizard's day heading.
+	const dateLabel = $derived(
+		startDate
+			? `${startDate.getDate()}. ${startDate.toLocaleDateString(getLocale(), { month: 'long' })} ${startDate.getFullYear()}`
+			: '',
+	);
 
 	let vacancy = $state(null);
 	let vacancyError = $state(null);
@@ -302,7 +308,7 @@
 			</div>
 			<div class="grid grid-cols-3 gap-4 px-4 py-3 sm:px-6">
 				<dt class="text-sm font-semibold text-gray-900">{m.labelDate()}</dt>
-				<dd class="col-span-2 text-sm text-gray-700">{DateUtils.toLocalDate(startDate)}</dd>
+				<dd class="col-span-2 text-sm text-gray-700">{dateLabel}</dd>
 			</div>
 			<div class="grid grid-cols-3 gap-4 px-4 py-3 sm:px-6">
 				<dt class="text-sm font-semibold text-gray-900">{m.labelTime()}</dt>

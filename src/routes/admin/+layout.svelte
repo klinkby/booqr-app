@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { m } from '#lib/paraglide/messages.js';
+	import { alert } from '#lib/ui.js';
 
 	let { children } = $props();
 
@@ -24,5 +25,5 @@
 {#if auth.isEmployee}
 	{@render children()}
 {:else if auth.isLoggedIn}
-	<p role="alert">{m.accessDenied()}</p>
+	<p role="alert" class={alert}>{m.accessDenied()}</p>
 {/if}
