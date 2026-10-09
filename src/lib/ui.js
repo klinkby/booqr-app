@@ -11,6 +11,10 @@ export const link = 'font-semibold text-indigo-600 hover:text-indigo-500';
 export const alert = 'rounded-lg bg-red-50 px-4 py-4 text-sm text-red-800';
 export const success = 'rounded-lg bg-green-50 px-4 py-4 text-sm text-green-800';
 export const sectionHeading = 'text-base font-bold text-gray-900';
+export const pageHeading = 'text-xl font-bold tracking-tight text-gray-900';
+// Full-width option button inside a divide-y card list (booking flow choice lists).
+export const choiceRow =
+	'flex w-full items-center gap-4 px-4 py-4 text-left hover:bg-gray-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:px-6';
 export const cardActions =
 	'flex items-center justify-end gap-3 border-t border-gray-900/10 bg-gray-50 px-4 py-4 sm:px-6';
 // Full-width message bars inside a card (no rounding; the card clips them).

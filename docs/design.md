@@ -123,6 +123,8 @@ The mark represents booking without relying on a tenant name and uses bold, simp
   `aria-current="page"` and swaps to `bg-indigo-50 text-indigo-700`.
 - **Sign out** is an action, so a `<button>`, set apart from the links by `ml-2 border-l border-gray-200 pl-3` and an
   icon.
+- **Sign in** (signed out) is a normal nav link with the matching sign-in icon (arrow into the rectangle; sign out
+  points out of it). Both icons are `size-4`, `aria-hidden`, from NavBar's `ICONS` map, in the mobile menu too.
 - Below `md` the links collapse behind the menu button.
 
 ### Page heading
@@ -132,8 +134,9 @@ highlighted navigation item and the Cancel button already lead back.
 
 The root layout owns it: `titleFromPath()` in `src/routes/+layout.svelte` maps the route to a `title*` message, which
 becomes both the `<h1>` and the `<title>`. Pages it maps must not render their own `<h1>`; pages it doesn't map (home,
-booking wizard) render their own. Form routes (`isFormPage`: `admin/<resource>/<id>`, `login`,
-`change-password`) are wrapped in the centred `mx-auto max-w-2xl` column, heading included.
+booking wizard) render their own, styled with the `pageHeading` token. Form routes and the
+[booking flow](#booking-flow) (`isFormPage`: `admin/<resource>/<id>`, `login`, `change-password`, `/`, `book/**`) are
+wrapped in the centred `mx-auto max-w-2xl` column, heading included.
 
 ## Forms
 
@@ -194,6 +197,31 @@ renders as an `absolute right-0 top-full z-10 mt-2 w-72 rounded-xl bg-white p-4 
 with `label`/`input`/`checkbox` fields spaced `space-y-4`. Use a real form element with `onsubmit` calling
 `preventDefault()` then an `onsubmit` prop, so Enter submits and closes the overlay. Debounce free-text inputs 500ms via
 a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately on submit.
+
+## Booking flow
+
+The customer path: home (`/`, pick a service), the wizard (`/book/[serviceId]`: location, employee, month, time),
+confirm (sign-in gate, then confirm and book), and the conflict and done pages. It is the most visited part of the app,
+so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isFormPage` covers `/` and `/book/**`).
+
+- **Heading.** These pages render their own `<h1>` (it receives focus on each step); it uses the `pageHeading` token
+  plus `mb-6 outline-none`, the same look as the layout's heading.
+- **Selection and back.** The `BookingSummary` line (`text-sm text-gray-500`) sits above a text-sized `link`
+  "Back"; both `mb-4`.
+- **Choice lists** (`ServiceList`, `ChoiceList`): one `card` holding a `divide-y` list. Each option is a full-width
+  `choiceRow` button: the name in `text-sm font-semibold text-gray-900`, secondary lines `text-sm text-gray-500`, and a
+  decorative chevron on the right. A service's duration sits right-aligned before the chevron.
+- **Month and day.** Prev/next are `iconButtonSecondary` chevrons around the heading. The month grid is a `card`
+  (`p-4 sm:p-6`); bookable days are round `indigo-50` buttons with `indigo-700` bold numbers, other days plain
+  `gray-400` text (disabled).
+- **Times.** Slots are `buttonSecondary` buttons with tabular numbers in a `card` grid.
+- **Confirm.** The appointment details are a `card` with a `divide-y` description list (term `text-sm font-semibold`,
+  value `text-sm text-gray-700`), followed by a `<Form card>` with the cancellation checkbox, notes and "Book now".
+  The sign-in gate uses the same card form as `/login`: "Forgot your password?" sits right of the Password label
+  (`link text-sm`), and the switch between sign-in and sign-up is one centred `text-sm text-gray-500` line under the
+  card (`mt-6`).
+- **Messages.** Errors use `alert`; "sign-up sent" uses `success`; explanatory text `text-sm text-gray-500`. The
+  done and conflict pages keep their links, styled with `link`.
 
 ## Calendar
 

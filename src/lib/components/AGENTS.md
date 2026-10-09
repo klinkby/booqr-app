@@ -147,16 +147,21 @@ apply.
 | `TimeSlotList`   | `slots: Array<{vacancyId,startTime,endTime,...}>`, `onSelectSlot`        | `startTime`/`endTime` are local `Date` objects; "No available times" when empty |
 | `BookingSummary` | `items: string[]`                                                        | Breadcrumb, pre-formatted segments joined with " · "                            |
 
+`ServiceList` and `ChoiceList` render one `card` holding a `divide-y` list of `choiceRow` buttons.
+
 ### NavBar (`src/lib/components/NavBar.svelte`)
 
 Responsive sticky header with brand, nav links, hamburger on mobile, and optional Sign out button. The brand link shows the app icon (`#lib/assets/favicon.svg`, decorative `alt=""`) before the tenant name. The page title is
 rendered by the root layout (`<h1>` in `<main>`), not by the header.
 
-| Prop        | Type                    | Default     |
-| ----------- | ----------------------- | ----------- |
-| `links`     | `Array<{ name, href }>` | `[]`        |
-| `brandName` | `string`                | `'App'`     |
-| `onlogout`  | `() => void`            | `undefined` |
+| Prop        | Type                           | Default     |
+| ----------- | ------------------------------ | ----------- |
+| `links`     | `Array<{ name, href, icon? }>` | `[]`        |
+| `brandName` | `string`                       | `'App'`     |
+| `onlogout`  | `() => void`                   | `undefined` |
+
+A link may set an optional `icon` key (currently `'signIn'`); NavBar draws it before the label from its `ICONS` map of
+Heroicons outline paths. Sign out uses the `signOut` entry from the same map.
 
 Active link: exact match for `/`, `startsWith` for all other routes. Typical usage:
 

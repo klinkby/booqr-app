@@ -1,5 +1,6 @@
 <script>
 	import { ServiceList, apiErrorMessage } from '#lib';
+	import { alert, pageHeading } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -29,14 +30,12 @@
 	}
 </script>
 
-<h1 bind:this={heading} tabindex="-1" class="text-2xl font-semibold mb-6 outline-none">{m.selectAServiceHeading()}</h1>
+<h1 bind:this={heading} tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.selectAServiceHeading()}</h1>
 
 {#if home.isLoading}
-	<div role="status" aria-live="polite"><p>{m.loading()}</p></div>
+	<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loading()}</p>
 {:else if home.error}
-	<div role="alert" aria-live="assertive">
-		<p class="text-red-600">{apiErrorMessage(home.error, m.errorLoadServices())}</p>
-	</div>
+	<div role="alert" aria-live="assertive" class={alert}>{apiErrorMessage(home.error, m.errorLoadServices())}</div>
 {:else}
 	<ServiceList services={home.services} onselect={handleSelect} />
 {/if}

@@ -3,6 +3,7 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import { AuthenticationService, TenantService, ApiError } from '#lib/api/index.js';
 	import { auth, NavBar, LanguageToggle, locale, tenant, MARKETING_URL } from '#lib';
+	import { pageHeading } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -96,9 +97,12 @@
 
 	let pageTitle = $derived(titleFromPath(segments));
 
-	// Single-column form pages (centred max-w-2xl), see design.md › Forms.
+	// Single-column pages (centred max-w-2xl): the home page and the customer booking flow
+	// (design.md › Booking flow), plus form pages (design.md › Forms).
 	let isFormPage = $derived(
-		(segments.length === 3 && segments[0] === 'admin') ||
+		segments.length === 0 ||
+			segments[0] === 'book' ||
+			(segments.length === 3 && segments[0] === 'admin') ||
 			(segments.length === 1 && ['login', 'change-password'].includes(segments[0])),
 	);
 
@@ -112,7 +116,7 @@
 				]
 			: []),
 		...(auth.isLoggedIn ? [{ name: m.navMyProfile(), href: '/profile' }] : []),
-		...(auth.isLoggedIn ? [] : [{ name: m.navSignIn(), href: '/login' }]),
+		...(auth.isLoggedIn ? [] : [{ name: m.navSignIn(), href: '/login', icon: 'signIn' }]),
 	]);
 
 	async function handleLogout() {
@@ -154,7 +158,7 @@
 				<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 					<div class={isFormPage ? 'mx-auto max-w-2xl' : undefined}>
 						{#if pageTitle}
-							<h1 class="mb-6 text-xl font-bold tracking-tight text-gray-900">{pageTitle}</h1>
+							<h1 class="{pageHeading} mb-6">{pageTitle}</h1>
 						{/if}
 						{@render children()}
 					</div>

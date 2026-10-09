@@ -81,7 +81,10 @@
 			</div>
 
 			<div>
-				<label for="password" class={label}>{m.labelPassword()}</label>
+				<div class="flex items-center justify-between">
+					<label for="password" class={label}>{m.labelPassword()}</label>
+					<a href={resolve('change-password')} class="{link} mb-2 text-sm">{m.forgotPassword()}</a>
+				</div>
 				<RequiredInput
 					id="password"
 					name="password"
@@ -93,10 +96,4 @@
 			</div>
 		</div>
 	</Form>
-
-	<p class="mt-4 text-sm">
-		<a href={resolve('change-password')} class={link}>
-			{m.forgotPassword()}
-		</a>
-	</p>
 </div>
