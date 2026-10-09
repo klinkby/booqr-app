@@ -54,16 +54,22 @@ When not loading and not errored, an empty `rows` renders a "No items found" mes
 
 Accessible form wrapper handling submission, errors, and loading state. Children are injected as the fieldset body.
 
-| Prop                    | Type              | Default     | Description                                              |
-| ----------------------- | ----------------- | ----------- | -------------------------------------------------------- |
-| `legend`                | `string`          | required    | Fieldset label (`sr-only`)                               |
-| `error`                 | `string \| null`  | `null`      | Error message (kept in DOM for `aria-live`)              |
-| `loading`               | `boolean`         | `false`     | Disables fieldset; shows "Please wait…" on submit button |
-| `submitLabel`           | `string`          | `'Submit'`  | Submit button label                                      |
-| `deleteLabel`           | `string`          | `undefined` | Delete button label; hidden if omitted                   |
-| `onsubmit`              | `(event) => void` | required    | `preventDefault` called automatically                    |
-| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; delete is left-aligned in red |
-| `children`              | snippet           | required    | Form fields                                              |
+| Prop                    | Type              | Default     | Description                                                              |
+| ----------------------- | ----------------- | ----------- | ------------------------------------------------------------------------ |
+| `legend`                | `string`          | required    | Fieldset label (`sr-only`)                                               |
+| `error`                 | `string \| null`  | `null`      | Error message (kept in DOM for `aria-live`)                              |
+| `loading`               | `boolean`         | `false`     | Disables fieldset; shows "Please wait…" on submit button                 |
+| `card`                  | `boolean`         | `false`     | Design-manual card: children are `cardSection` divs, `Form` divides them |
+| `submitLabel`           | `string`          | `'Submit'`  | Submit button label                                                      |
+| `deleteLabel`           | `string`          | `undefined` | Delete button label; hidden if omitted                                   |
+| `onsubmit`              | `(event) => void` | required    | `preventDefault` called automatically                                    |
+| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; delete is left-aligned in red                 |
+| `children`              | snippet           | required    | Form fields                                                              |
+
+### RequiredInput (`src/lib/components/RequiredInput.svelte`)
+
+Required text input with the design-manual asterisk. Spreads all props onto the `<input>` (`id`, `name`, `type`,
+`autocomplete`…), always sets `required`, and supports `bind:value`. Pair it with a `<label for>`.
 
 ### Calendar (`src/lib/components/Calendar.svelte`)
 
@@ -132,7 +138,8 @@ apply.
 
 ### NavBar (`src/lib/components/NavBar.svelte`)
 
-Responsive sticky header with brand, nav links, hamburger on mobile, and optional Logout button.
+Responsive sticky header with brand, nav links, hamburger on mobile, and optional Sign out button. The page title is
+rendered by the root layout (`<h1>` in `<main>`), not by the header.
 
 | Prop        | Type                    | Default     |
 | ----------- | ----------------------- | ----------- |

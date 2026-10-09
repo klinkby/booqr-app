@@ -22,6 +22,7 @@ export { default as ChoiceList } from './components/ChoiceList.svelte';
 export { default as MonthPicker } from './components/MonthPicker.svelte';
 export { default as TimeSlotList } from './components/TimeSlotList.svelte';
 export { default as BookingSummary } from './components/BookingSummary.svelte';
+export { default as RequiredInput } from './components/RequiredInput.svelte';
 export { default as LanguageToggle } from './components/LanguageToggle.svelte';
 export { locale } from './locale.svelte.js';
 export { tenant, hostCategory, MARKETING_URL } from './tenant.svelte.js';

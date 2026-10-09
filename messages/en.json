@@ -36,9 +36,9 @@
 	"labelEnd": "End",
 	"labelNotes": "Notes",
 	"labelAddress": "Address",
-	"labelAddress1": "Address 1",
-	"labelAddress2": "Address 2",
-	"labelZipCode": "Zip Code",
+	"labelAddress1": "Street address",
+	"labelAddress2": "Address line 2",
+	"labelZipCode": "Zip code",
 	"labelZip": "Zip",
 	"labelCity": "City",
 	"labelNewPassword": "New password",
@@ -51,11 +51,11 @@
 	"navContacts": "Contacts",
 	"navServices": "Services",
 	"navLocations": "Locations",
-	"navMyProfile": "My Profile",
+	"navMyProfile": "My profile",
 	"navSignIn": "Sign in",
 
 	"titleSignIn": "Sign in",
-	"titleMyProfile": "My Profile",
+	"titleMyProfile": "My profile",
 	"titleChangePassword": "Change Password",
 	"titlePlan": "Plan",
 	"titleContacts": "Contacts",
@@ -65,8 +65,8 @@
 	"titleEditContact": "Edit Contact",
 	"titleCreateService": "Create Service",
 	"titleEditService": "Edit Service",
-	"titleCreateLocation": "Create Location",
-	"titleEditLocation": "Edit Location",
+	"titleCreateLocation": "Create location",
+	"titleEditLocation": "Edit location",
 
 	"errorDefault": "Unable to connect to the server. Please try again later.",
 	"errorLoadServices": "Failed to load services. Please try again.",
@@ -155,8 +155,7 @@
 	"duplicateBooking": "Duplicate",
 	"bookingCancelled": "Booking cancelled.",
 
-	"termsAndConditions": "Terms and Conditions",
-	"termsPlaceholder": "These terms and conditions are coming soon. By creating an account you agree to use this service responsibly.",
+	"termsAndConditions": "Terms and conditions",
 
 	"somethingWentWrong": "Something went wrong",
 	"serviceNotFound": "Service not found",
@@ -227,7 +226,7 @@
 	"employees": "Employees",
 	"noEmployeesFound": "No employees found.",
 
-	"createLocation": "Create Location",
+	"createLocation": "Create location",
 	"legendEditLocation": "Edit location",
 	"legendCreateLocation": "Create location",
 

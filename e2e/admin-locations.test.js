@@ -14,7 +14,7 @@ test.describe('Admin Locations CRUD', () => {
 		await expect(table).toBeVisible();
 		await expect(table.getByRole('columnheader', { name: 'Name' })).toBeVisible();
 		await expect(page.getByText(LOCATIONS[0].name)).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Create Location' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Create location' })).toBeVisible();
 
 		await pageScreenshot(page, 'admin-locations');
 	});
@@ -22,7 +22,7 @@ test.describe('Admin Locations CRUD', () => {
 	test('create button navigates to the new-location form', async ({ page }) => {
 		await page.goto('/admin/locations');
 
-		await page.getByRole('button', { name: 'Create Location' }).click();
+		await page.getByRole('button', { name: 'Create location' }).click();
 
 		await expect(page).toHaveURL('/admin/locations/new');
 		await expect(page.locator('#name')).toBeVisible();

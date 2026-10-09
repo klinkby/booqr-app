@@ -3,16 +3,20 @@
 How the Booqr app looks, and the rules that keep it consistent. Agents get the must-follow summary in
 [AGENTS.md › Design System](../AGENTS.md#design-system); this document has the details and the reasons.
 
-> **Status:** approved 2026-10-09 from the _Create location_ mockup below. The app is being migrated to it; until that
-> is done, this document describes the target rather than what `main` renders today.
+> **Status:** approved 2026-10-09. The app shell (header, footer, font) and _Create location_ (`/admin/locations/[id]`)
+> are migrated and are the reference implementation. Other pages still use older classes; migrate them with
+> [Migrating a form](#migrating-a-form) rather than copying from them.
 
-![Create location on desktop (approved mockup)](images/design-create-location-desktop.png)
+![Create location on desktop](images/design-create-location-desktop.webp)
 
 <img src="images/design-create-location-mobile.png" alt="Create location on a phone (approved mockup)" width="320">
 
 ## Principles
 
 - **Standards first**: semantic HTML5 and Tailwind utilities. No custom CSS beyond the `@theme` tokens.
+- **One source per class string**: shared class strings live in `src/lib/ui.js` (`label`, `input`, `groupHeading`,
+  `cardSection`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`, `buttonDanger`) and in components (`Form`, `RequiredInput`,
+  `NavBar`, `LanguageToggle`). Import them; never paste a copy into a page. A new pattern used twice becomes a token.
 - **Quiet by default**: a grey canvas, white surfaces and one accent colour (indigo). Decoration must carry meaning.
 - **Accessible by requirement**: WCAG AA, see [AGENTS.md › Semantic HTML5 & Accessibility](../AGENTS.md#semantic-html5--accessibility-required)
   and the [checklist](#accessibility-checklist) below.
@@ -58,6 +62,19 @@ Use Tailwind's palette directly; this table is the contract for what each colour
 | Required marker | `text-indigo-400`                                          | Lightest indigo that passes 3:1 for meaningful icons (3.13:1)       |
 | Error           | `bg-red-50 text-red-800`                                   | Form error alert (`Form.svelte`)                                    |
 
+### Spacing
+
+Vertical gaps use three steps only:
+
+| Step | Tailwind | Where                                                                                       |
+| ---- | -------- | ------------------------------------------------------------------------------------------- |
+| 8px  | `2`      | Label → its control (`mb-2` is part of the `label` token)                                   |
+| 16px | `4`      | Between fields, legend → its fields, toolbar → table, card section/action bar/alert padding |
+| 24px | `6`      | Page padding (`main`), page heading → content, between page-level blocks                    |
+
+Header and footer heights are fixed by the shell. Don't use `1.5`, `3`, `5`, `8` or `12` steps
+for vertical spacing; horizontal gutters follow [Layout](#layout).
+
 ### Shape and depth
 
 Controls and buttons are `rounded-lg` with `shadow-xs`; cards are `rounded-xl` with `shadow-sm ring-1 ring-gray-900/5`.
@@ -78,12 +95,14 @@ No other shadows.
 </div>
 ```
 
-- Content container: `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8`.
+- Content container: `mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8`; the header and footer share its gutters.
 - The skip link must be `fixed` with a z-index above the header. An `absolute` skip link without one is painted under
   the sticky header and is invisible when focused. Its remaining focus styles:
   `focus:top-3 focus:left-4 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-indigo-700 focus:shadow-lg focus:ring-1 focus:ring-gray-900/10`
 
 ### Header
+
+`NavBar.svelte`; the root layout passes `brandName`, `links` and `onlogout`.
 
 - **Brand**: the tenant's `displayName` as text, `text-xl font-bold tracking-tight`, truncated when long
   (`min-w-0 truncate`). No monogram or placeholder logo; if the tenant API ever provides a logo, show it with the name
@@ -97,80 +116,54 @@ No other shadows.
 
 ### Page heading
 
-One `<h1>` per page, first in `<main>`, using the page-title style. No back link and no description line by default:
-the highlighted navigation item and the Cancel button already lead back.
+One `<h1>` per page, first in `<main>`, page-title style plus `mb-6`. No back link and no description line: the
+highlighted navigation item and the Cancel button already lead back.
+
+The root layout owns it: `titleFromPath()` in `src/routes/+layout.svelte` maps the route to a `title*` message, which
+becomes both the `<h1>` and the `<title>`. Pages it maps must not render their own `<h1>`; pages it doesn't map (home,
+booking wizard) render their own. Form routes (`isFormPage`: `admin/<resource>/<id>`, `login`,
+`change-password`) are wrapped in the centred `mx-auto max-w-2xl` column, heading included.
 
 ## Forms
 
-Reference: the approved mockup at the top (`/admin/locations/new`).
+Reference: `src/routes/admin/locations/[id]/+page.svelte` (screenshots at the top).
 
-- **Card**: a centred column `mx-auto max-w-2xl`; the `<form>` itself is the card,
-  `overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5`.
-- **Sections**: separated with `divide-y divide-gray-900/10`, each `px-4 py-5 sm:px-6 sm:py-6`. Related fields go in a
-  `<fieldset>` whose `<legend>` uses the group-heading style.
-- **Inputs**, placed `mt-1.5` below their label:
-  `block w-full rounded-lg border-gray-300 px-3 py-1.5 text-base text-gray-900 shadow-xs placeholder:text-gray-400 focus:border-indigo-600 focus:ring-indigo-600 sm:text-sm/6`
-- **Required fields**: the `required` attribute plus an asterisk inside the input's right edge (snippet below). Never
-  write "Required" or "Optional", and add hint lines only when the product owner supplies the text.
+- **Card**: `<Form card …>` renders the white card (`rounded-xl shadow-sm ring-1 ring-gray-900/5`), the error alert,
+  the divided sections and the action bar. Without `card`, `Form` keeps the old plain layout for forms not yet migrated.
+- **Sections**: each direct child of `Form` is a `<div class={cardSection}>`; `Form` draws the dividers between them.
+  Related fields go in a `<fieldset>` whose `<legend class={groupHeading}>` names the group.
+- **Fields**: `<label class={label}>` then `<input class={input}>`; the label's `mb-2` makes the gap.
+- **Required fields**: `<RequiredInput id=… name=… bind:value />` sets `required` and draws the `aria-hidden` asterisk
+  (`text-indigo-400`) inside the input's right edge; screen readers announce the attribute. Never write "Required" or
+  "Optional", and add hint lines only when the product owner supplies the text.
 - **Short values share a row**: `grid grid-cols-6 gap-x-3 gap-y-4 sm:gap-x-4` at every width, e.g. Zip code
   (`col-span-2`, `inputmode="numeric" autocomplete="postal-code"`) next to City (`col-span-4`).
-- **Action bar**: the form's last child,
-  `flex items-center justify-end gap-3 border-t border-gray-900/10 bg-gray-50 px-4 py-3 sm:px-6`. Cancel (secondary)
-  comes first, then a submit button that names the action ("Create location", not "Create"). Both are
-  `flex-1 sm:flex-none`, so they split the width on phones.
-
-Required field:
-
-```svelte
-<label for="name" class="block text-sm/6 font-semibold text-gray-900">{m.labelName()}</label>
-<div class="relative mt-1.5">
-	<!-- input classes as above, with pl-3 pr-8 instead of px-3 so text never runs under the asterisk -->
-	<input id="name" name="name" type="text" required bind:value={name} class="… pl-3 pr-8" />
-	<span aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-indigo-400">
-		<svg
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2.5"
-			stroke-linecap="round"
-			class="size-2.5"
-		>
-			<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" />
-		</svg>
-	</span>
-</div>
-```
-
-The asterisk is `aria-hidden` because screen readers already announce the `required` attribute.
+- **Action bar** (drawn by `Form`): Cancel, then the submit button: `m.create()` when creating,
+  `m.update()` when editing (the page heading already names the object). On phones both split the width.
 
 ### Buttons
 
-Primary (one per form, the submit action):
+Use the tokens in `src/lib/ui.js`: `buttonPrimary` (one per form, the submit action), `buttonSecondary` (Cancel and
+other neutral actions) and `buttonDanger` (destructive). All are `rounded-lg text-sm font-bold shadow-xs` with a
+`focus-visible` outline, so keyboard users get a ring and mouse clicks don't leave one behind.
 
-```text
-inline-flex justify-center rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-bold text-white shadow-xs
-hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600
-disabled:cursor-not-allowed disabled:opacity-50
-```
+### Migrating a form
 
-Secondary (Cancel and other neutral actions):
-
-```text
-inline-flex justify-center rounded-lg bg-white px-3.5 py-2 text-sm font-bold text-gray-900 shadow-xs
-ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2
-focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50
-```
-
-Use `focus-visible`, not `focus`, so keyboard users get a ring and mouse clicks don't leave one behind. Destructive
-actions keep the red delete button in `Form.svelte`.
+1. Pass `card` to `Form`; drop the page's own width wrapper (the layout centres form routes) and any `mt-*` above it.
+2. Wrap each group of fields in `<div class={cardSection}>`; use a `<fieldset>` + `groupHeading` legend for groups
+   the old page already labels (reuse its message, don't invent a heading).
+3. Swap label/input class lists for `label` / `input`, and required inputs for `RequiredInput`.
+4. Put short related values in the six-column grid.
+5. Submit label: `m.create()` / `m.update()`; for anything else, keep the current label.
+6. Update e2e selectors and screenshots (`npm run test:e2e`) and compare with the reference page.
 
 ## List pages
 
 ### Top row
 
 Put the "Create" button and any filter toggle together in one `flex justify-between items-center` row above the table
-(not centered below it). Style both as `bg-transparent border border-gray-300 hover:bg-gray-50` (thin gray border, no
-fill) rather than a solid color, for a consistent, low-emphasis action row.
+(not centered below it). Both are secondary buttons: `buttonSecondary` for "Create", `iconButtonSecondary` for the
+icon-only filter toggle (`src/lib/ui.js`). Low emphasis; the solid indigo button is reserved for a form's submit.
 
 ### Filter overlay
 
@@ -188,7 +181,8 @@ One centred line, `text-xs text-gray-500`, with a `border-t border-gray-200` and
 > © 2026 Klinkby · Terms and conditions · 🌐 Dansk
 
 - **© 2026 Klinkby** links to the license on GitHub (`https://github.com/klinkby/booqr-app?tab=AGPL-3.0-1-ov-file`).
-- **Terms and conditions** (`m.termsAndConditions()`) links to `` `${MARKETING_URL}/terms-and-conditions` ``.
+- **Terms and conditions** (`m.termsAndConditions()`) links to `` `${MARKETING_URL}/terms` ``, as does the sign-up
+  checkbox on the booking confirm page.
 - **Language toggle**: globe icon plus the other language's name in that language (`LanguageToggle`).
 - Links are underlined (`underline decoration-gray-300 underline-offset-2`) because they sit next to plain text, where
   colour alone wouldn't mark them. Separators are `·` in `text-gray-300` with `aria-hidden="true"`.
@@ -199,7 +193,8 @@ One centred line, `text-xs text-gray-500`, with a `border-t border-gray-200` and
   product owner's approval before they go in.
 - Reuse existing Paraglide messages in `messages/en.json` and `messages/da.json`; every new string needs both languages.
 - English uses sentence case ("My profile", "Zip code", "Create location"). Danish already does.
-- Buttons name their action: a verb plus its object ("Create location").
+- Buttons are verbs. Form submits use `m.create()` / `m.update()`; list-page buttons that stand alone name their
+  object (`m.createLocation()`).
 
 ## Accessibility checklist
 

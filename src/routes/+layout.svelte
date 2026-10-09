@@ -13,6 +13,10 @@
 
 	let { children } = $props();
 
+	const SKIP_LINK =
+		'sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-indigo-700 focus:shadow-lg focus:ring-1 focus:ring-gray-900/10';
+	const FOOTER_LINK = 'underline decoration-gray-300 underline-offset-2 hover:text-gray-900 hover:decoration-gray-500';
+
 	$effect(() => {
 		const locale = getLocale();
 		document.documentElement.lang = locale;
@@ -62,8 +66,9 @@
 	// Per-tenant branding: fall back to the app name until resolved.
 	let brandName = $derived(tenant.displayName ?? m.marketingHeading());
 
-	function titleFromPath(pathname) {
-		const seg = pathname.split('/').filter(Boolean);
+	let segments = $derived(page.url.pathname.split('/').filter(Boolean));
+
+	function titleFromPath(seg) {
 		if (!seg.length) return null;
 
 		if (seg.length === 3 && seg[0] === 'admin') {
@@ -89,7 +94,13 @@
 		);
 	}
 
-	let pageTitle = $derived(titleFromPath(page.url.pathname));
+	let pageTitle = $derived(titleFromPath(segments));
+
+	// Single-column form pages (centred max-w-2xl), see design.md › Forms.
+	let isFormPage = $derived(
+		(segments.length === 3 && segments[0] === 'admin') ||
+			(segments.length === 1 && ['login', 'change-password'].includes(segments[0])),
+	);
 
 	let links = $derived([
 		...(auth.isEmployee
@@ -125,10 +136,7 @@
 {#if tenant.isReserved}
 	<!-- Reserved/apex host (booqr.dk, www, status): marketing/onboarding view,
 	     not the booking app. Its own single <main>/<h1>. -->
-	<a
-		class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded"
-		href="#main-content">{m.skipToMainContent()}</a
-	>
+	<a class={SKIP_LINK} href="#main-content">{m.skipToMainContent()}</a>
 	<main class="container mx-auto px-4 py-16 max-w-2xl text-center" id="main-content">
 		<h1 class="text-4xl font-bold">{m.marketingHeading()}</h1>
 		<p class="mt-4 text-xl text-gray-700">{m.marketingTagline()}</p>
@@ -137,41 +145,41 @@
 {:else if tenant.isResolved}
 	<QueryClientProvider client={queryClient}>
 		<!-- Skip link for keyboard users -->
-		<a
-			class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded"
-			href="#main-content"
-		>
-			{m.skipToMainContent()}
-		</a>
+		<div class="flex min-h-dvh flex-col bg-gray-50">
+			<a class={SKIP_LINK} href="#main-content">{m.skipToMainContent()}</a>
 
-		<NavBar {brandName} {links} {pageTitle} onlogout={auth.isLoggedIn ? handleLogout : undefined} />
+			<NavBar {brandName} {links} onlogout={auth.isLoggedIn ? handleLogout : undefined} />
 
-		<main class="container mx-auto px-4 py-8 max-w-7xl" id="main-content">
-			{@render children()}
-		</main>
+			<main class="flex-1" id="main-content">
+				<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+					<div class={isFormPage ? 'mx-auto max-w-2xl' : undefined}>
+						{#if pageTitle}
+							<h1 class="mb-6 text-xl font-bold tracking-tight text-gray-900">{pageTitle}</h1>
+						{/if}
+						{@render children()}
+					</div>
+				</div>
+			</main>
 
-		<footer class="bg-gray-100 text-gray-600 mt-8">
-			<div class="container mx-auto px-4 py-3 max-w-7xl text-sm flex justify-between items-center">
-				<small class="text-sm">
-					© 2026 Mads Klinkby,
-					<a
-						class="hover:text-gray-900 focus:text-gray-900 focus:outline-none focus:underline"
-						href="https://github.com/klinkby/booqr-app/blob/main/LICENSE">AGPL licensed</a
-					>.
-				</small>
-				<LanguageToggle current={locale.current} alternate={locale.alternate} ontoggle={() => locale.toggle()} />
-			</div>
-		</footer>
+			<footer class="border-t border-gray-200">
+				<div
+					class="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-4 text-xs text-gray-500 sm:px-6 lg:px-8"
+				>
+					<a class={FOOTER_LINK} href="https://github.com/klinkby/booqr-app?tab=AGPL-3.0-1-ov-file">© 2026 Klinkby</a>
+					<span aria-hidden="true" class="text-gray-300">·</span>
+					<a class={FOOTER_LINK} href="{MARKETING_URL}/terms">{m.termsAndConditions()}</a>
+					<span aria-hidden="true" class="text-gray-300">·</span>
+					<LanguageToggle current={locale.current} alternate={locale.alternate} ontoggle={() => locale.toggle()} />
+				</div>
+			</footer>
+		</div>
 	</QueryClientProvider>
 {:else if tenant.isError}
 	<!-- Non-404 resolution failure (500, network, CORS, bare 404): retryable
 	     error instead of hanging on the loading interstitial. Its own single
 	     <main>/<h1>. Retry resets tenant status to 'loading', re-triggering the
 	     bootstrap $effect above. -->
-	<a
-		class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded"
-		href="#main-content">{m.skipToMainContent()}</a
-	>
+	<a class={SKIP_LINK} href="#main-content">{m.skipToMainContent()}</a>
 	<main class="container mx-auto px-4 py-16 max-w-2xl text-center" id="main-content">
 		<h1 class="text-2xl font-bold">{m.tenantErrorHeading()}</h1>
 		<p role="alert" class="mt-4 text-gray-700">{m.tenantErrorBody()}</p>

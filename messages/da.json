@@ -36,8 +36,8 @@
 	"labelEnd": "Slut",
 	"labelNotes": "Noter",
 	"labelAddress": "Adresse",
-	"labelAddress1": "Adresse 1",
-	"labelAddress2": "Adresse 2",
+	"labelAddress1": "Vejnavn og husnummer",
+	"labelAddress2": "Adresselinje 2",
 	"labelZipCode": "Postnummer",
 	"labelZip": "Postnr.",
 	"labelCity": "By",
@@ -156,7 +156,6 @@
 	"bookingCancelled": "Booking annulleret.",
 
 	"termsAndConditions": "Vilkår og betingelser",
-	"termsPlaceholder": "Disse vilkår og betingelser kommer snart. Ved at oprette en konto accepterer du at bruge denne tjeneste ansvarligt.",
 
 	"somethingWentWrong": "Noget gik galt",
 	"serviceNotFound": "Ydelse ikke fundet",

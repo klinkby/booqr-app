@@ -1,10 +1,12 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
+	import { buttonDanger, buttonPrimary, buttonSecondary } from '#lib/ui.js';
 
 	let {
 		legend,
 		error = null,
 		loading = false,
+		card = false,
 		submitLabel = m.submit(),
 		submitDisabled = false,
 		deleteLabel = undefined,
@@ -13,6 +15,23 @@
 		ondelete = undefined,
 		children,
 	} = $props();
+
+	// Card mode is the design.md form card; the plain mode is kept for forms not yet migrated.
+	const CARD = {
+		form: 'overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5',
+		alert: 'bg-red-50 px-4 py-4 text-sm text-red-800 sm:px-6',
+		fieldset: 'min-w-0 divide-y divide-gray-900/10',
+		actions: 'flex items-center justify-end gap-3 border-t border-gray-900/10 bg-gray-50 px-4 py-4 sm:px-6',
+		button: 'flex-1 sm:flex-none',
+	};
+	const PLAIN = {
+		form: '',
+		alert: 'mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800',
+		fieldset: 'space-y-4',
+		actions: 'mt-6 flex items-center justify-end gap-3',
+		button: '',
+	};
+	let cls = $derived(card ? CARD : PLAIN);
 
 	const trimTypes = new Set(['text', 'tel', 'email', 'search', 'url']);
 
@@ -46,37 +65,27 @@
 	});
 </script>
 
-<form novalidate onsubmit={handleSubmit}>
-	<div aria-live="polite" class="rounded-md bg-red-50 p-4 mb-4" class:hidden={!error} role="alert">
-		<p class="text-sm text-red-800">{error}</p>
+<form novalidate onsubmit={handleSubmit} class={cls.form}>
+	<div aria-live="polite" class={cls.alert} class:hidden={!error} role="alert">
+		<p>{error}</p>
 	</div>
 
-	<fieldset class="space-y-4" disabled={loading}>
+	<fieldset class={cls.fieldset} disabled={loading}>
 		<legend class="sr-only">{legend}</legend>
 		{@render children()}
 	</fieldset>
 
-	<div class="flex items-center justify-end gap-3 mt-6">
+	<div class={cls.actions}>
 		{#if ondelete && deleteLabel}
-			<button
-				type="button"
-				disabled={loading}
-				class="mr-auto px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-				onclick={ondelete}
-				>{deleteLabel}
-			</button>
+			<button type="button" disabled={loading} class="{buttonDanger} mr-auto" onclick={ondelete}>{deleteLabel}</button>
 		{/if}
 		{#if oncancel}
-			<button
-				type="button"
-				disabled={loading}
-				class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-				onclick={oncancel}
-				>{m.cancel()}
-			</button>
+			<button type="button" disabled={loading} class="{buttonSecondary} {cls.button}" onclick={oncancel}
+				>{m.cancel()}</button
+			>
 		{/if}
 		<button
-			class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+			class="{buttonPrimary} {cls.button}"
 			class:opacity-50={submitDisabled && !loading}
 			class:cursor-not-allowed={submitDisabled && !loading}
 			disabled={loading}

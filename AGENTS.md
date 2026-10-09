@@ -205,7 +205,6 @@ Shared (do not duplicate per route):
     redirect to `/login`) when signed out, else step 7 (confirm & book). Reads `?vacancy=&start=`.
   - `/book/[serviceId]/conflict` — Step 8; reached only on a 409 from `addBooking` (slot taken by someone else first).
   - `/book/done` — Step 9, thank-you.
-  - `/terms-and-conditions` — placeholder, linked from the sign-up checkbox.
   - `/login` — Email/password login; includes "Forgot your password?" link to `/change-password`
   - `/change-password` — Password reset/change. Without `action` param shows PasswordReset component; with `action`
     validates `expires` and forwards all params to `POST /api/users/change-password`
@@ -215,8 +214,8 @@ Shared (do not duplicate per route):
     invalidate `vacancies.all`
   - `/admin/services`, `/admin/services/new`, `/admin/services/[id]` — Service CRUD
 - **Layout**: `src/routes/+layout.svelte` — `<NavBar>` with `links` array derived from `auth.isEmployee` /
-  `auth.isLoggedIn`. Admin links merged into main nav; no secondary sub-nav. Content constrained with
-  `container mx-auto max-w-7xl`.
+  `auth.isLoggedIn`. Admin links merged into main nav; no secondary sub-nav. Also renders the page `<h1>`
+  and footer; app shell in [docs/design.md › Layout](docs/design.md#layout).
 - **Shared Utilities / Components**: `src/lib/`; exported via `src/lib/index.js`.
 
 ## Admin Section
@@ -231,8 +230,8 @@ Shared (do not duplicate per route):
 button navigates to `.../new`.
 
 **Form page**: Dynamic `[id]` route; derive `isEdit = id !== 'new'`; use `Form` component with children fields; load
-existing data in `onMount` for edit mode; render it as a centred `mx-auto max-w-2xl` card
-([docs/design.md › Forms](docs/design.md#forms)).
+existing data in `onMount` for edit mode; use `<Form card>` and follow
+[docs/design.md › Migrating a form](docs/design.md#migrating-a-form).
 
 **List page top row** and **filter overlay**: "Create" button and filter toggle share one row above the table; the
 filter is an icon-only funnel toggle with an absolute overlay form (Enter submits, free text debounced 500ms).
@@ -252,11 +251,16 @@ any visual change. Must-follow rules:
 - **Copy**: never invent UI text (labels, hints, descriptions, link texts, screen-reader-only text). Ask the product
   owner first. Reuse Paraglide messages; English in sentence case; every string in both `en` and `da`.
 - **Look**: `bg-gray-50` canvas, white sticky `<header>`, forms as centred `max-w-2xl` cards, Nunito Variable
-  (self-hosted; the CSP blocks font CDNs). Copy button, input and card classes from the manual; don't invent variants.
+  (self-hosted; the CSP blocks font CDNs). Reference page: `src/routes/admin/locations/[id]/+page.svelte`.
+- **Reuse, don't copy**: class strings come from `src/lib/ui.js` (`label`, `input`, `groupHeading`, `cardSection`,
+  `button*`) and components (`<Form card>`, `RequiredInput`). Never paste class lists or invent variants; a pattern
+  used twice becomes a token in `ui.js` and the manual.
+- **Page `<h1>`**: rendered by the root layout from `titleFromPath()`; mapped pages must not add their own. Form
+  routes are centred by the layout's `isFormPage`.
 - **Type**: `<h1>` and brand `text-xl font-bold tracking-tight`; labels `text-sm font-semibold`;
   `<legend>` `text-xl font-normal tracking-tight text-gray-500`. No `font-medium` (Nunito 500 looks like 400).
-- **Required fields**: `required` attribute plus an `aria-hidden` asterisk SVG inside the input (`text-indigo-400`).
-  Never write "Required" or "Optional".
+- **Required fields**: `<RequiredInput>` (`required` + `aria-hidden` asterisk). Never write "Required" or "Optional".
+- **Spacing**: vertical gaps are 8/16/24px only (`2`/`4`/`6`); see the manual's spacing table.
 - **Contrast floors**: text no lighter than `gray-500`; meaningful icons no lighter than `indigo-400`.
 - **Navigation**: the current item gets `aria-current="page"` and `bg-indigo-50 text-indigo-700`.
 

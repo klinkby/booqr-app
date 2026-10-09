@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { useLocationsData } from './locationsData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
+	import { buttonSecondary } from '#lib/ui.js';
 
 	const columns = [
 		{ key: 'name', label: m.labelName() },
@@ -25,12 +26,7 @@
 
 <div>
 	<div class="mb-4">
-		<button
-			class="px-4 py-2 text-sm font-medium bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-			onclick={handleCreate}
-			type="button"
-			>{m.createLocation()}
-		</button>
+		<button class={buttonSecondary} onclick={handleCreate} type="button">{m.createLocation()}</button>
 	</div>
 	<PaginatedTable
 		{columns}

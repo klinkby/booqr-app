@@ -77,62 +77,60 @@
 			<p>{m.loading()}</p>
 		</div>
 	{:else}
-		<div class="max-w-2xl">
-			<Form
-				legend={isEdit ? m.legendEditService() : m.legendCreateService()}
-				{error}
-				{loading}
-				submitLabel={isEdit ? m.update() : m.create()}
-				onsubmit={handleSubmit}
-				oncancel={handleCancel}
-			>
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
-					<input
-						id="name"
-						name="name"
-						type="text"
-						required
-						bind:value={name}
-						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					/>
+		<Form
+			legend={isEdit ? m.legendEditService() : m.legendCreateService()}
+			{error}
+			{loading}
+			submitLabel={isEdit ? m.update() : m.create()}
+			onsubmit={handleSubmit}
+			oncancel={handleCancel}
+		>
+			<div>
+				<label for="name" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelName()} </label>
+				<input
+					id="name"
+					name="name"
+					type="text"
+					required
+					bind:value={name}
+					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+				/>
+			</div>
+
+			<div>
+				<label for="duration" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelDuration()} </label>
+				<input
+					id="duration"
+					name="duration"
+					type="text"
+					required
+					bind:value={duration}
+					class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					placeholder={m.durationPlaceholder()}
+				/>
+			</div>
+
+			<LimitedTextarea id="description" label={m.labelDescription()} bind:value={description} />
+
+			<fieldset>
+				<legend class="block text-sm font-medium text-gray-700 mb-1">{m.employees()}</legend>
+				<div class="space-y-2">
+					{#each service.employees as emp (emp.id)}
+						<div class="flex items-center gap-2">
+							<input
+								type="checkbox"
+								id="emp-{emp.id}"
+								checked={isSelected(emp.id)}
+								onchange={() => toggleEmployee(emp.id)}
+								class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+							/>
+							<label for="emp-{emp.id}" class="text-sm text-gray-700 flex">{emp.name || emp.email}</label>
+						</div>
+					{:else}
+						<p class="text-sm text-gray-500">{m.noEmployeesFound()}</p>
+					{/each}
 				</div>
-
-				<div>
-					<label for="duration" class="block text-sm font-medium text-gray-700 mb-1"> {m.labelDuration()} </label>
-					<input
-						id="duration"
-						name="duration"
-						type="text"
-						required
-						bind:value={duration}
-						class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-						placeholder={m.durationPlaceholder()}
-					/>
-				</div>
-
-				<LimitedTextarea id="description" label={m.labelDescription()} bind:value={description} />
-
-				<fieldset>
-					<legend class="block text-sm font-medium text-gray-700 mb-1">{m.employees()}</legend>
-					<div class="space-y-2">
-						{#each service.employees as emp (emp.id)}
-							<div class="flex items-center gap-2">
-								<input
-									type="checkbox"
-									id="emp-{emp.id}"
-									checked={isSelected(emp.id)}
-									onchange={() => toggleEmployee(emp.id)}
-									class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-								/>
-								<label for="emp-{emp.id}" class="text-sm text-gray-700 flex">{emp.name || emp.email}</label>
-							</div>
-						{:else}
-							<p class="text-sm text-gray-500">{m.noEmployeesFound()}</p>
-						{/each}
-					</div>
-				</fieldset>
-			</Form>
-		</div>
+			</fieldset>
+		</Form>
 	{/if}
 </div>

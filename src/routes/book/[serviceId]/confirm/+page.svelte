@@ -1,5 +1,5 @@
 <script>
-	import { BookingSummary, Form, LimitedTextarea, apiErrorMessage, auth } from '#lib';
+	import { BookingSummary, Form, LimitedTextarea, MARKETING_URL, apiErrorMessage, auth } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -269,7 +269,7 @@
 				<label for="acceptTerms" class="text-sm text-gray-700">
 					{m.iAcceptThe()}
 					<a
-						href={resolve('terms-and-conditions')}
+						href="{MARKETING_URL}/terms"
 						target="_blank"
 						rel="noopener"
 						class="text-indigo-600 hover:text-indigo-500 underline"
@@ -357,7 +357,7 @@
 					<label for="acceptCancellation" class="text-sm text-gray-700">
 						{m.cancellationPolicyLabel()}
 						<a
-							href={resolve('terms-and-conditions')}
+							href="{MARKETING_URL}/terms"
 							target="_blank"
 							rel="noopener"
 							class="text-indigo-600 hover:text-indigo-500 underline"

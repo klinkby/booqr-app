@@ -123,8 +123,6 @@
 				<p class="text-red-600">{apiErrorMessage(profile.error)}</p>
 			</div>
 		{:else}
-			<h1 class="sr-only">{m.titleMyProfile()}</h1>
-
 			<!-- Calendar takes the remaining width on the left; the profile form is a
 			     fixed narrower pane on the right. Stacks (calendar first) on mobile. -->
 			<div class="flex flex-col gap-12 lg:flex-row lg:gap-16">
