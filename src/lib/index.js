@@ -6,6 +6,7 @@ export { default as PaginatedTable } from './components/PaginatedTable.svelte';
 export { default as Form } from './components/Form.svelte';
 export { default as LimitedTextarea } from './components/LimitedTextarea.svelte';
 export { default as PhoneInput } from './components/PhoneInput.svelte';
+export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
 // Calendar and ListCalendar are intentionally NOT re-exported here: they pull the
 // heavy `@event-calendar/core` dependency (with a CSS side-effect import that defeats
 // tree-shaking across this barrel). Import them lazily by direct path instead —

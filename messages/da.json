@@ -205,6 +205,12 @@
 	"legendEditContact": "Rediger kontakt",
 	"legendCreateContact": "Opret kontakt",
 	"roleCannotBeChanged": "Rollen kan ikke ændres via denne formular",
+	"roleAdmin": "Administrator",
+	"changeRole": "Skift rolle",
+	"changeRoleConfirmTitle": "Skift rolle?",
+	"changeRoleConfirmMessage": "Skift rollen for {name} fra {from} til {to}? Vedkommende bliver logget ud på alle enheder.",
+	"roleChanged": "Rollen er ændret.",
+	"changeRoleConflict": "Fjern brugerens fremtidige kalenderposter, før vedkommende gøres til kunde.",
 
 	"createService": "Opret ydelse",
 	"noServicesFound": "Ingen ydelser fundet.",

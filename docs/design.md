@@ -173,6 +173,14 @@ other neutral actions) and `buttonDanger` (destructive actions that are not the 
 5. Submit label: `m.create()` / `m.update()`; for anything else, keep the current label.
 6. Update e2e selectors and screenshots (`npm run test:e2e`) and compare with the reference page.
 
+### Confirmation dialog
+
+Use `ConfirmDialog` (`src/lib/components/ConfirmDialog.svelte`) before an action that changes another user's data and
+cannot be undone with one click, such as changing a role. It is a native `<dialog>` in the `card` token: a `sectionHeading`
+title, a `text-sm text-gray-700` message, then a `cardActions` bar with Cancel (`buttonSecondary`) and the confirm action
+(`buttonPrimary`). Escape and Cancel close it without acting. The confirm label names the action (e.g. `m.changeRole()`),
+and the message states the consequence.
+
 ## List pages
 
 ### Top row

@@ -1,6 +1,6 @@
 /**
  * @typedef {object} ResetPasswordRequest
- * @property {string} email
+ * @property {any} email
  */
 
 export {};

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { pageScreenshot, setupApiMocks, setupAuthToken } from './mocks.js';
+import { pageScreenshot, setupAdminToken, setupApiMocks, setupAuthToken } from './mocks.js';
 
 const CONTACT = {
 	id: 'contact-42',
@@ -8,6 +8,8 @@ const CONTACT = {
 	phone: '4512345678',
 	role: 'Customer',
 };
+
+const CONFLICT_MESSAGE = "Remove this user's future calendar entries before making them a customer.";
 
 test.describe('Admin Contact Form (create / edit)', () => {
 	test.beforeEach(async ({ page }) => {
@@ -75,9 +77,10 @@ test.describe('Admin Contact Form (create / edit)', () => {
 		await expect(emailLink).toBeVisible();
 		await expect(emailLink).toHaveText(CONTACT.email);
 
-		// Name prefilled; role disabled.
+		// Name prefilled; role disabled and not changeable by an employee.
 		await expect(page.locator('#name')).toHaveValue(CONTACT.name);
 		await expect(page.locator('#role')).toBeDisabled();
+		await expect(page.getByRole('button', { name: 'Change role' })).toHaveCount(0);
 
 		await pageScreenshot(page, 'admin-contacts-edit');
 
@@ -95,5 +98,117 @@ test.describe('Admin Contact Form (create / edit)', () => {
 		await page.goto('/admin/contacts/new');
 		await page.getByRole('button', { name: 'Cancel' }).click();
 		await expect(page).toHaveURL('/admin/contacts');
+	});
+});
+
+test.describe('Admin Contact Form (role change)', () => {
+	test.beforeEach(async ({ page }) => {
+		await setupApiMocks(page);
+		await setupAdminToken(page);
+	});
+
+	test('admin viewing their own contact cannot change their role', async ({ page }) => {
+		// The mock user '1' is the admin signed in via ADMIN_TOKEN (sub "1").
+		await page.route('**/api/users/1', (route) => {
+			if (route.request().method() === 'GET') {
+				return route.fulfill({
+					status: 200,
+					contentType: 'application/json',
+					body: JSON.stringify({ id: '1', name: 'Test Admin', email: 'test@example.com', role: 'Admin' }),
+				});
+			}
+			return route.fallback();
+		});
+
+		await page.goto('/admin/contacts/1');
+
+		await expect(page.locator('#role')).toBeDisabled();
+		await expect(page.locator('#role')).toHaveValue('Admin');
+		await expect(page.getByRole('button', { name: 'Change role' })).toHaveCount(0);
+	});
+
+	test('admin changes another user role after confirming; Escape cancels without saving', async ({ page }) => {
+		const rolePuts = [];
+		await page.route(`**/api/users/${CONTACT.id}`, (route) => {
+			if (route.request().method() === 'GET') {
+				return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CONTACT) });
+			}
+			return route.fallback();
+		});
+		await page.route(`**/api/users/${CONTACT.id}/role`, (route) => {
+			if (route.request().method() === 'PUT') {
+				rolePuts.push(route.request().postDataJSON());
+				return route.fulfill({ status: 204 });
+			}
+			return route.fallback();
+		});
+
+		await page.goto(`/admin/contacts/${CONTACT.id}`);
+		await expect(page.locator('#role')).toHaveValue('Customer');
+
+		await pageScreenshot(page, 'admin-contacts-edit-admin');
+
+		const roleSelect = page.locator('#role');
+		const dialog = page.getByRole('dialog', { name: 'Change role?' });
+
+		// Open the dialog and check its content.
+		await roleSelect.selectOption('Employee');
+		await page.getByRole('button', { name: 'Change role', exact: true }).click();
+		await expect(dialog).toBeVisible();
+		await expect(dialog).toContainText('Jane Doe');
+		await expect(dialog).toContainText('from Customer to Employee');
+
+		await pageScreenshot(page, 'admin-contacts-edit-change-role');
+
+		// Escape closes the dialog only: no save, no navigation, selection reset.
+		await page.keyboard.press('Escape');
+		await expect(dialog).toBeHidden();
+		await expect(page).toHaveURL(`/admin/contacts/${CONTACT.id}`);
+		await expect(roleSelect).toHaveValue('Customer');
+		expect(rolePuts).toHaveLength(0);
+
+		// Reopen and confirm: PUT with the new role and a success message.
+		await roleSelect.selectOption('Employee');
+		await page.getByRole('button', { name: 'Change role', exact: true }).click();
+		await dialog.getByRole('button', { name: 'Change role', exact: true }).click();
+
+		await expect(dialog).toBeHidden();
+		await expect(page.getByText('Role changed.', { exact: true })).toBeVisible();
+		expect(rolePuts).toEqual([{ role: 'Employee' }]);
+	});
+
+	test('a 409 conflict on role change shows the conflict message in the form alert', async ({ page }) => {
+		await page.route(`**/api/users/${CONTACT.id}`, (route) => {
+			if (route.request().method() === 'GET') {
+				return route.fulfill({
+					status: 200,
+					contentType: 'application/json',
+					body: JSON.stringify({ ...CONTACT, role: 'Employee' }),
+				});
+			}
+			return route.fallback();
+		});
+		await page.route(`**/api/users/${CONTACT.id}/role`, (route) => {
+			if (route.request().method() === 'PUT') {
+				return route.fulfill({
+					status: 409,
+					contentType: 'application/json',
+					body: JSON.stringify({ title: 'Conflict' }),
+				});
+			}
+			return route.fallback();
+		});
+
+		await page.goto(`/admin/contacts/${CONTACT.id}`);
+		await expect(page.locator('#role')).toHaveValue('Employee');
+
+		// Demoting to Customer is the case that can conflict with future calendar entries.
+		await page.locator('#role').selectOption('Customer');
+		await page.getByRole('button', { name: 'Change role', exact: true }).click();
+		const dialog = page.getByRole('dialog', { name: 'Change role?' });
+		await dialog.getByRole('button', { name: 'Change role', exact: true }).click();
+
+		await expect(dialog).toBeHidden();
+		await expect(page.getByRole('alert')).toContainText(CONFLICT_MESSAGE);
 	});
 });
