@@ -84,7 +84,7 @@ export function useConfirmData() {
 		// someone else between step 5 and landing here.
 		getVacancy: (id) => fetchResource(() => VacancyService.getVacancyById(id)),
 		login: (credentials) => login(credentials),
-		signUp: (email) => signUp({ email }),
+		signUp: (email) => signUp(email),
 		addBooking: (requestBody) => addBookingMutation.mutateAsync(requestBody),
 		deleteBooking: (id) => deleteBookingMutation.mutateAsync(id),
 	};

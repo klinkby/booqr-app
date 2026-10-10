@@ -5,6 +5,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { DateUtils } from '#lib/dateUtils.js';
+	import { ApiError } from '#lib/api/index.js';
 	import { onMount } from 'svelte';
 	import { useConfirmData } from './confirmData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
@@ -77,11 +78,14 @@
 		authLoading = true;
 		try {
 			await confirmData.signUp(email);
-		} catch {
-			// Same message shown either way — differentiating would leak which
-			// addresses already have accounts.
-		} finally {
 			signUpSent = true;
+		} catch (err) {
+			// A 409 (address already registered) gets the same success message —
+			// differentiating would leak which addresses already have accounts.
+			// Anything else (validation, network, server) is a real failure.
+			if (err instanceof ApiError && err.status === 409) signUpSent = true;
+			else authError = apiErrorMessage(err);
+		} finally {
 			authLoading = false;
 		}
 	}

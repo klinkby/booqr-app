@@ -156,9 +156,39 @@ test.describe('Customer booking flow', () => {
 		await page.getByRole('button', { name: 'Create an account' }).click();
 		await page.fill('#signupEmail', 'new-customer@example.com');
 		await page.check('#acceptTerms');
+		const signUpRequest = page.waitForRequest((req) => req.url().includes('/api/users') && req.method() === 'POST');
 		await page.getByRole('button', { name: 'Sign up' }).click();
 
+		expect((await signUpRequest).postDataJSON()).toEqual({ email: 'new-customer@example.com' });
 		await expect(page.getByText("We've sent an activation link to new-customer@example.com")).toBeVisible();
+	});
+
+	test('sign-up shows an error and no activation message when the API rejects the request', async ({ page }) => {
+		const { target, monthDiff } = pickTargetDay();
+		await mockSingleVacancy(page, target);
+		await page.route('**/api/users', (route) => {
+			if (route.request().method() !== 'POST') return route.fallback();
+			return route.fulfill({
+				status: 400,
+				contentType: 'application/problem+json',
+				body: JSON.stringify({ title: 'Bad Request', status: 400 }),
+			});
+		});
+
+		await page.goto('/');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+		await page.getByRole('button', { name: 'Location A' }).click();
+		await advanceToMonth(page, monthDiff);
+		await page.getByRole('button', { name: String(target.getDate()), exact: true }).click();
+		await page.getByRole('button', { name: /09:00/ }).click();
+
+		await page.getByRole('button', { name: 'Create an account' }).click();
+		await page.fill('#signupEmail', 'new-customer@example.com');
+		await page.check('#acceptTerms');
+		await page.getByRole('button', { name: 'Sign up' }).click();
+
+		await expect(page.getByText('Bad Request')).toBeVisible();
+		await expect(page.getByText("We've sent an activation link")).toHaveCount(0);
 	});
 
 	test('signed-in customer completes a booking and reaches the thank-you page', async ({ page }) => {
