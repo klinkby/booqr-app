@@ -173,6 +173,7 @@
 	"termsAndConditionsLink": "terms and conditions",
 	"alreadyHaveAccount": "Already have an account?",
 	"activationSent": "We've sent an activation link to {email}. Open it, then return to this tab and sign in below.",
+	"emailAlreadyRegistered": "This email is already registered. Sign in instead.",
 	"confirmAppointment": "Confirm appointment",
 	"cancellationPolicyLabel": "I accept that the appointment can be cancelled up to the day before the reservation, and the",
 	"cancellationPolicyError": "You must accept the cancellation policy to continue.",

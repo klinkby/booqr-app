@@ -173,6 +173,7 @@
 	"termsAndConditionsLink": "vilkår og betingelser",
 	"alreadyHaveAccount": "Har du allerede en konto?",
 	"activationSent": "Vi har sendt et aktiveringslink til {email}. Åbn det, og vend derefter tilbage til denne fane og log ind nedenfor.",
+	"emailAlreadyRegistered": "Denne e-mail er allerede registreret. Log ind i stedet.",
 	"confirmAppointment": "Bekræft aftale",
 	"cancellationPolicyLabel": "Jeg accepterer, at aftalen kan aflyses senest dagen før reservationen, og",
 	"cancellationPolicyError": "Du skal acceptere afbestillingspolitikken for at fortsætte.",

@@ -142,7 +142,7 @@ test.describe('Customer booking flow', () => {
 		await expect(page.locator('h1')).toHaveText(monthLabel);
 	});
 
-	test('sign-up shows the activation message and never reveals whether the email exists', async ({ page }) => {
+	test('sign-up shows the activation message', async ({ page }) => {
 		const { target, monthDiff } = pickTargetDay();
 		await mockSingleVacancy(page, target);
 
@@ -188,6 +188,34 @@ test.describe('Customer booking flow', () => {
 		await page.getByRole('button', { name: 'Sign up' }).click();
 
 		await expect(page.getByText('Bad Request')).toBeVisible();
+		await expect(page.getByText("We've sent an activation link")).toHaveCount(0);
+	});
+
+	test('sign-up tells the user when the email is already registered', async ({ page }) => {
+		const { target, monthDiff } = pickTargetDay();
+		await mockSingleVacancy(page, target);
+		await page.route('**/api/users', (route) => {
+			if (route.request().method() !== 'POST') return route.fallback();
+			return route.fulfill({
+				status: 409,
+				contentType: 'application/problem+json',
+				body: JSON.stringify({ title: 'Conflict', status: 409 }),
+			});
+		});
+
+		await page.goto('/');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+		await page.getByRole('button', { name: 'Location A' }).click();
+		await advanceToMonth(page, monthDiff);
+		await page.getByRole('button', { name: String(target.getDate()), exact: true }).click();
+		await page.getByRole('button', { name: /09:00/ }).click();
+
+		await page.getByRole('button', { name: 'Create an account' }).click();
+		await page.fill('#signupEmail', 'new-customer@example.com');
+		await page.check('#acceptTerms');
+		await page.getByRole('button', { name: 'Sign up' }).click();
+
+		await expect(page.getByText('This email is already registered. Sign in instead.')).toBeVisible();
 		await expect(page.getByText("We've sent an activation link")).toHaveCount(0);
 	});
 

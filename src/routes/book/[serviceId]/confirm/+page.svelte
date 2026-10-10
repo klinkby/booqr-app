@@ -80,11 +80,7 @@
 			await confirmData.signUp(email);
 			signUpSent = true;
 		} catch (err) {
-			// A 409 (address already registered) gets the same success message —
-			// differentiating would leak which addresses already have accounts.
-			// Anything else (validation, network, server) is a real failure.
-			if (err instanceof ApiError && err.status === 409) signUpSent = true;
-			else authError = apiErrorMessage(err);
+			authError = err instanceof ApiError && err.status === 409 ? m.emailAlreadyRegistered() : apiErrorMessage(err);
 		} finally {
 			authLoading = false;
 		}
