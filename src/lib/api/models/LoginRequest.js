@@ -1,6 +1,6 @@
 /**
  * @typedef {object} LoginRequest
- * @property {string} email
+ * @property {any} email
  * @property {string} password
  */
 
