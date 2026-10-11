@@ -30,7 +30,7 @@ How the Booqr app looks, and the rules that keep it consistent. Agents get the m
 
 [Nunito](https://fonts.google.com/specimen/Nunito) Variable, self-hosted through the `@fontsource-variable/nunito`
 package and set as `--font-sans` in the `@theme` block of `src/routes/layout.css`. Never load fonts from a CDN: the
-Content-Security-Policy in `lighttpd.conf` is `default-src 'self'`, so the browser would block them.
+CSP (a `<meta>` tag emitted by SvelteKit, configured in `vite.config.js`) is `default-src 'self'`, so the browser would block them.
 
 Weights: **400** body · **600** labels and navigation · **700** headings, buttons and brand. Don't use 500
 (`font-medium`): in Nunito it is too close to 400 to carry hierarchy.

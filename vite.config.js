@@ -75,8 +75,11 @@ export default defineConfig({
 					'frame-src': ['none'],
 					'img-src': ['self', 'data:'],
 					'object-src': ['none'],
-					'script-src': ['self', 'unsafe-inline'],
-					'style-src': ['self', 'unsafe-inline', 'unsafe-hashes'],
+					'script-src': ['self'],
+					'style-src': ['self'],
+					// SvelteKit's own #svelte-announcer carries a static style attribute that it does not hash itself.
+					// Re-derive on @sveltejs/kit upgrades: e2e/csp.test.js fails with the new hash in the message.
+					'style-src-attr': ['unsafe-hashes', 'sha256-S8qMpvofolR8Mpjy4kQvEm7m1q8clzU4dfDH0AmvZjo='],
 				},
 			},
 		}),
