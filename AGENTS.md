@@ -127,7 +127,7 @@ the sole authority — never assume a subdomain is valid client-side.
 - **Secrets**: NEVER in code. Use `.env` (gitignored).
 - **Auth storage**: Access tokens in `sessionStorage`; refresh tokens in `HttpOnly`, `SameSite=Strict` cookies.
 - **XSS**: Svelte 5 auto-escapes. Avoid `{@html ...}`; use `DOMPurify` if unavoidable.
-- **CSP**: Avoid inline styles/scripts.
+- **CSP**: No `unsafe-inline`. Never write inline `style="…"` markup or inline scripts (`style:` directives and `el.style` are fine). The policy is a build-time `<meta>` from `vite.config.js`; `e2e/csp.test.js` guards it.
 - **Error Handling**: Show generic messages. Use `apiErrorMessage(err, fallback)` from `#lib` for API errors
   (handles ProblemDetails 400s, falls back safely).
 - **No Console Logging**: Never log tokens, passwords, or PII.
