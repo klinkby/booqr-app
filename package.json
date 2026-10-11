@@ -33,7 +33,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/vite": "^4.3.3",
-		"dotenv": "^17.4.2",
+		"dotenv": "^18.0.5",
 		"eslint": "^10.12.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.23.0",
