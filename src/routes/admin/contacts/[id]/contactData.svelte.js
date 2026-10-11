@@ -11,9 +11,14 @@ export function useContactData() {
 		return isEdit ? UserService.updateUser(id, payload) : UserService.addUser(payload);
 	});
 
+	const changeRole = useResourceMutation(queryKeys.users.all, ({ id, role }) =>
+		UserService.changeUserRole(id, { role }),
+	);
+
 	return {
 		// Always-fresh detail fetch for edit mode.
 		getContact: (id) => fetchResource(() => UserService.getUserById(id)),
 		saveContact: (variables) => saveContact(variables),
+		changeRole: (variables) => changeRole(variables),
 	};
 }

@@ -205,6 +205,12 @@
 	"legendEditContact": "Edit contact",
 	"legendCreateContact": "Create contact",
 	"roleCannotBeChanged": "Role cannot be changed via this form",
+	"roleAdmin": "Admin",
+	"changeRole": "Change role",
+	"changeRoleConfirmTitle": "Change role?",
+	"changeRoleConfirmMessage": "Change the role of {name} from {from} to {to}? They will be signed out on all devices.",
+	"roleChanged": "Role changed.",
+	"changeRoleConflict": "Remove this user's future calendar entries before making them a customer.",
 
 	"createService": "Create service",
 	"noServicesFound": "No services found.",

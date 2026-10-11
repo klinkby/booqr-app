@@ -1,6 +1,6 @@
 /**
  * @typedef {object} SignUpRequest
- * @property {string} email
+ * @property {any} email
  */
 
 export {};

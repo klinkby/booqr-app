@@ -1,12 +1,18 @@
 /**
  * Shared Playwright API mocks for tests that don't hit a real backend.
  * Call setupApiMocks(page) in beforeEach for offline/unit-style tests.
- * Call setupAuthToken(page) to inject a fake Employee JWT via initScript.
+ * Call setupAuthToken(page) to inject a fake Employee JWT via initScript (setupAdminToken for Admin).
  */
 
 export const FAKE_TOKEN =
 	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' +
 	'.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6IkVtcGxveWVlIiwibmJmIjoxNzcwNDc1NjgwLCJleHAiOjI3NzA0NzkyODAsImlhdCI6MTc3MDQ3NTY4MCwiaXNzIjoiYm9vcXIiLCJhdWQiOiJodHRwczovL3d3dy5ib29xci5kayJ9' +
+	'.fake';
+
+// Same as FAKE_TOKEN but with the Admin role (sub "1", so it is the same user).
+export const ADMIN_TOKEN =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' +
+	'.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNzcwNDc1NjgwLCJleHAiOjI3NzA0NzkyODAsImlhdCI6MTc3MDQ3NTY4MCwiaXNzIjoiYm9vcXIiLCJhdWQiOiJodHRwczovL3d3dy5ib29xci5kayJ9' +
 	'.fake';
 
 export const LOCATIONS = [
@@ -198,13 +204,19 @@ export async function setupApiMocks(page) {
 }
 
 /**
- * Injects a fake Employee JWT into sessionStorage before the page loads,
- * bypassing the login flow for tests that need an authenticated session.
+ * Injects a fake JWT into sessionStorage before the page loads, bypassing the
+ * login flow for tests that need an authenticated session. Defaults to an
+ * Employee token; pass another token (e.g. ADMIN_TOKEN) to change the role.
  */
-export async function setupAuthToken(page) {
-	await page.addInitScript((token) => {
-		sessionStorage.setItem('access_token', token);
-	}, FAKE_TOKEN);
+export async function setupAuthToken(page, token = FAKE_TOKEN) {
+	await page.addInitScript((value) => {
+		sessionStorage.setItem('access_token', value);
+	}, token);
+}
+
+/** Injects an Admin JWT (see ADMIN_TOKEN). */
+export function setupAdminToken(page) {
+	return setupAuthToken(page, ADMIN_TOKEN);
 }
 
 /**

@@ -36,6 +36,7 @@ export class UserService {
                 400: `Bad Request`,
                 404: `Not Found`,
                 412: `Precondition Failed`,
+                429: `Too Many Requests`,
             },
         });
     }
@@ -203,6 +204,33 @@ export class UserService {
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,
+            },
+        });
+    }
+    /**
+     * Change a user's role (admin only)
+     * User
+     * @param id
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    static changeUserRole(id, requestBody) {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/users/{id}/role',
+            path: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+                409: `Conflict`,
+                412: `Precondition Failed`,
             },
         });
     }
