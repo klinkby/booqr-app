@@ -155,11 +155,20 @@ test.describe('Customer booking flow', () => {
 
 		await page.getByRole('button', { name: 'Create an account' }).click();
 		await page.fill('#signupEmail', 'new-customer@example.com');
+		await page.fill('#name', 'New Customer');
+		await page.fill('#phone', '12345678');
 		await page.check('#acceptTerms');
+		await expect(page.locator('#name')).toHaveAttribute('required', '');
+		await expect(page.locator('#phone')).toHaveAttribute('required', '');
+		await pageScreenshot(page, 'book-service-confirm-sign-up');
 		const signUpRequest = page.waitForRequest((req) => req.url().includes('/api/users') && req.method() === 'POST');
 		await page.getByRole('button', { name: 'Sign up' }).click();
 
-		expect((await signUpRequest).postDataJSON()).toEqual({ email: 'new-customer@example.com' });
+		expect((await signUpRequest).postDataJSON()).toEqual({
+			email: 'new-customer@example.com',
+			name: 'New Customer',
+			phone: '4512345678',
+		});
 		await expect(page.getByText("We've sent an activation link to new-customer@example.com")).toBeVisible();
 	});
 
@@ -184,6 +193,8 @@ test.describe('Customer booking flow', () => {
 
 		await page.getByRole('button', { name: 'Create an account' }).click();
 		await page.fill('#signupEmail', 'new-customer@example.com');
+		await page.fill('#name', 'New Customer');
+		await page.fill('#phone', '12345678');
 		await page.check('#acceptTerms');
 		await page.getByRole('button', { name: 'Sign up' }).click();
 
@@ -212,6 +223,8 @@ test.describe('Customer booking flow', () => {
 
 		await page.getByRole('button', { name: 'Create an account' }).click();
 		await page.fill('#signupEmail', 'new-customer@example.com');
+		await page.fill('#name', 'New Customer');
+		await page.fill('#phone', '12345678');
 		await page.check('#acceptTerms');
 		await page.getByRole('button', { name: 'Sign up' }).click();
 

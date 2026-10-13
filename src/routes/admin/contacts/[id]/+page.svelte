@@ -1,5 +1,5 @@
 <script>
-	import { ConfirmDialog, Form, RequiredInput, apiError, PhoneInput } from '#lib';
+	import { ConfirmDialog, ContactFields, Form, RequiredInput, apiError } from '#lib';
 	import { auth } from '#lib/auth.svelte.js';
 	import { buttonSecondary, cardSection, input, label, link, success } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
@@ -50,7 +50,7 @@
 		error = null;
 		loading = true;
 		try {
-			await contact.saveContact({ id, isEdit, payload: isEdit ? { name, phone: phone || null } : { email } });
+			await contact.saveContact({ id, isEdit, payload: isEdit ? { name, phone } : { email, name, phone } });
 			await goto(resolve('admin/contacts'));
 		} catch (err) {
 			error = apiError(err);
@@ -101,24 +101,19 @@
 		>
 			<div class={cardSection}>
 				<div class="space-y-4">
-					<div>
-						{#if isEdit}
-							<span id="email-label" class={label}>{m.labelEmail()}</span>
-							<a href="mailto:{email}" aria-labelledby="email-label" class={link}>{email}</a>
-						{:else}
-							<label for="email" class={label}>{m.labelEmail()}</label>
-							<RequiredInput id="email" name="email" type="email" bind:value={email} />
-						{/if}
-					</div>
+					<ContactFields bind:name bind:phone>
+						<div>
+							{#if isEdit}
+								<span id="email-label" class={label}>{m.labelEmail()}</span>
+								<a href="mailto:{email}" aria-labelledby="email-label" class={link}>{email}</a>
+							{:else}
+								<label for="email" class={label}>{m.labelEmail()}</label>
+								<RequiredInput id="email" name="email" type="email" bind:value={email} />
+							{/if}
+						</div>
+					</ContactFields>
 
 					{#if isEdit}
-						<div>
-							<label for="name" class={label}>{m.labelName()}</label>
-							<input id="name" name="name" type="text" bind:value={name} class={input} />
-						</div>
-
-						<PhoneInput bind:value={phone} />
-
 						<div>
 							<label for="role" class={label}>{m.labelRole()}</label>
 							{#if editable}

@@ -196,7 +196,7 @@ export async function setupApiMocks(page) {
 			return route.fulfill({
 				status: 200,
 				contentType: 'application/json',
-				body: JSON.stringify({ id: '1', name: 'Test Customer', email: 'test@example.com', phone: '12345678' }),
+				body: JSON.stringify({ id: '1', name: 'Test Customer', email: 'test@example.com', phone: '4512345678' }),
 			});
 		}
 		return route.fallback();

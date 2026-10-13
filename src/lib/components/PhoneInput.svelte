@@ -3,6 +3,7 @@
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { COUNTRIES, DEFAULT_CODE, decodePhone, encodePhone, nationalPattern } from '#lib/phone.js';
 	import { input, label } from '#lib/ui.js';
+	import RequiredMark from './RequiredMark.svelte';
 
 	// `value` is the API's single numeric string: calling code + subscriber number.
 	let { value = $bindable('') } = $props();
@@ -51,18 +52,20 @@
 				{/each}
 			</select>
 		</div>
-		<div class="min-w-0 flex-1">
+		<div class="relative min-w-0 flex-1">
 			<input
 				id="phone"
 				name="phone"
 				type="tel"
 				inputmode="numeric"
 				autocomplete="tel-national"
+				required
 				pattern={nationalPattern(code)}
 				value={decoded.national}
 				oninput={onNumberInput}
-				class={input}
+				class="{input} pr-8"
 			/>
+			<RequiredMark />
 		</div>
 	</div>
 </div>

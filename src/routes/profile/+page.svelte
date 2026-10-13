@@ -1,5 +1,5 @@
 <script>
-	import { auth, Form, apiError, ErrorMessage, PhoneInput, RequiredInput } from '#lib';
+	import { auth, ContactFields, Form, apiError, ErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -51,7 +51,7 @@
 		successMessage = null;
 		loading = true;
 		try {
-			await profile.saveProfile({ name, phone: phone || null });
+			await profile.saveProfile({ name, phone });
 			successMessage = m.profileUpdated();
 		} catch (err) {
 			error = apiError(err);
@@ -167,27 +167,21 @@
 							onsubmit={handleSubmit}
 						>
 							<div class="{cardSection} space-y-4">
-								<!-- Email: read-only display -->
-								<div>
-									<label for="email" class={label}> {m.labelEmail()} </label>
-									<input
-										id="email"
-										name="email"
-										type="email"
-										disabled
-										bind:value={email}
-										class={input}
-										title={m.emailCannotBeChanged()}
-									/>
-								</div>
-
-								<!-- Name: editable -->
-								<div>
-									<label for="name" class={label}> {m.labelName()} </label>
-									<RequiredInput id="name" name="name" type="text" bind:value={name} />
-								</div>
-
-								<PhoneInput bind:value={phone} />
+								<ContactFields bind:name bind:phone>
+									<!-- Email: read-only display -->
+									<div>
+										<label for="email" class={label}> {m.labelEmail()} </label>
+										<input
+											id="email"
+											name="email"
+											type="email"
+											disabled
+											bind:value={email}
+											class={input}
+											title={m.emailCannotBeChanged()}
+										/>
+									</div>
+								</ContactFields>
 							</div>
 						</Form>
 					</div>

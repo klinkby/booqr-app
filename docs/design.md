@@ -17,7 +17,7 @@ How the Booqr app looks, and the rules that keep it consistent. Agents get the m
 - **One source per class string**: shared class strings live in `src/lib/ui.js` (`label`, `input`, `checkbox`, `radio`, `choiceLabel`,
   `groupHeading`, `sectionHeading`, `link`, `alert`, `success`, `card`, `cardSection`, `cardActions`, `cardAlert`,
   `cardSuccess`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`,
-  `buttonDanger`) and in components (`Form`, `RequiredInput`, `RequiredMark`, `PhoneInput`, `LimitedTextarea`,
+  `buttonDanger`) and in components (`Form`, `RequiredInput`, `RequiredMark`, `PhoneInput`, `ContactFields`, `LimitedTextarea`,
   `DataTable`, `PaginatedTable`, `NavBar`, `LanguageToggle`). Import them; never paste a copy into a page. A new pattern used twice becomes a token.
 - **Quiet by default**: a grey canvas, white surfaces and one accent colour (indigo). Decoration must carry meaning.
 - **Accessible by requirement**: WCAG AA, see [AGENTS.md › Semantic HTML5 & Accessibility](../AGENTS.md#semantic-html5--accessibility-required)

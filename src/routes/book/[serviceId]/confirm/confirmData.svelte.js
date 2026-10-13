@@ -46,7 +46,7 @@ export function useConfirmData() {
 	}));
 
 	const login = usePublicMutation((credentials) => AuthenticationService.login(credentials));
-	const signUp = usePublicMutation((email) => UserService.addUser({ email }));
+	const signUp = usePublicMutation((payload) => UserService.addUser(payload));
 
 	const addBookingMutation = createMutation(() => ({
 		mutationFn: (requestBody) => authedQueryFn(() => BookingService.addBooking(requestBody)),
@@ -84,7 +84,7 @@ export function useConfirmData() {
 		// someone else between step 5 and landing here.
 		getVacancy: (id) => fetchResource(() => VacancyService.getVacancyById(id)),
 		login: (credentials) => login(credentials),
-		signUp: (email) => signUp(email),
+		signUp: (payload) => signUp(payload),
 		addBooking: (requestBody) => addBookingMutation.mutateAsync(requestBody),
 		deleteBooking: (id) => deleteBookingMutation.mutateAsync(id),
 	};

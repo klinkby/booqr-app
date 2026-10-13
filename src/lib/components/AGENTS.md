@@ -102,7 +102,7 @@ Required text input with the design-manual asterisk. Spreads all props onto the 
 ### RequiredMark (`src/lib/components/RequiredMark.svelte`)
 
 The `aria-hidden` asterisk span (`text-indigo-400`, absolute right edge). Place it inside a `relative` wrapper beside
-an input; `RequiredInput` renders it.
+an input; `RequiredInput` and `PhoneInput` render it.
 
 ### Calendar (`src/lib/components/Calendar.svelte`)
 
@@ -215,19 +215,34 @@ Error/success kept in DOM with `class:hidden` for reliable `aria-live` announcem
 Presentational phone-number field: a calling-code `<select>` (Nordics, Benelux, Germany, Poland, Baltics; flag + code options; country
 name on hover via `Intl.DisplayNames`) plus a digits-only `type="tel"` input. The API stores one numeric string, so the
 component decodes `value` into code + number and encodes it back (`src/lib/phone.js`, unit-tested). A value with an
-unrecognised prefix is shown under the default code (+45) and left untouched until the user edits it. Used by the
-profile form and the admin contact form. The field is always optional: blank is valid, and callers send
-`value || null` to the API.
+unrecognised prefix is shown under the default code (+45) and left untouched until the user edits it. Used by `ContactFields`.
+The field is always required: the number input carries `required` and the `RequiredMark` asterisk, so `value` is never
+blank on submit and callers send it to the API as-is.
 
 | Prop               | Type     | Default | Description                                               |
 | ------------------ | -------- | ------- | --------------------------------------------------------- |
 | `value` (bindable) | `string` | `''`    | Calling code + number, e.g. `4512345678`; `''` when blank |
 
-Renders `id="phone"`/`name="phone"` (number) and `id="phoneCountry"` — render at most one per page (both consumers do).
+Renders `id="phone"`/`name="phone"` (number) and `id="phoneCountry"` — render at most one per page.
+
+### ContactFields (`src/lib/components/ContactFields.svelte`)
+
+Presentational required contact fields: name (`RequiredInput`, `id="name"`), then `children` (the form's email field),
+then `PhoneInput`. Field order everywhere: name, email, phone. No
+wrapper styling — place it inside the form's `space-y-4` section. No API calls; parents own loading and saving. Used by
+the profile form, the admin contact form (create and edit) and `SignUpForm`. Render at most one per
+page (fixed `id`s).
+
+| Prop               | Type     | Default | Description                                              |
+| ------------------ | -------- | ------- | -------------------------------------------------------- |
+| `name` (bindable)  | `string` | `''`    | Contact name                                             |
+| `phone` (bindable) | `string` | `''`    | Calling code + number (see above)                        |
+| `children`         | snippet  | —       | Rendered between name and phone (the form's email field) |
 
 ### SignUpForm (`src/lib/components/SignUpForm.svelte`)
 
-Presentational sign-up card (email + accept-terms checkbox). Props: `email` (bindable), `error`, `loading`, `onsubmit`.
+Presentational sign-up card (email, `ContactFields` name + phone, accept-terms checkbox). Props: `email`, `name`, `phone`
+(all bindable), `error`, `loading`, `onsubmit`.
 Shared by `/login` and the booking confirm auth gate; parents own the API call.
 
 ### Password Validation

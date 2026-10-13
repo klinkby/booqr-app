@@ -17,18 +17,21 @@ test.describe('Admin Contact Form (create / edit)', () => {
 		await setupAuthToken(page);
 	});
 
-	test('create form shows only the email field', async ({ page }) => {
+	test('create form shows email, name and phone', async ({ page }) => {
 		await page.goto('/admin/contacts/new');
 
 		await expect(page.locator('#email')).toBeVisible();
-		// Name/role fields are edit-only.
-		await expect(page.locator('#name')).toHaveCount(0);
+		await expect(page.locator('#name')).toBeVisible();
+		await expect(page.locator('#phone')).toBeVisible();
+		await expect(page.locator('#name')).toHaveAttribute('required', '');
+		await expect(page.locator('#phone')).toHaveAttribute('required', '');
+		// The role field is edit-only.
 		await expect(page.locator('#role')).toHaveCount(0);
 
 		await pageScreenshot(page, 'admin-contacts-new');
 	});
 
-	test('creating a contact POSTs the email and returns to the list', async ({ page }) => {
+	test('creating a contact POSTs email, name and phone and returns to the list', async ({ page }) => {
 		let postBody = null;
 		await page.route('**/api/users', (route) => {
 			if (route.request().method() === 'POST') {
@@ -45,10 +48,12 @@ test.describe('Admin Contact Form (create / edit)', () => {
 		await page.goto('/admin/contacts/new');
 
 		await page.fill('#email', 'new-contact@example.com');
+		await page.fill('#name', 'New Contact');
+		await page.fill('#phone', '12345678');
 		await page.getByRole('button', { name: 'Create', exact: true }).click();
 
 		await expect(page).toHaveURL('/admin/contacts');
-		expect(postBody).toMatchObject({ email: 'new-contact@example.com' });
+		expect(postBody).toEqual({ email: 'new-contact@example.com', name: 'New Contact', phone: '4512345678' });
 	});
 
 	test('edit form loads the contact, shows email as a mailto link, and PUTs name/phone', async ({ page }) => {

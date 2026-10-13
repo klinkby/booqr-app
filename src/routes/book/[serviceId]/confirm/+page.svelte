@@ -62,6 +62,8 @@
 	// --- Step 6: inline auth gate ---
 	let authMode = $state('login'); // 'login' | 'signup'
 	let email = $state('');
+	let name = $state('');
+	let phone = $state('');
 	let password = $state('');
 	let authError = $state(null);
 	let authLoading = $state(false);
@@ -86,7 +88,7 @@
 		authError = null;
 		authLoading = true;
 		try {
-			await confirmData.signUp(email);
+			await confirmData.signUp({ email, name, phone });
 			signUpSent = true;
 		} catch (err) {
 			authError =
@@ -260,7 +262,7 @@
 			</div>
 		</Form>
 	{:else if !signUpSent}
-		<SignUpForm bind:email error={authError} loading={authLoading} onsubmit={handleSignUp} />
+		<SignUpForm bind:email bind:name bind:phone error={authError} loading={authLoading} onsubmit={handleSignUp} />
 		<p class="mt-6 text-center text-sm text-gray-500">
 			{m.alreadyHaveAccount()} <button type="button" onclick={switchToLogin} class={link}>{m.signIn()}</button>
 		</p>
