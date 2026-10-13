@@ -228,7 +228,8 @@ so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isF
   The sign-in gate uses the same card form as `/login`: "Forgot your password?" sits right of the Password label
   (`link text-sm`), and the switch between sign-in and sign-up is one centred `text-sm text-gray-500` line under the
   card (`mt-6`).
-- **Messages.** Errors use `alert`; "sign-up sent" uses `success`; explanatory text `text-sm text-gray-500`.
+- **Messages.** Errors use `alert` (API errors with a ProblemDetails `type` end in an `ErrorMessage` info-circle link to
+  the problem page, `size-5`, inheriting `text-red-800`); "sign-up sent" uses `success`; explanatory text `text-sm text-gray-500`.
   The conflict page keeps its links, styled with `link`. The done page celebrates: a centred `card` with an emerald
   check badge that pops in plus a short confetti burst (both `prefers-reduced-motion: no-preference` only, decorative
   and `aria-hidden`), the heading and message (with the booked date and time as an `indigo-50` pill under the heading),

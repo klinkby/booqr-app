@@ -1,5 +1,5 @@
 <script>
-	import { BookingSummary, ChoiceList, MonthPicker, TimeSlotList, apiErrorMessage } from '#lib';
+	import { BookingSummary, ChoiceList, MonthPicker, TimeSlotList, apiError, ErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -228,7 +228,7 @@
 {:else if booking.error}
 	<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.somethingWentWrong()}</h1>
 	<div role="alert" aria-live="assertive" class={alert}>
-		{apiErrorMessage(booking.error, m.errorLoadAvailability())}
+		<ErrorMessage error={apiError(booking.error, m.errorLoadAvailability())} />
 	</div>
 {:else if !booking.service}
 	<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.serviceNotFound()}</h1>

@@ -6,7 +6,8 @@
 		MARKETING_URL,
 		RequiredInput,
 		SignUpForm,
-		apiErrorMessage,
+		apiError,
+		ErrorMessage,
 		auth,
 	} from '#lib';
 	import { alert, card, cardSection, checkbox, choiceLabel, label, link, pageHeading, success } from '#lib/ui.js';
@@ -47,7 +48,7 @@
 		try {
 			vacancy = await confirmData.getVacancy(vacancyId);
 		} catch (err) {
-			vacancyError = apiErrorMessage(err, m.errorLoadTimeSlot());
+			vacancyError = apiError(err, m.errorLoadTimeSlot());
 		}
 	});
 
@@ -75,7 +76,7 @@
 			auth.accessToken = response.access_token;
 			if (!auth.isLoggedIn) authError = m.authenticationFailed();
 		} catch (err) {
-			authError = apiErrorMessage(err);
+			authError = apiError(err);
 		} finally {
 			authLoading = false;
 		}
@@ -88,7 +89,10 @@
 			await confirmData.signUp(email);
 			signUpSent = true;
 		} catch (err) {
-			authError = err instanceof ApiError && err.status === 409 ? m.emailAlreadyRegistered() : apiErrorMessage(err);
+			authError =
+				err instanceof ApiError && err.status === 409
+					? { ...apiError(err), message: m.emailAlreadyRegistered() }
+					: apiError(err);
 		} finally {
 			authLoading = false;
 		}
@@ -169,7 +173,7 @@
 
 				goto(`/book/${serviceId}/conflict?date=${dateStr}`);
 			} else {
-				bookError = apiErrorMessage(err);
+				bookError = apiError(err);
 			}
 		} finally {
 			bookLoading = false;
@@ -270,7 +274,7 @@
 	<h1 bind:this={heading} tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.confirmAppointment()}</h1>
 
 	{#if vacancyError}
-		<p role="alert" class={alert}>{vacancyError}</p>
+		<p role="alert" class={alert}><ErrorMessage error={vacancyError} /></p>
 	{:else if !vacancy || !service}
 		<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loading()}</p>
 	{:else}
