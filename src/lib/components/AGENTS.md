@@ -95,7 +95,7 @@ Required text input with the design-manual asterisk. Spreads all props onto the 
 ### RequiredMark (`src/lib/components/RequiredMark.svelte`)
 
 The `aria-hidden` asterisk span (`text-indigo-400`, absolute right edge). Place it inside a `relative` wrapper beside
-an input; `RequiredInput` and `PhoneInput` (when `required`) render it.
+an input; `RequiredInput` renders it.
 
 ### Calendar (`src/lib/components/Calendar.svelte`)
 
@@ -209,12 +209,12 @@ Presentational phone-number field: a calling-code `<select>` (Nordics, Benelux, 
 name on hover via `Intl.DisplayNames`) plus a digits-only `type="tel"` input. The API stores one numeric string, so the
 component decodes `value` into code + number and encodes it back (`src/lib/phone.js`, unit-tested). A value with an
 unrecognised prefix is shown under the default code (+45) and left untouched until the user edits it. Used by the
-profile form and the admin contact form.
+profile form and the admin contact form. The field is always optional: blank is valid, and callers send
+`value || null` to the API.
 
-| Prop               | Type      | Default | Description                                                          |
-| ------------------ | --------- | ------- | -------------------------------------------------------------------- |
-| `value` (bindable) | `string`  | `''`    | Calling code + number, e.g. `4512345678`                             |
-| `required`         | `boolean` | `true`  | Drives the input's `required` attribute (pass `false` when optional) |
+| Prop               | Type     | Default | Description                                               |
+| ------------------ | -------- | ------- | --------------------------------------------------------- |
+| `value` (bindable) | `string` | `''`    | Calling code + number, e.g. `4512345678`; `''` when blank |
 
 Renders `id="phone"`/`name="phone"` (number) and `id="phoneCountry"` — render at most one per page (both consumers do).
 
