@@ -105,6 +105,20 @@
 		});
 	}
 
+	const LOCATION_KEY = 'vacancy-location';
+
+	// Most recently used location if it still exists, else the first one.
+	function defaultLocationId() {
+		let stored = null;
+		try {
+			stored = localStorage.getItem(LOCATION_KEY);
+		} catch {
+			// localStorage unavailable — fall back to the first location
+		}
+		const known = plan.locations.find((l) => String(l.id) === stored);
+		return String((known ?? plan.locations[0])?.id ?? '');
+	}
+
 	function handleDateClick(info) {
 		const startDate = new Date(info.date);
 		const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
@@ -116,7 +130,7 @@
 			startTime: DateUtils.toLocalTime(startDate),
 			endTime: DateUtils.toLocalTime(endDate),
 			employeeId: auth.userId || '',
-			locationId: plan.locations[0]?.id || '',
+			locationId: defaultLocationId(),
 		};
 		formError = null;
 		showForm = true;
@@ -163,6 +177,11 @@
 				startTime: new Date(formData.date + 'T' + formData.startTime).toISOString(),
 				endTime: new Date(formData.date + 'T' + formData.endTime).toISOString(),
 			});
+			try {
+				localStorage.setItem(LOCATION_KEY, String(formData.locationId));
+			} catch {
+				// localStorage unavailable — preference just isn't remembered
+			}
 			showForm = false;
 		} catch (err) {
 			formError = apiErrorMessage(err);

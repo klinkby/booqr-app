@@ -171,7 +171,7 @@
 				<div
 					class="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-4 text-xs text-gray-500 sm:px-6 lg:px-8"
 				>
-					<a class={FOOTER_LINK} href="https://github.com/klinkby/booqr-app?tab=AGPL-3.0-1-ov-file">© 2026 Klinkby</a>
+					<a class={FOOTER_LINK} href="{MARKETING_URL}/license">© 2026 Klinkby</a>
 					<span aria-hidden="true" class="text-gray-300">·</span>
 					<a class={FOOTER_LINK} href="{MARKETING_URL}/terms">{m.termsAndConditions()}</a>
 					<span aria-hidden="true" class="text-gray-300">·</span>

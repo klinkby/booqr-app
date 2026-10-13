@@ -130,8 +130,6 @@
 	"profileUpdated": "Profile updated successfully.",
 	"legendEditProfile": "Edit profile information",
 	"emailCannotBeChanged": "Email cannot be changed",
-	"phoneValidation": "Phone number must be an EU/Scandinavian country code followed by the subscriber number (e.g. 4512345678)",
-	"phonePlaceholder": "4512345678",
 
 	"myBookings": "My bookings",
 	"bookNewAppointment": "Book",

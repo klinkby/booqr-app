@@ -1,5 +1,14 @@
 <script>
-	import { BookingSummary, Form, LimitedTextarea, MARKETING_URL, RequiredInput, apiErrorMessage, auth } from '#lib';
+	import {
+		BookingSummary,
+		Form,
+		LimitedTextarea,
+		MARKETING_URL,
+		RequiredInput,
+		SignUpForm,
+		apiErrorMessage,
+		auth,
+	} from '#lib';
 	import { alert, card, cardSection, checkbox, choiceLabel, label, link, pageHeading, success } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -53,7 +62,6 @@
 	let authMode = $state('login'); // 'login' | 'signup'
 	let email = $state('');
 	let password = $state('');
-	let acceptTerms = $state(false);
 	let authError = $state(null);
 	let authLoading = $state(false);
 	let signUpSent = $state(false);
@@ -205,9 +213,12 @@
 {:else if !auth.isLoggedIn}
 	<h1 bind:this={heading} tabindex="-1" class="{pageHeading} mb-2 outline-none">{m.signInOrSignUp()}</h1>
 
-	<p class="mb-6 text-sm text-gray-500">{m.timeNotHeld()}</p>
+	<p class="mb-2 text-sm text-gray-500">{m.timeNotHeld()}</p>
 
 	{#if authMode === 'login'}
+		<p class="mb-6 text-sm text-gray-500">
+			{m.newHere()} <button type="button" onclick={switchToSignUp} class={link}>{m.createAnAccount()}</button>
+		</p>
 		<Form
 			card
 			legend={m.signIn()}
@@ -244,48 +255,8 @@
 				</div>
 			</div>
 		</Form>
-		<p class="mt-6 text-center text-sm text-gray-500">
-			{m.newHere()} <button type="button" onclick={switchToSignUp} class={link}>{m.createAnAccount()}</button>
-		</p>
 	{:else if !signUpSent}
-		<Form
-			card
-			legend={m.signUp()}
-			error={authError}
-			loading={authLoading}
-			onsubmit={handleSignUp}
-			submitLabel={m.signUp()}
-		>
-			<div class="{cardSection} space-y-4">
-				<div>
-					<label for="signupEmail" class={label}>{m.labelEmailAddress()}</label>
-					<RequiredInput
-						id="signupEmail"
-						name="email"
-						type="email"
-						autocomplete="email"
-						placeholder={m.labelEmailAddress()}
-						bind:value={email}
-					/>
-				</div>
-				<div class="flex items-start gap-3">
-					<input
-						id="acceptTerms"
-						name="acceptTerms"
-						type="checkbox"
-						required
-						bind:checked={acceptTerms}
-						class="{checkbox} mt-0.5"
-					/>
-					<label for="acceptTerms" class={choiceLabel}>
-						{m.iAcceptThe()}
-						<a href="{MARKETING_URL}/terms" target="_blank" rel="noopener" class={link}>
-							{m.termsAndConditionsLink()}
-						</a>.
-					</label>
-				</div>
-			</div>
-		</Form>
+		<SignUpForm bind:email error={authError} loading={authLoading} onsubmit={handleSignUp} />
 		<p class="mt-6 text-center text-sm text-gray-500">
 			{m.alreadyHaveAccount()} <button type="button" onclick={switchToLogin} class={link}>{m.signIn()}</button>
 		</p>

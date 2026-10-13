@@ -26,3 +26,4 @@ export { default as RequiredMark } from './components/RequiredMark.svelte';
 export { default as LanguageToggle } from './components/LanguageToggle.svelte';
 export { locale } from './locale.svelte.js';
 export { tenant, hostCategory, MARKETING_URL } from './tenant.svelte.js';
+export { default as SignUpForm } from './components/SignUpForm.svelte';

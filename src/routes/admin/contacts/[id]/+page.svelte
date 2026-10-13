@@ -149,7 +149,7 @@
 									name="role"
 									type="text"
 									disabled
-									bind:value={role}
+									value={roleLabel(role)}
 									class={input}
 									title={m.roleCannotBeChanged()}
 								/>

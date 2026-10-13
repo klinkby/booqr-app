@@ -205,16 +205,23 @@ Error/success kept in DOM with `class:hidden` for reliable `aria-live` announcem
 
 ### PhoneInput (`src/lib/components/PhoneInput.svelte`)
 
-Presentational phone-number field: `type="tel"` input with the `+` country-code prefix affordance, EU/Scandinavian
-`pattern` validation, and Paraglide label/title/placeholder. Used by the profile form and the admin contact form.
+Presentational phone-number field: a calling-code `<select>` (Nordics, Benelux, Germany, Poland, Baltics; flag + code options; country
+name on hover via `Intl.DisplayNames`) plus a digits-only `type="tel"` input. The API stores one numeric string, so the
+component decodes `value` into code + number and encodes it back (`src/lib/phone.js`, unit-tested). A value with an
+unrecognised prefix is shown under the default code (+45) and left untouched until the user edits it. Used by the
+profile form and the admin contact form.
 
 | Prop               | Type      | Default | Description                                                          |
 | ------------------ | --------- | ------- | -------------------------------------------------------------------- |
-| `value` (bindable) | `string`  | `''`    | Phone number, two-way bound to the input                             |
+| `value` (bindable) | `string`  | `''`    | Calling code + number, e.g. `4512345678`                             |
 | `required`         | `boolean` | `true`  | Drives the input's `required` attribute (pass `false` when optional) |
 
-Label and input use the `label`/`input` tokens; the input gets `pl-6` for the `+` (and `pr-8` when required).
-Renders `id="phone"`/`name="phone"` — render at most one per page (both consumers do).
+Renders `id="phone"`/`name="phone"` (number) and `id="phoneCountry"` — render at most one per page (both consumers do).
+
+### SignUpForm (`src/lib/components/SignUpForm.svelte`)
+
+Presentational sign-up card (email + accept-terms checkbox). Props: `email` (bindable), `error`, `loading`, `onsubmit`.
+Shared by `/login` and the booking confirm auth gate; parents own the API call.
 
 ### Password Validation
 

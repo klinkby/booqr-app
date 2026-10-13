@@ -281,7 +281,7 @@ One centred line, `text-xs text-gray-500`, with a `border-t border-gray-200` and
 
 > © 2026 Klinkby · Terms and conditions · 🌐 Dansk
 
-- **© 2026 Klinkby** links to the license on GitHub (`https://github.com/klinkby/booqr-app?tab=AGPL-3.0-1-ov-file`).
+- **© 2026 Klinkby** links to the license on the marketing site (`${MARKETING_URL}/license`, i.e. `https://www.booqr.dk/license`).
 - **Terms and conditions** (`m.termsAndConditions()`) links to `` `${MARKETING_URL}/terms` ``, as does the sign-up
   checkbox on the booking confirm page.
 - **Language toggle**: globe icon plus the other language's name in that language (`LanguageToggle`).
