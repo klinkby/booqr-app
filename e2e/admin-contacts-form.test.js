@@ -210,5 +210,33 @@ test.describe('Admin Contact Form (role change)', () => {
 
 		await expect(dialog).toBeHidden();
 		await expect(page.getByRole('alert')).toContainText(CONFLICT_MESSAGE);
+		// No ProblemDetails `type` in the body, so no help link.
+		await expect(page.getByRole('alert').getByRole('link')).toHaveCount(0);
+	});
+
+	test('a ProblemDetails type adds an error details link to the form alert', async ({ page }) => {
+		const type = 'https://www.booqr.dk/problems/validation';
+		await page.route(`**/api/users/${CONTACT.id}`, (route) => {
+			if (route.request().method() === 'PUT') {
+				return route.fulfill({
+					status: 400,
+					contentType: 'application/problem+json',
+					body: JSON.stringify({ type, title: 'Bad Request', errors: { name: ['Name is taken.'] } }),
+				});
+			}
+			return route.fallback();
+		});
+
+		await page.goto(`/admin/contacts/${CONTACT.id}`);
+		await page.locator('#name').fill('Taken Name');
+		await page.locator('#phone').fill('12345678');
+		await page.getByRole('button', { name: 'Update', exact: true }).click();
+
+		const alert = page.getByRole('alert');
+		await expect(alert).toContainText('Name is taken.');
+		const link = alert.getByRole('link', { name: 'Error details (opens in a new tab)' });
+		await expect(link).toHaveAttribute('href', type);
+		await expect(link).toHaveAttribute('target', '_blank');
+		await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 	});
 });

@@ -1,5 +1,5 @@
 <script>
-	import { ConfirmDialog, Form, RequiredInput, apiErrorMessage, PhoneInput } from '#lib';
+	import { ConfirmDialog, Form, RequiredInput, apiError, PhoneInput } from '#lib';
 	import { auth } from '#lib/auth.svelte.js';
 	import { buttonSecondary, cardSection, input, label, link, success } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
@@ -40,7 +40,7 @@
 			role = existing.role;
 			newRole = existing.role;
 		} catch (err) {
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loadingData = false;
 		}
@@ -53,7 +53,7 @@
 			await contact.saveContact({ id, isEdit, payload: isEdit ? { name, phone } : { email } });
 			await goto(resolve('admin/contacts'));
 		} catch (err) {
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loading = false;
 		}
@@ -70,7 +70,7 @@
 			confirmOpen = false;
 		} catch (err) {
 			confirmOpen = false;
-			error = err?.status === 409 ? m.changeRoleConflict() : apiErrorMessage(err);
+			error = err?.status === 409 ? { ...apiError(err), message: m.changeRoleConflict() } : apiError(err);
 		} finally {
 			roleLoading = false;
 		}

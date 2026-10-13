@@ -1,5 +1,6 @@
 <script>
-	import { DataTable, UserName, apiErrorMessage } from '#lib';
+	import { DataTable, UserName, apiError, ErrorMessage } from '#lib';
+	import { DateUtils } from '#lib/dateUtils.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useServicesData } from './servicesData.svelte.js';
@@ -32,7 +33,7 @@
 		</div>
 	{:else if services.error}
 		<div role="alert" aria-live="assertive" class={alertClass}>
-			<p>{apiErrorMessage(services.error)}</p>
+			<p><ErrorMessage error={apiError(services.error)} /></p>
 		</div>
 	{:else if services.rows.length === 0}
 		<div class="{card} {cardSection}">
@@ -46,6 +47,8 @@
 						<UserName id={emp.id} name={emp.name || emp.email} />
 					{/each}
 				</span>
+			{:else if column.key === 'duration'}
+				{DateUtils.formatDuration(row.duration)}
 			{:else}
 				{row[column.key]}
 			{/if}

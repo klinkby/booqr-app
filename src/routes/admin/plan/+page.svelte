@@ -1,5 +1,5 @@
 <script>
-	import { auth, VacancyForm, apiErrorMessage } from '#lib';
+	import { auth, VacancyForm, apiError, ErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -160,7 +160,7 @@
 				locationId: vacancy.locationId?.toString() || '',
 			};
 		} catch (err) {
-			formError = apiErrorMessage(err);
+			formError = apiError(err);
 		} finally {
 			formLoading = false;
 		}
@@ -184,7 +184,7 @@
 			}
 			showForm = false;
 		} catch (err) {
-			formError = apiErrorMessage(err);
+			formError = apiError(err);
 		} finally {
 			formLoading = false;
 		}
@@ -219,7 +219,7 @@
 			await plan.deleteVacancy(selectedVacancyId);
 			showForm = false;
 		} catch (err) {
-			formError = apiErrorMessage(err);
+			formError = apiError(err);
 		} finally {
 			formLoading = false;
 		}
@@ -229,7 +229,7 @@
 <div class="container mx-auto max-w-7xl">
 	{#if plan.error}
 		<div role="alert" class="{alert} mb-4">
-			{apiErrorMessage(plan.error, m.errorLoadVacancies())}
+			<ErrorMessage error={apiError(plan.error, m.errorLoadVacancies())} />
 		</div>
 	{/if}
 

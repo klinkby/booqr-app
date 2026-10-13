@@ -5,7 +5,7 @@ vi.mock('#lib/paraglide/messages.js', () => ({
 	m: { errorDefault: () => 'default-error' },
 }));
 
-const { apiErrorMessage } = await import('./apiErrorMessage.js');
+const { apiError, apiErrorHelpUrl, apiErrorMessage } = await import('./apiErrorMessage.js');
 
 /** Build an ApiError with a given ProblemDetails-ish body. */
 const makeError = (body) =>
@@ -48,5 +48,35 @@ describe('apiErrorMessage', () => {
 	it('falls back to the default when body.errors is empty', () => {
 		const err = makeError({ errors: {} });
 		expect(apiErrorMessage(err)).toBe('default-error');
+	});
+});
+
+describe('apiErrorHelpUrl', () => {
+	it('returns an https ProblemDetails type', () => {
+		const err = makeError({ type: 'https://www.booqr.dk/problems/vacancy-taken' });
+		expect(apiErrorHelpUrl(err)).toBe('https://www.booqr.dk/problems/vacancy-taken');
+	});
+
+	it.each([['about:blank'], ['javascript:alert(1)'], ['http://example.com/p'], ['/problems/x'], [42]])(
+		'rejects non-linkable type %s',
+		(type) => {
+			expect(apiErrorHelpUrl(makeError({ type }))).toBeNull();
+		},
+	);
+
+	it('returns null for non-ApiError input or a missing body', () => {
+		expect(apiErrorHelpUrl(new Error('plain'))).toBeNull();
+		expect(apiErrorHelpUrl(makeError(undefined))).toBeNull();
+	});
+});
+
+describe('apiError', () => {
+	it('pairs the message with the help URL', () => {
+		const err = makeError({ title: 'Conflict', type: 'https://www.booqr.dk/problems/x' });
+		expect(apiError(err)).toEqual({ message: 'Conflict', helpUrl: 'https://www.booqr.dk/problems/x' });
+	});
+
+	it('uses the fallback and no link for non-API errors', () => {
+		expect(apiError(new Error('plain'), 'custom')).toEqual({ message: 'custom', helpUrl: null });
 	});
 });

@@ -59,17 +59,24 @@ When not loading and not errored, an empty `rows` renders a "No items found" mes
 
 Accessible form wrapper handling submission, errors, and loading state. Children are injected as the fieldset body.
 
-| Prop                    | Type              | Default     | Description                                                              |
-| ----------------------- | ----------------- | ----------- | ------------------------------------------------------------------------ |
-| `legend`                | `string`          | required    | Fieldset label (`sr-only`)                                               |
-| `error`                 | `string \| null`  | `null`      | Error message (kept in DOM for `aria-live`)                              |
-| `loading`               | `boolean`         | `false`     | Disables fieldset; shows "Please wait…" on submit button                 |
-| `card`                  | `boolean`         | `false`     | Design-manual card: children are `cardSection` divs, `Form` divides them |
-| `submitLabel`           | `string \| null`  | `'Submit'`  | Submit button label; `null` hides it (view-only forms)                   |
-| `deleteLabel`           | `string`          | `undefined` | Delete button label; hidden if omitted                                   |
-| `onsubmit`              | `(event) => void` | required    | `preventDefault` called automatically                                    |
-| `oncancel` / `ondelete` | `() => void`      | `undefined` | Buttons hidden if omitted; order Cancel, Delete, submit                  |
-| `children`              | snippet           | required    | Form fields                                                              |
+| Prop                    | Type               | Default     | Description                                                                      |
+| ----------------------- | ------------------ | ----------- | -------------------------------------------------------------------------------- |
+| `legend`                | `string`           | required    | Fieldset label (`sr-only`)                                                       |
+| `error`                 | `string \| object` | `null`      | Message or `apiError()` result, via `ErrorMessage` (kept in DOM for `aria-live`) |
+| `loading`               | `boolean`          | `false`     | Disables fieldset; shows "Please wait…" on submit button                         |
+| `card`                  | `boolean`          | `false`     | Design-manual card: children are `cardSection` divs, `Form` divides them         |
+| `submitLabel`           | `string \| null`   | `'Submit'`  | Submit button label; `null` hides it (view-only forms)                           |
+| `deleteLabel`           | `string`           | `undefined` | Delete button label; hidden if omitted                                           |
+| `onsubmit`              | `(event) => void`  | required    | `preventDefault` called automatically                                            |
+| `oncancel` / `ondelete` | `() => void`       | `undefined` | Buttons hidden if omitted; order Cancel, Delete, submit                          |
+| `children`              | snippet            | required    | Form fields                                                                      |
+
+### ErrorMessage (`src/lib/components/ErrorMessage.svelte`)
+
+Inline error text for alerts. `error` is a plain string or `apiError(err)`'s `{ message, helpUrl }`; a `helpUrl` (the
+ProblemDetails `type`) adds an info-circle icon link after the message that opens the problem page in a new tab. The
+icon inherits the alert's red text colour; the link's sr-only name is "Error details (opens in a new tab)". Wrap it in
+the alert element yourself — `Form`, `PasswordReset` and `PaginatedTable` already do.
 
 ### ConfirmDialog (`src/lib/components/ConfirmDialog.svelte`)
 
