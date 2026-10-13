@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodePhone, encodePhone } from './phone.js';
+import { decodePhone, encodePhone, nationalPattern } from './phone.js';
 
 describe('decodePhone', () => {
 	it('splits two- and three-digit calling codes', () => {
@@ -23,5 +23,14 @@ describe('encodePhone', () => {
 	it('strips non-digits and returns empty for no subscriber number', () => {
 		expect(encodePhone('45', '12 34-56')).toBe('45123456');
 		expect(encodePhone('45', '')).toBe('');
+	});
+});
+
+describe('nationalPattern', () => {
+	it('bounds the subscriber number per country', () => {
+		expect(new RegExp(`^${nationalPattern('45')}$`).test('12345678')).toBe(true);
+		expect(new RegExp(`^${nationalPattern('45')}$`).test('1234567')).toBe(false);
+		expect(new RegExp(`^${nationalPattern('48')}$`).test('123456789')).toBe(true);
+		expect(new RegExp(`^${nationalPattern('358')}$`).test('401234567')).toBe(true);
 	});
 });

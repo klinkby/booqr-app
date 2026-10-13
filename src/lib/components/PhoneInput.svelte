@@ -1,7 +1,7 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
-	import { COUNTRIES, DEFAULT_CODE, decodePhone, encodePhone } from '#lib/phone.js';
+	import { COUNTRIES, DEFAULT_CODE, decodePhone, encodePhone, nationalPattern } from '#lib/phone.js';
 	import { input, label } from '#lib/ui.js';
 	import RequiredMark from './RequiredMark.svelte';
 
@@ -60,7 +60,7 @@
 				inputmode="numeric"
 				autocomplete="tel-national"
 				{required}
-				pattern={'[0-9]{6,12}'}
+				pattern={nationalPattern(code)}
 				value={decoded.national}
 				oninput={onNumberInput}
 				class="{input} {required ? 'pr-8' : ''}"
