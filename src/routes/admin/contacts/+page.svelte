@@ -50,7 +50,7 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			<UserName id={row.id} name={row.name} />
+			<UserName id={row.id} name={row.name || row.email} />
 		{:else}
 			{row[column.key]}
 		{/if}
