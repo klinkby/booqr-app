@@ -1,32 +1,73 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { COUNTRIES, DEFAULT_CODE, decodePhone, encodePhone } from '#lib/phone.js';
 	import { input, label } from '#lib/ui.js';
 	import RequiredMark from './RequiredMark.svelte';
 
+	// `value` is the API's single numeric string: calling code + subscriber number.
 	let { value = $bindable(''), required = true } = $props();
+
+	const regionNames = new Intl.DisplayNames(getLocale(), { type: 'region' });
+	// Regional-indicator pair = flag emoji, e.g. 'DK' → 🇩🇰.
+	const flag = (region) => String.fromCodePoint(...[...region].map((ch) => 0x1f1a5 + ch.charCodeAt(0)));
+	const options = COUNTRIES.map((c) => ({
+		code: c.code,
+		name: regionNames.of(c.region),
+		text: `${flag(c.region)} +${c.code}`,
+	}));
+
+	const decoded = $derived(decodePhone(value));
+	// Remembers the picked code while there is no number yet (value is '' then).
+	let picked = $state(null);
+	const code = $derived(decoded.matched ? decoded.code : (picked ?? DEFAULT_CODE));
+	const countryName = $derived(options.find((o) => o.code === code)?.name);
+
+	function onCodeChange(event) {
+		picked = event.currentTarget.value;
+		if (decoded.matched) value = encodePhone(picked, decoded.national);
+	}
+
+	function onNumberInput(event) {
+		const digits = event.currentTarget.value.replace(/\D/g, '');
+		event.currentTarget.value = digits;
+		value = encodePhone(code, digits);
+	}
 </script>
 
-<!-- Phone: editable -->
 <div>
-	<label for="phone" class={label}>{m.labelPhone()}</label>
-	<div class="relative">
-		<span
-			aria-hidden="true"
-			class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 sm:text-sm">+</span
-		>
-		<input
-			id="phone"
-			name="phone"
-			type="tel"
-			{required}
-			pattern={'(3[0-46]|39|4[013-9])[0-9]{8}|(35[1-46-9]|37[0-2]|38[56]|42[01])[0-9]{7}'}
-			title={m.phoneValidation()}
-			placeholder={m.phonePlaceholder()}
-			bind:value
-			class="{input} pl-6 {required ? 'pr-8' : ''}"
-		/>
-		{#if required}
-			<RequiredMark />
-		{/if}
+	<label id="phoneLabel" for="phone" class={label}>{m.labelPhone()}</label>
+	<div class="flex gap-2">
+		<div class="w-28 shrink-0">
+			<select
+				id="phoneCountry"
+				name="phoneCountry"
+				class={input}
+				aria-labelledby="phoneLabel"
+				title={countryName}
+				onchange={onCodeChange}
+			>
+				{#each options as option (option.code)}
+					<option value={option.code} title={option.name} selected={option.code === code}>{option.text}</option>
+				{/each}
+			</select>
+		</div>
+		<div class="relative min-w-0 flex-1">
+			<input
+				id="phone"
+				name="phone"
+				type="tel"
+				inputmode="numeric"
+				autocomplete="tel-national"
+				{required}
+				pattern={'[0-9]{6,12}'}
+				value={decoded.national}
+				oninput={onNumberInput}
+				class="{input} {required ? 'pr-8' : ''}"
+			/>
+			{#if required}
+				<RequiredMark />
+			{/if}
+		</div>
 	</div>
 </div>

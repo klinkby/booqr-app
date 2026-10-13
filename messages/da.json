@@ -205,7 +205,7 @@
 	"legendEditContact": "Rediger kontakt",
 	"legendCreateContact": "Opret kontakt",
 	"roleCannotBeChanged": "Rollen kan ikke ændres via denne formular",
-	"roleAdmin": "Administrator",
+	"roleAdmin": "Admin",
 	"changeRole": "Skift rolle",
 	"changeRoleConfirmTitle": "Skift rolle?",
 	"changeRoleConfirmMessage": "Skift rollen for {name} fra {from} til {to}? Vedkommende bliver logget ud på alle enheder.",
