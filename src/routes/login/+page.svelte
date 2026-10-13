@@ -58,10 +58,6 @@
 				error = m.authenticationFailed();
 			}
 		} catch (err) {
-			// Log error in development mode for debugging
-			if (import.meta.env.DEV) {
-				console.error('Login error:', err);
-			}
 			// Try to use the error message from API if available
 			error = apiError(err);
 		} finally {

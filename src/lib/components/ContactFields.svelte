@@ -5,6 +5,7 @@
 	import RequiredInput from './RequiredInput.svelte';
 
 	// `children` renders between name and phone (forms put the email field there).
+	// Fixed ids (`name`, `phone`, `phoneCountry`): render at most one per page.
 	let { name = $bindable(''), phone = $bindable(''), children } = $props();
 </script>
 

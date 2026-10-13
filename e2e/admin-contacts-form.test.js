@@ -31,25 +31,13 @@ test.describe('Admin Contact Form (create / edit)', () => {
 		await pageScreenshot(page, 'admin-contacts-new');
 	});
 
-	test('creating a contact POSTs the email, PUTs name/phone and returns to the list', async ({ page }) => {
+	test('creating a contact POSTs email, name and phone and returns to the list', async ({ page }) => {
 		let postBody = null;
-		let putBody = null;
 		await page.route('**/api/users', (route) => {
 			if (route.request().method() === 'POST') {
 				postBody = route.request().postDataJSON();
 				return route.fulfill({
 					status: 201,
-					contentType: 'application/json',
-					body: JSON.stringify({ id: 'new-contact' }),
-				});
-			}
-			return route.fallback();
-		});
-		await page.route('**/api/users/new-contact', (route) => {
-			if (route.request().method() === 'PUT') {
-				putBody = route.request().postDataJSON();
-				return route.fulfill({
-					status: 200,
 					contentType: 'application/json',
 					body: JSON.stringify({ id: 'new-contact' }),
 				});
@@ -65,8 +53,7 @@ test.describe('Admin Contact Form (create / edit)', () => {
 		await page.getByRole('button', { name: 'Create', exact: true }).click();
 
 		await expect(page).toHaveURL('/admin/contacts');
-		expect(postBody).toEqual({ email: 'new-contact@example.com' });
-		expect(putBody).toEqual({ name: 'New Contact', phone: '4512345678' });
+		expect(postBody).toEqual({ email: 'new-contact@example.com', name: 'New Contact', phone: '4512345678' });
 	});
 
 	test('edit form loads the contact, shows email as a mailto link, and PUTs name/phone', async ({ page }) => {

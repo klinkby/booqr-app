@@ -43,9 +43,6 @@
 			await cp.requestReset(resetEmail);
 			resetMessage = m.passwordResetSent();
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to request password reset:', err);
-			}
 			resetError = apiError(err);
 		} finally {
 			resetLoading = false;
@@ -73,9 +70,6 @@
 			confirmPassword = '';
 			await goto(resolve('login'));
 		} catch (err) {
-			if (import.meta.env.DEV) {
-				console.error('Failed to change password:', err);
-			}
 			error = apiError(err);
 		} finally {
 			loading = false;
