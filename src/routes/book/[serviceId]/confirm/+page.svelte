@@ -1,6 +1,7 @@
 <script>
 	import {
 		BookingSummary,
+		ContactFields,
 		Form,
 		LimitedTextarea,
 		MARKETING_URL,
@@ -109,11 +110,23 @@
 	}
 
 	// --- Step 7: confirmation form ---
+	let name = $state('');
+	let phone = $state('');
+	let initialized = $state(false);
 	let notes = $state('');
 	let acceptCancellation = $state(false);
 	let cancellationError = $state(null);
 	let bookLoading = $state(false);
 	let bookError = $state(null);
+
+	// Populate name/phone once from the signed-in user's profile.
+	$effect(() => {
+		if (confirmData.user && !initialized) {
+			name = confirmData.user.name || '';
+			phone = confirmData.user.phone || '';
+			initialized = true;
+		}
+	});
 
 	async function handleBook() {
 		cancellationError = null;
@@ -124,6 +137,9 @@
 		}
 		bookLoading = true;
 		try {
+			if (name !== (confirmData.user?.name || '') || phone !== (confirmData.user?.phone || '')) {
+				await confirmData.saveProfile({ name, phone });
+			}
 			await confirmData.addBooking({
 				customerId: null,
 				vacancyId,
@@ -313,6 +329,7 @@
 			submitDisabled={!acceptCancellation}
 		>
 			<div class="{cardSection} space-y-4">
+				<ContactFields bind:name bind:phone />
 				<div>
 					<div class="flex items-start gap-3">
 						<input

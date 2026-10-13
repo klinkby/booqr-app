@@ -1,5 +1,5 @@
 <script>
-	import { auth, Form, apiError, ErrorMessage, PhoneInput, RequiredInput } from '#lib';
+	import { auth, ContactFields, Form, apiError, ErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -51,7 +51,7 @@
 		successMessage = null;
 		loading = true;
 		try {
-			await profile.saveProfile({ name, phone: phone || null });
+			await profile.saveProfile({ name, phone });
 			successMessage = m.profileUpdated();
 		} catch (err) {
 			error = apiError(err);
@@ -181,13 +181,7 @@
 									/>
 								</div>
 
-								<!-- Name: editable -->
-								<div>
-									<label for="name" class={label}> {m.labelName()} </label>
-									<RequiredInput id="name" name="name" type="text" bind:value={name} />
-								</div>
-
-								<PhoneInput bind:value={phone} />
+								<ContactFields bind:name bind:phone />
 							</div>
 						</Form>
 					</div>

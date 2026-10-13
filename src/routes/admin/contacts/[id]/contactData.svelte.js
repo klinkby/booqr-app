@@ -8,7 +8,10 @@ import { fetchResource, useResourceMutation } from '#lib/resourceQuery.svelte.js
 export function useContactData() {
 	const saveContact = useResourceMutation(queryKeys.users.all, (variables) => {
 		const { id, isEdit, payload } = variables;
-		return isEdit ? UserService.updateUser(id, payload) : UserService.addUser(payload);
+		if (isEdit) return UserService.updateUser(id, payload);
+		// POST /api/users only accepts the email; name and phone follow in a PUT.
+		const { email, name, phone } = payload;
+		return UserService.addUser({ email }).then((created) => UserService.updateUser(created.id, { name, phone }));
 	});
 
 	const changeRole = useResourceMutation(queryKeys.users.all, ({ id, role }) =>

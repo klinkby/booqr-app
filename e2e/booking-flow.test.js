@@ -252,6 +252,12 @@ test.describe('Customer booking flow', () => {
 		await expect(page.getByLabel('Your selections so far')).toContainText(EMPLOYEES[0].name);
 		await expect(page.getByText(EMPLOYEES[0].name).last()).toBeVisible();
 
+		// Name and phone are required and prefilled from the signed-in user's profile.
+		await expect(page.locator('#name')).toHaveValue('Test Customer');
+		await expect(page.locator('#phone')).toHaveValue('12345678');
+		await expect(page.locator('#name')).toHaveAttribute('required', '');
+		await expect(page.locator('#phone')).toHaveAttribute('required', '');
+
 		await pageScreenshot(page, 'book-service-confirm');
 
 		await page.check('#acceptCancellation');
@@ -264,6 +270,53 @@ test.describe('Customer booking flow', () => {
 		).toBeVisible();
 
 		await pageScreenshot(page, 'book-done');
+	});
+
+	test('changed name/phone are saved with a PUT before the booking is posted', async ({ page }) => {
+		const { target, monthDiff } = pickTargetDay();
+		await mockSingleVacancy(page, target);
+
+		const calls = [];
+		await page.route('**/api/users/1', (route) => {
+			if (route.request().method() !== 'PUT') return route.fallback();
+			calls.push({ method: 'PUT users/1', body: route.request().postDataJSON() });
+			return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: '1' }) });
+		});
+		await page.route('**/api/bookings', (route) => {
+			if (route.request().method() !== 'POST') return route.fallback();
+			calls.push({ method: 'POST bookings' });
+			return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 'booking1' }) });
+		});
+		await page.route('**/api/auth/login', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ access_token: FAKE_TOKEN }),
+			}),
+		);
+
+		await page.goto('/');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+		await page.getByRole('button', { name: 'Location A' }).click();
+		await advanceToMonth(page, monthDiff);
+		await page.getByRole('button', { name: String(target.getDate()), exact: true }).click();
+		await page.getByRole('button', { name: /09:00/ }).click();
+
+		await page.fill('#email', process.env.TEST_EMAIL ?? 'test@example.com');
+		await page.fill('#password', process.env.TEST_PASSWORD ?? 'TestPassword1!');
+		await page.getByRole('button', { name: 'Sign in' }).click();
+
+		await expect(page.locator('#name')).toHaveValue('Test Customer');
+		await page.fill('#name', 'Changed Name');
+		await page.fill('#phone', '87654321');
+		await page.check('#acceptCancellation');
+		await page.getByRole('button', { name: 'Book now' }).click();
+
+		await expect(page).toHaveURL(/\/book\/done/);
+		expect(calls).toEqual([
+			{ method: 'PUT users/1', body: { name: 'Changed Name', phone: '4587654321' } },
+			{ method: 'POST bookings' },
+		]);
 	});
 
 	test('a slot taken between selection and submit lands on the conflict page', async ({ page }) => {
@@ -296,6 +349,7 @@ test.describe('Customer booking flow', () => {
 		await page.fill('#email', process.env.TEST_EMAIL ?? 'test@example.com');
 		await page.fill('#password', process.env.TEST_PASSWORD ?? 'TestPassword1!');
 		await page.getByRole('button', { name: 'Sign in' }).click();
+		await expect(page.locator('#name')).toHaveValue('Test Customer');
 		await page.check('#acceptCancellation');
 		await page.getByRole('button', { name: 'Book now' }).click();
 
