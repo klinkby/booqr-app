@@ -1,5 +1,5 @@
 <script>
-	import { auth, Form, RequiredInput, SignUpForm, apiErrorMessage } from '#lib';
+	import { auth, Form, RequiredInput, SignUpForm, apiError } from '#lib';
 	import { cardSection, label, link, success } from '#lib/ui.js';
 	import { ApiError } from '#lib/api/index.js';
 	import { goto } from '$app/navigation';
@@ -61,7 +61,7 @@
 				console.error('Login error:', err);
 			}
 			// Try to use the error message from API if available
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loading = false;
 		}
@@ -74,7 +74,10 @@
 			await loginData.signUp(email);
 			signUpSent = true;
 		} catch (err) {
-			error = err instanceof ApiError && err.status === 409 ? m.emailAlreadyRegistered() : apiErrorMessage(err);
+			error =
+				err instanceof ApiError && err.status === 409
+					? { ...apiError(err), message: m.emailAlreadyRegistered() }
+					: apiError(err);
 		} finally {
 			loading = false;
 		}

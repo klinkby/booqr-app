@@ -1,5 +1,6 @@
 <script>
 	import DataTable from './DataTable.svelte';
+	import ErrorMessage from './ErrorMessage.svelte';
 	import { m } from '#lib/paraglide/messages.js';
 	import { alert as alertClass, card, cardSection } from '#lib/ui.js';
 
@@ -25,7 +26,7 @@
 	</div>
 {:else if error}
 	<div role="alert" aria-live="assertive" class={alertClass}>
-		<p>{error}</p>
+		<p><ErrorMessage {error} /></p>
 	</div>
 {:else if rows.length === 0}
 	<div class="{card} {cardSection}">

@@ -1,5 +1,5 @@
 <script>
-	import { Form, LimitedTextarea, RequiredInput, apiErrorMessage } from '#lib';
+	import { Form, LimitedTextarea, RequiredInput, apiError } from '#lib';
 	import { cardSection, checkbox, choiceLabel, groupHeading, label } from '#lib/ui.js';
 	import { DateUtils } from '#lib/dateUtils.js';
 	import { goto } from '$app/navigation';
@@ -45,7 +45,7 @@
 			description = existing.description || '';
 			selectedEmployeeIds = (existing.employees || []).map(String);
 		} catch (err) {
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loadingData = false;
 		}
@@ -67,7 +67,7 @@
 			});
 			await goto(resolve('admin/services'));
 		} catch (err) {
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loading = false;
 		}

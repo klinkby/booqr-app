@@ -1,6 +1,6 @@
 <script>
 	import { resolve } from '$app/paths';
-	import { Form, PasswordReset, RequiredInput, apiErrorMessage } from '#lib';
+	import { Form, PasswordReset, RequiredInput, apiError } from '#lib';
 	import { alert, cardSection, label } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -46,7 +46,7 @@
 			if (import.meta.env.DEV) {
 				console.error('Failed to request password reset:', err);
 			}
-			resetError = apiErrorMessage(err);
+			resetError = apiError(err);
 		} finally {
 			resetLoading = false;
 		}
@@ -76,7 +76,7 @@
 			if (import.meta.env.DEV) {
 				console.error('Failed to change password:', err);
 			}
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loading = false;
 		}
