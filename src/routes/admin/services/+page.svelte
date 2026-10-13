@@ -48,7 +48,7 @@
 					{/each}
 				</span>
 			{:else if column.key === 'duration'}
-				{DateUtils.formatHmm(row.duration)}
+				{DateUtils.formatDuration(row.duration)}
 			{:else}
 				{row[column.key]}
 			{/if}
