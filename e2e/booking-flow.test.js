@@ -343,6 +343,37 @@ test.describe('Customer booking flow', () => {
 		);
 	});
 
+	test('a full hour of time slots fits on one row on a narrow phone', async ({ page }) => {
+		await page.setViewportSize({ width: 320, height: 640 });
+		const { target } = pickTargetDay();
+		const startTime = new Date(target);
+		const endTime = new Date(target);
+		endTime.setHours(11, 0, 0, 0);
+		const vacancy = {
+			id: 'e2e-hour',
+			startTime: startTime.toISOString(),
+			endTime: endTime.toISOString(),
+			employeeId: 'emp1',
+			locationId: 1,
+			bookingId: null,
+		};
+		await page.route('**/api/vacancies*', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [vacancy] }) }),
+		);
+
+		const date = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
+		await page.goto(`/book/svc1?location=1&date=${date}`);
+
+		const slots = ['09:00', '09:15', '09:30', '09:45'].map((t) =>
+			page.getByRole('button', { name: new RegExp(`^${t} `) }),
+		);
+		await expect(slots[3]).toBeVisible();
+		const tops = await Promise.all(slots.map(async (slot) => (await slot.boundingBox()).y));
+		expect(new Set(tops).size).toBe(1);
+
+		await pageScreenshot(page, 'book-service-times');
+	});
+
 	test('no available dates shows a message instead of a disabled calendar', async ({ page }) => {
 		// Override vacancies to return nothing — simulating a service with
 		// no open slots anywhere in the lookahead horizon.

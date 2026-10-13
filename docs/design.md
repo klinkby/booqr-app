@@ -222,7 +222,8 @@ so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isF
 - **Month and day.** Prev/next are `iconButtonSecondary` chevrons around the heading. The month grid is a `card`
   (`p-4 sm:p-6`); bookable days are round `indigo-50` buttons with `indigo-700` bold numbers, other days plain
   `gray-400` text (disabled).
-- **Times.** Slots are `buttonSecondary` buttons with tabular numbers in a `card` grid.
+- **Times.** Slots are `buttonSecondaryCompact` buttons (narrow `px-2` padding) with tabular numbers in a
+  `card` grid, four per row on phones so a full hour of 15-minute slots fits on one line.
 - **Confirm.** The appointment details are a `card` with a `divide-y` description list (term `text-sm font-semibold`,
   value `text-sm text-gray-700`), followed by a `<Form card>` with the cancellation checkbox, notes and "Book now".
   The sign-in gate uses the same card form as `/login`: "Forgot your password?" sits right of the Password label
