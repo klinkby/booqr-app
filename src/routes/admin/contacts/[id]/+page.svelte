@@ -50,7 +50,7 @@
 		error = null;
 		loading = true;
 		try {
-			await contact.saveContact({ id, isEdit, payload: isEdit ? { name, phone } : { email } });
+			await contact.saveContact({ id, isEdit, payload: isEdit ? { name, phone: phone || null } : { email } });
 			await goto(resolve('admin/contacts'));
 		} catch (err) {
 			error = apiError(err);
@@ -117,7 +117,7 @@
 							<input id="name" name="name" type="text" bind:value={name} class={input} />
 						</div>
 
-						<PhoneInput bind:value={phone} required={false} />
+						<PhoneInput bind:value={phone} />
 
 						<div>
 							<label for="role" class={label}>{m.labelRole()}</label>

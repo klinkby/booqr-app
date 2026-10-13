@@ -51,7 +51,7 @@
 		successMessage = null;
 		loading = true;
 		try {
-			await profile.saveProfile({ name, phone });
+			await profile.saveProfile({ name, phone: phone || null });
 			successMessage = m.profileUpdated();
 		} catch (err) {
 			error = apiError(err);

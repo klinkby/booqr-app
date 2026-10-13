@@ -3,10 +3,9 @@
 	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { COUNTRIES, DEFAULT_CODE, decodePhone, encodePhone, nationalPattern } from '#lib/phone.js';
 	import { input, label } from '#lib/ui.js';
-	import RequiredMark from './RequiredMark.svelte';
 
 	// `value` is the API's single numeric string: calling code + subscriber number.
-	let { value = $bindable(''), required = true } = $props();
+	let { value = $bindable('') } = $props();
 
 	const regionNames = new Intl.DisplayNames(getLocale(), { type: 'region' });
 	// Regional-indicator pair = flag emoji, e.g. 'DK' → 🇩🇰.
@@ -52,22 +51,18 @@
 				{/each}
 			</select>
 		</div>
-		<div class="relative min-w-0 flex-1">
+		<div class="min-w-0 flex-1">
 			<input
 				id="phone"
 				name="phone"
 				type="tel"
 				inputmode="numeric"
 				autocomplete="tel-national"
-				{required}
 				pattern={nationalPattern(code)}
 				value={decoded.national}
 				oninput={onNumberInput}
-				class="{input} {required ? 'pr-8' : ''}"
+				class={input}
 			/>
-			{#if required}
-				<RequiredMark />
-			{/if}
 		</div>
 	</div>
 </div>
