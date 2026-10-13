@@ -156,8 +156,8 @@ test.describe('My Bookings overflow menu', () => {
 		);
 		await page.goto('/');
 		await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-		const pending = await page.evaluate(() => sessionStorage.getItem('pendingRebook'));
-		expect(pending).toBeNull();
+		// The heading can render before the page's onMount has cleared the intent, so poll.
+		await expect.poll(() => page.evaluate(() => sessionStorage.getItem('pendingRebook'))).toBeNull();
 	});
 });
 
