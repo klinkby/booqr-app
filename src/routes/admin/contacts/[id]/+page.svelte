@@ -8,6 +8,7 @@
 	import { page } from '$app/state';
 	import { useContactData } from './contactData.svelte.js';
 	import { canChangeRole, ROLES } from './roleChange.js';
+	import { roleLabel } from '../roleLabel.js';
 	import { m } from '#lib/paraglide/messages.js';
 
 	let id = $derived(page.params.id);
@@ -27,12 +28,6 @@
 	let error = $state(null);
 	let loading = $state(false);
 	let loadingData = $state(false);
-
-	function roleLabel(value) {
-		if (value === 'Employee') return m.employee();
-		if (value === 'Admin') return m.roleAdmin();
-		return m.customer();
-	}
 
 	onMount(async () => {
 		if (!isEdit) return;

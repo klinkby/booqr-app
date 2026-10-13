@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { useContactsData } from './contactsData.svelte.js';
 	import ContactsFilterForm from './ContactsFilterForm.svelte';
+	import { roleLabel } from './roleLabel.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { buttonSecondary, iconButtonSecondary } from '#lib/ui.js';
 
@@ -50,7 +51,9 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			<UserName id={row.id} name={row.name} />
+			<UserName id={row.id} name={row.name || row.email} />
+		{:else if column.key === 'role'}
+			{roleLabel(row.role)}
 		{:else}
 			{row[column.key]}
 		{/if}
