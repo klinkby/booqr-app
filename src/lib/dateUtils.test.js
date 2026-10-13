@@ -69,3 +69,23 @@ describe('utcToLocalIso', () => {
 		expect(DateUtils.utcToLocalIso(utc)).toBe(`${DateUtils.toLocalDate(instant)}T${DateUtils.toLocalTime(instant)}`);
 	});
 });
+
+describe('formatHmm', () => {
+	it('drops seconds and pads minutes', () => {
+		expect(DateUtils.formatHmm('00:30:00')).toBe('0:30');
+		expect(DateUtils.formatHmm('01:10:10')).toBe('1:10');
+		expect(DateUtils.formatHmm('02:00:00')).toBe('2:00');
+		expect(DateUtils.formatHmm('')).toBe('0:00');
+	});
+});
+
+describe('hmmToDuration', () => {
+	it('builds the API HH:MM:SS value', () => {
+		expect(DateUtils.hmmToDuration('1:10')).toBe('01:10:00');
+		expect(DateUtils.hmmToDuration('0:05')).toBe('00:05:00');
+		expect(DateUtils.hmmToDuration('12:30')).toBe('12:30:00');
+	});
+	it('round-trips with formatHmm', () => {
+		expect(DateUtils.formatHmm(DateUtils.hmmToDuration('1:45'))).toBe('1:45');
+	});
+});

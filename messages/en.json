@@ -214,7 +214,7 @@
 	"noServicesFound": "No services found.",
 	"legendEditService": "Edit service",
 	"legendCreateService": "Create service",
-	"durationPlaceholder": "e.g., 01:00:00",
+	"durationPlaceholder": "e.g., 1:00",
 	"employees": "Employees",
 	"noEmployeesFound": "No employees found.",
 

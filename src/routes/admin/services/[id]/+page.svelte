@@ -1,6 +1,7 @@
 <script>
 	import { Form, LimitedTextarea, RequiredInput, apiErrorMessage } from '#lib';
 	import { cardSection, checkbox, choiceLabel, groupHeading, label } from '#lib/ui.js';
+	import { DateUtils } from '#lib/dateUtils.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -40,7 +41,7 @@
 		try {
 			const existing = await service.getService(id);
 			name = existing.name;
-			duration = existing.duration;
+			duration = DateUtils.formatHmm(existing.duration);
 			description = existing.description || '';
 			selectedEmployeeIds = (existing.employees || []).map(String);
 		} catch (err) {
@@ -57,7 +58,12 @@
 			await service.saveService({
 				id,
 				isEdit,
-				payload: { name, duration, description: description || null, employees: selectedEmployeeIds },
+				payload: {
+					name,
+					duration: DateUtils.hmmToDuration(duration),
+					description: description || null,
+					employees: selectedEmployeeIds,
+				},
 			});
 			await goto(resolve('admin/services'));
 		} catch (err) {
@@ -101,6 +107,7 @@
 							name="duration"
 							type="text"
 							autocomplete="off"
+							pattern={'[0-9]{1,2}:[0-5][0-9]'}
 							placeholder={m.durationPlaceholder()}
 							bind:value={duration}
 						/>

@@ -50,7 +50,7 @@ test.describe('Admin Services CRUD', () => {
 		await page.goto('/admin/services/new');
 
 		await page.fill('#name', 'Shave');
-		await page.fill('#duration', '00:15:00');
+		await page.fill('#duration', '0:15');
 		await page.locator(`#emp-${EMPLOYEES[0].id}`).check();
 		await page.getByRole('button', { name: 'Create', exact: true }).click();
 
@@ -76,7 +76,7 @@ test.describe('Admin Services CRUD', () => {
 
 		// Existing values are populated from the detail fetch.
 		await expect(page.locator('#name')).toHaveValue(svc.name);
-		await expect(page.locator('#duration')).toHaveValue(svc.duration);
+		await expect(page.locator('#duration')).toHaveValue('0:30');
 
 		await pageScreenshot(page, 'admin-services-edit');
 

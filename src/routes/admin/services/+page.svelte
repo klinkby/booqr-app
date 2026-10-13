@@ -1,5 +1,6 @@
 <script>
 	import { DataTable, UserName, apiErrorMessage } from '#lib';
+	import { DateUtils } from '#lib/dateUtils.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useServicesData } from './servicesData.svelte.js';
@@ -46,6 +47,8 @@
 						<UserName id={emp.id} name={emp.name || emp.email} />
 					{/each}
 				</span>
+			{:else if column.key === 'duration'}
+				{DateUtils.formatHmm(row.duration)}
 			{:else}
 				{row[column.key]}
 			{/if}
