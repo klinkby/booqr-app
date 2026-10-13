@@ -49,30 +49,11 @@ export function encodePhone(code, national) {
 }
 
 /**
- * Inclusive numeric range of valid phone values for a calling code, international
- * caller code included (e.g. DK: 4510000000–4599999999). BigInt because DE can exceed 2^53.
+ * HTML `pattern` for the subscriber number of a calling code.
  * @param {string} code
- * @returns {{ min: bigint, max: bigint } | null}
+ * @returns {string}
  */
-export function phoneRange(code) {
-	const country = COUNTRIES.find((c) => c.code === code);
-	if (!country) return null;
-	return {
-		min: BigInt(code + '1'.padEnd(country.min, '0')),
-		max: BigInt(code + '9'.repeat(country.max)),
-	};
-}
-
-/**
- * Whether a full phone value (caller code + number) lies within its country's numeric range.
- * @param {string} value
- * @returns {boolean}
- */
-export function isValidPhone(value) {
-	if (!/^[0-9]+$/.test(value)) return false;
-	const { code } = decodePhone(value);
-	const range = phoneRange(code);
-	if (!range) return false;
-	const n = BigInt(value);
-	return n >= range.min && n <= range.max;
+export function nationalPattern(code) {
+	const { min, max } = COUNTRIES.find((c) => c.code === code) ?? { min: 6, max: 12 };
+	return `[0-9]{${min},${max}}`;
 }

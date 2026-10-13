@@ -34,7 +34,7 @@ with no app-level error:
 
 - Inputs with `minlength="8"` (e.g. the change-password fields) reject short values natively — to reach the
   app's _custom_ complexity error, use an 8+ char value that still fails the pattern (e.g. `weakpass`).
-- `PhoneInput`'s number field is validated as a numeric range including the caller code (+45 needs exactly 8 digits); a too-short phone
+- `PhoneInput`'s number field has a per-country digit-length `pattern` (calling code is a separate select; +45 needs exactly 8); a too-short phone
   blocks submit. Fill `#phone` with the national number only, e.g. `12345678` (default code +45 → `4512345678`) when a test needs the form to actually submit.
 
 The email link on the contact **edit** form is labelled "Email" via `aria-labelledby`, so its accessible name
