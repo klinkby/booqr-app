@@ -50,4 +50,26 @@ export class DateUtils {
 		if (minutes === 0) return m.durationHours({ hours });
 		return m.durationHoursMinutes({ hours, minutes });
 	}
+
+	/**
+	 * Formats an API duration (`HH:MM:SS`) as `H:mm`, rounding to whole minutes.
+	 *
+	 * @param {string | null | undefined} duration
+	 * @returns {string} e.g. `0:30`, `1:10`
+	 */
+	static formatHmm(duration) {
+		const totalMinutes = Math.round(DateUtils.parseDurationSeconds(duration) / 60);
+		return `${Math.floor(totalMinutes / 60)}:${String(totalMinutes % 60).padStart(2, '0')}`;
+	}
+
+	/**
+	 * Converts `H:mm` input to the API's `HH:MM:SS` duration.
+	 *
+	 * @param {string} hmm e.g. `1:10`
+	 * @returns {string} e.g. `01:10:00`
+	 */
+	static hmmToDuration(hmm) {
+		const [hours = '0', minutes = '0'] = hmm.trim().split(':');
+		return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
+	}
 }

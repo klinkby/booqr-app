@@ -1,6 +1,7 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
 	import { buttonPrimary, card, cardActions, cardSection, label, cardAlert, cardSuccess } from '#lib/ui.js';
+	import ErrorMessage from './ErrorMessage.svelte';
 	import RequiredInput from './RequiredInput.svelte';
 
 	let { email = $bindable(''), error = null, message = null, loading = false, onsubmit } = $props();
@@ -14,7 +15,7 @@
 
 	<!-- Error message -->
 	<div role="alert" aria-live="polite" class={cardAlert} class:hidden={!error}>
-		<p>{error}</p>
+		<p><ErrorMessage {error} /></p>
 	</div>
 
 	<div class={cardSection}>

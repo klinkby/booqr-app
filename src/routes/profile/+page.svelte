@@ -1,5 +1,5 @@
 <script>
-	import { auth, Form, apiErrorMessage, PhoneInput, RequiredInput } from '#lib';
+	import { auth, Form, apiError, ErrorMessage, PhoneInput, RequiredInput } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -54,7 +54,7 @@
 			await profile.saveProfile({ name, phone: phone || null });
 			successMessage = m.profileUpdated();
 		} catch (err) {
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loading = false;
 		}
@@ -106,7 +106,7 @@
 			await profile.cancelBooking(event.id);
 			bookingMessage = m.bookingCancelled();
 		} catch (err) {
-			bookingError = apiErrorMessage(err);
+			bookingError = apiError(err);
 		} finally {
 			cancelling = false;
 		}
@@ -121,7 +121,7 @@
 			</div>
 		{:else if profile.error}
 			<div role="alert" aria-live="assertive" class={alert}>
-				{apiErrorMessage(profile.error)}
+				<ErrorMessage error={apiError(profile.error)} />
 			</div>
 		{:else}
 			<!-- Calendar takes the remaining width on the left; the profile form is a
@@ -134,7 +134,7 @@
 						<div role="status" aria-live="polite" class="{success} mb-4">{bookingMessage}</div>
 					{/if}
 					{#if bookingError}
-						<div role="alert" aria-live="assertive" class="{alert} mb-4">{bookingError}</div>
+						<div role="alert" aria-live="assertive" class="{alert} mb-4"><ErrorMessage error={bookingError} /></div>
 					{/if}
 					{#if ListCalendar}
 						<ListCalendar

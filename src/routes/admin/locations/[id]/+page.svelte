@@ -1,5 +1,5 @@
 <script>
-	import { Form, RequiredInput, apiErrorMessage } from '#lib';
+	import { Form, RequiredInput, apiError } from '#lib';
 	import { cardSection, groupHeading, input, label } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -33,7 +33,7 @@
 			zip = existing.zip || '';
 			city = existing.city || '';
 		} catch (err) {
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loadingData = false;
 		}
@@ -46,7 +46,7 @@
 			await location.saveLocation({ id, isEdit, payload: { name, address1, address2, zip, city } });
 			await goto(resolve('admin/locations'));
 		} catch (err) {
-			error = apiErrorMessage(err);
+			error = apiError(err);
 		} finally {
 			loading = false;
 		}

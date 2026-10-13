@@ -1,5 +1,6 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
+	import ErrorMessage from './ErrorMessage.svelte';
 	import { buttonDanger, buttonPrimary, buttonSecondary, card as cardClass, cardActions, cardAlert } from '#lib/ui.js';
 
 	let {
@@ -67,7 +68,7 @@
 
 <form novalidate onsubmit={handleSubmit} class={cls.form}>
 	<div aria-live="polite" class={cls.alert} class:hidden={!error} role="alert">
-		<p>{error}</p>
+		<p><ErrorMessage {error} /></p>
 	</div>
 
 	<fieldset class={cls.fieldset} disabled={loading}>

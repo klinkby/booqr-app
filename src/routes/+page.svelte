@@ -1,5 +1,5 @@
 <script>
-	import { ServiceList, apiErrorMessage } from '#lib';
+	import { ServiceList, apiError, ErrorMessage } from '#lib';
 	import { alert, pageHeading } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -35,7 +35,9 @@
 {#if home.isLoading}
 	<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loading()}</p>
 {:else if home.error}
-	<div role="alert" aria-live="assertive" class={alert}>{apiErrorMessage(home.error, m.errorLoadServices())}</div>
+	<div role="alert" aria-live="assertive" class={alert}>
+		<ErrorMessage error={apiError(home.error, m.errorLoadServices())} />
+	</div>
 {:else}
 	<ServiceList services={home.services} onselect={handleSelect} />
 {/if}
