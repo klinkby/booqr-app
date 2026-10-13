@@ -8,9 +8,9 @@ import { usePublicMutation } from '#lib/resourceQuery.svelte.js';
  */
 export function useLoginData() {
 	const login = usePublicMutation((credentials) => AuthenticationService.login(credentials));
-	const signUp = usePublicMutation((email) => UserService.addUser({ email }));
+	const signUp = usePublicMutation((payload) => UserService.addUser(payload));
 	return {
 		login: (credentials) => login(credentials),
-		signUp: (email) => signUp(email),
+		signUp: (payload) => signUp(payload),
 	};
 }

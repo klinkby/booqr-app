@@ -1,10 +1,17 @@
 <script>
-	import { Form, RequiredInput } from '#lib';
+	import { ContactFields, Form, RequiredInput } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import { MARKETING_URL } from '#lib/tenant.svelte.js';
 	import { cardSection, checkbox, choiceLabel, label, link } from '#lib/ui.js';
 
-	let { email = $bindable(''), error = null, loading = false, onsubmit } = $props();
+	let {
+		email = $bindable(''),
+		name = $bindable(''),
+		phone = $bindable(''),
+		error = null,
+		loading = false,
+		onsubmit,
+	} = $props();
 	let acceptTerms = $state(false);
 </script>
 
@@ -21,6 +28,7 @@
 				bind:value={email}
 			/>
 		</div>
+		<ContactFields bind:name bind:phone />
 		<div class="flex items-start gap-3">
 			<input
 				id="acceptTerms"

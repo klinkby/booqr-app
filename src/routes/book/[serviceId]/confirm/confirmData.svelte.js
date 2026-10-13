@@ -10,9 +10,8 @@ import {
 } from '#lib/api/index.js';
 import { authedQueryFn } from '#lib/queryClient.js';
 import { queryKeys } from '#lib/queryKeys.js';
-import { auth } from '#lib/auth.svelte.js';
-import { fetchResource, usePublicMutation, useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
-import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
+import { fetchResource, usePublicMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
+import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 
 /**
  * Route-local data hook for the confirmation page (steps 6-7): the inline
@@ -46,19 +45,8 @@ export function useConfirmData() {
 		fetcher: () => LocationService.getLocations(0, 100),
 	}));
 
-	// Same key as the profile page so the cache is shared. Prefills step 7.
-	const userQuery = createQuery(() => ({
-		queryKey: queryKeys.users.detail(auth.userId),
-		enabled: !!auth.userId,
-		queryFn: () => authedQueryFn(() => UserService.getUserById(auth.userId)),
-	}));
-
-	const saveProfile = useResourceMutation(queryKeys.users.all, (payload) =>
-		UserService.updateUser(auth.userId, payload),
-	);
-
 	const login = usePublicMutation((credentials) => AuthenticationService.login(credentials));
-	const signUp = usePublicMutation((email) => UserService.addUser({ email }));
+	const signUp = usePublicMutation((payload) => UserService.addUser(payload));
 
 	const addBookingMutation = createMutation(() => ({
 		mutationFn: (requestBody) => authedQueryFn(() => BookingService.addBooking(requestBody)),
@@ -92,15 +80,11 @@ export function useConfirmData() {
 		get locations() {
 			return locations.items;
 		},
-		get user() {
-			return userQuery.data ?? null;
-		},
-		saveProfile: (payload) => saveProfile(payload),
 		// Always-fresh detail fetch — the vacancy may have been taken by
 		// someone else between step 5 and landing here.
 		getVacancy: (id) => fetchResource(() => VacancyService.getVacancyById(id)),
 		login: (credentials) => login(credentials),
-		signUp: (email) => signUp(email),
+		signUp: (payload) => signUp(payload),
 		addBooking: (requestBody) => addBookingMutation.mutateAsync(requestBody),
 		deleteBooking: (id) => deleteBookingMutation.mutateAsync(id),
 	};

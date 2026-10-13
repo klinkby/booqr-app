@@ -229,7 +229,7 @@ Renders `id="phone"`/`name="phone"` (number) and `id="phoneCountry"` — render 
 
 Presentational pair of required contact fields: name (`RequiredInput`, `id="name"`) followed by `PhoneInput`. No
 wrapper styling — place it inside the form's `space-y-4` section. No API calls; parents own loading and saving. Used by
-the profile form, the admin contact form (create and edit) and the booking confirm step 7 form. Render at most one per
+the profile form, the admin contact form (create and edit) and `SignUpForm`. Render at most one per
 page (fixed `id`s).
 
 | Prop               | Type     | Default | Description                       |
@@ -239,7 +239,8 @@ page (fixed `id`s).
 
 ### SignUpForm (`src/lib/components/SignUpForm.svelte`)
 
-Presentational sign-up card (email + accept-terms checkbox). Props: `email` (bindable), `error`, `loading`, `onsubmit`.
+Presentational sign-up card (email, `ContactFields` name + phone, accept-terms checkbox). Props: `email`, `name`, `phone`
+(all bindable), `error`, `loading`, `onsubmit`.
 Shared by `/login` and the booking confirm auth gate; parents own the API call.
 
 ### Password Validation

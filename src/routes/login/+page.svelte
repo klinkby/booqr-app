@@ -11,6 +11,8 @@
 	const loginData = useLoginData();
 
 	let email = $state('');
+	let name = $state('');
+	let phone = $state('');
 	let password = $state('');
 	let error = $state(null);
 	let loading = $state(false);
@@ -71,7 +73,7 @@
 		error = null;
 		loading = true;
 		try {
-			await loginData.signUp(email);
+			await loginData.signUp({ email, name, phone });
 			signUpSent = true;
 		} catch (err) {
 			error =
@@ -127,7 +129,7 @@
 			</div>
 		</Form>
 	{:else if !signUpSent}
-		<SignUpForm bind:email {error} {loading} onsubmit={handleSignUp} />
+		<SignUpForm bind:email bind:name bind:phone {error} {loading} onsubmit={handleSignUp} />
 		<p class="mt-6 text-center text-sm text-gray-500">
 			{m.alreadyHaveAccount()}
 			<button type="button" onclick={() => switchMode('login')} class={link}>{m.signIn()}</button>
