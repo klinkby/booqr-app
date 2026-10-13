@@ -1,7 +1,7 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
-	import { COUNTRIES, DEFAULT_CODE, decodePhone, encodePhone, nationalPattern } from '#lib/phone.js';
+	import { COUNTRIES, DEFAULT_CODE, decodePhone, encodePhone, isValidPhone } from '#lib/phone.js';
 	import { input, label } from '#lib/ui.js';
 	import RequiredMark from './RequiredMark.svelte';
 
@@ -22,6 +22,12 @@
 	let picked = $state(null);
 	const code = $derived(decoded.matched ? decoded.code : (picked ?? DEFAULT_CODE));
 	const countryName = $derived(options.find((o) => o.code === code)?.name);
+
+	let numberInput = $state();
+	// Native validity so Form's checkValidity() blocks out-of-range numbers.
+	$effect(() => {
+		numberInput?.setCustomValidity(!value || isValidPhone(value) ? '' : m.phoneValidation());
+	});
 
 	function onCodeChange(event) {
 		picked = event.currentTarget.value;
@@ -54,13 +60,13 @@
 		</div>
 		<div class="relative min-w-0 flex-1">
 			<input
+				bind:this={numberInput}
 				id="phone"
 				name="phone"
 				type="tel"
 				inputmode="numeric"
 				autocomplete="tel-national"
 				{required}
-				pattern={nationalPattern(code)}
 				value={decoded.national}
 				oninput={onNumberInput}
 				class="{input} {required ? 'pr-8' : ''}"

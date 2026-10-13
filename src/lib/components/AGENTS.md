@@ -207,7 +207,8 @@ Error/success kept in DOM with `class:hidden` for reliable `aria-live` announcem
 
 Presentational phone-number field: a calling-code `<select>` (Nordics, Benelux, Germany, Poland, Baltics; flag + code options; country
 name on hover via `Intl.DisplayNames`) plus a digits-only `type="tel"` input. The API stores one numeric string, so the
-component decodes `value` into code + number and encodes it back (`src/lib/phone.js`, unit-tested). A value with an
+component decodes `value` into code + number and encodes it back (`src/lib/phone.js`, unit-tested). Validity is a per-country numeric range of the whole value, caller code included
+(e.g. DK `4510000000`–`4599999999`), set via `setCustomValidity` with `m.phoneValidation()`. A value with an
 unrecognised prefix is shown under the default code (+45) and left untouched until the user edits it. Used by the
 profile form and the admin contact form.
 

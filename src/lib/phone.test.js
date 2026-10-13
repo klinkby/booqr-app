@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodePhone, encodePhone, nationalPattern } from './phone.js';
+import { decodePhone, encodePhone, isValidPhone, phoneRange } from './phone.js';
 
 describe('decodePhone', () => {
 	it('splits two- and three-digit calling codes', () => {
@@ -26,11 +26,24 @@ describe('encodePhone', () => {
 	});
 });
 
-describe('nationalPattern', () => {
-	it('bounds the subscriber number per country', () => {
-		expect(new RegExp(`^${nationalPattern('45')}$`).test('12345678')).toBe(true);
-		expect(new RegExp(`^${nationalPattern('45')}$`).test('1234567')).toBe(false);
-		expect(new RegExp(`^${nationalPattern('48')}$`).test('123456789')).toBe(true);
-		expect(new RegExp(`^${nationalPattern('358')}$`).test('401234567')).toBe(true);
+describe('phoneRange', () => {
+	it('includes the caller code in the numeric range', () => {
+		expect(phoneRange('45')).toEqual({ min: 4510000000n, max: 4599999999n });
+		expect(phoneRange('999')).toBeNull();
+	});
+});
+
+describe('isValidPhone', () => {
+	it('accepts numbers inside the country range', () => {
+		expect(isValidPhone('4512345678')).toBe(true);
+		expect(isValidPhone('48123456789')).toBe(true);
+		expect(isValidPhone('358401234567')).toBe(true);
+	});
+	it('rejects too short, too long, non-numeric and unknown-prefix values', () => {
+		expect(isValidPhone('451234567')).toBe(false);
+		expect(isValidPhone('45123456789')).toBe(false);
+		expect(isValidPhone('45 12345678')).toBe(false);
+		expect(isValidPhone('3312345678')).toBe(false);
+		expect(isValidPhone('')).toBe(false);
 	});
 });
