@@ -227,15 +227,17 @@ Renders `id="phone"`/`name="phone"` (number) and `id="phoneCountry"` — render 
 
 ### ContactFields (`src/lib/components/ContactFields.svelte`)
 
-Presentational pair of required contact fields: name (`RequiredInput`, `id="name"`) followed by `PhoneInput`. No
+Presentational required contact fields: name (`RequiredInput`, `id="name"`), then `children` (the form's email field),
+then `PhoneInput`. Field order everywhere: name, email, phone. No
 wrapper styling — place it inside the form's `space-y-4` section. No API calls; parents own loading and saving. Used by
 the profile form, the admin contact form (create and edit) and `SignUpForm`. Render at most one per
 page (fixed `id`s).
 
-| Prop               | Type     | Default | Description                       |
-| ------------------ | -------- | ------- | --------------------------------- |
-| `name` (bindable)  | `string` | `''`    | Contact name                      |
-| `phone` (bindable) | `string` | `''`    | Calling code + number (see above) |
+| Prop               | Type     | Default | Description                                              |
+| ------------------ | -------- | ------- | -------------------------------------------------------- |
+| `name` (bindable)  | `string` | `''`    | Contact name                                             |
+| `phone` (bindable) | `string` | `''`    | Calling code + number (see above)                        |
+| `children`         | snippet  | —       | Rendered between name and phone (the form's email field) |
 
 ### SignUpForm (`src/lib/components/SignUpForm.svelte`)
 

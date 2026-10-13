@@ -101,17 +101,17 @@
 		>
 			<div class={cardSection}>
 				<div class="space-y-4">
-					<div>
-						{#if isEdit}
-							<span id="email-label" class={label}>{m.labelEmail()}</span>
-							<a href="mailto:{email}" aria-labelledby="email-label" class={link}>{email}</a>
-						{:else}
-							<label for="email" class={label}>{m.labelEmail()}</label>
-							<RequiredInput id="email" name="email" type="email" bind:value={email} />
-						{/if}
-					</div>
-
-					<ContactFields bind:name bind:phone />
+					<ContactFields bind:name bind:phone>
+						<div>
+							{#if isEdit}
+								<span id="email-label" class={label}>{m.labelEmail()}</span>
+								<a href="mailto:{email}" aria-labelledby="email-label" class={link}>{email}</a>
+							{:else}
+								<label for="email" class={label}>{m.labelEmail()}</label>
+								<RequiredInput id="email" name="email" type="email" bind:value={email} />
+							{/if}
+						</div>
+					</ContactFields>
 
 					{#if isEdit}
 						<div>

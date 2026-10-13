@@ -17,18 +17,19 @@
 
 <Form card legend={m.signUp()} {error} {loading} {onsubmit} submitLabel={m.signUp()}>
 	<div class="{cardSection} space-y-4">
-		<div>
-			<label for="signupEmail" class={label}>{m.labelEmailAddress()}</label>
-			<RequiredInput
-				id="signupEmail"
-				name="email"
-				type="email"
-				autocomplete="email"
-				placeholder={m.labelEmailAddress()}
-				bind:value={email}
-			/>
-		</div>
-		<ContactFields bind:name bind:phone />
+		<ContactFields bind:name bind:phone>
+			<div>
+				<label for="signupEmail" class={label}>{m.labelEmailAddress()}</label>
+				<RequiredInput
+					id="signupEmail"
+					name="email"
+					type="email"
+					autocomplete="email"
+					placeholder={m.labelEmailAddress()}
+					bind:value={email}
+				/>
+			</div>
+		</ContactFields>
 		<div class="flex items-start gap-3">
 			<input
 				id="acceptTerms"

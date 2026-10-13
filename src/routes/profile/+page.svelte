@@ -167,21 +167,21 @@
 							onsubmit={handleSubmit}
 						>
 							<div class="{cardSection} space-y-4">
-								<!-- Email: read-only display -->
-								<div>
-									<label for="email" class={label}> {m.labelEmail()} </label>
-									<input
-										id="email"
-										name="email"
-										type="email"
-										disabled
-										bind:value={email}
-										class={input}
-										title={m.emailCannotBeChanged()}
-									/>
-								</div>
-
-								<ContactFields bind:name bind:phone />
+								<ContactFields bind:name bind:phone>
+									<!-- Email: read-only display -->
+									<div>
+										<label for="email" class={label}> {m.labelEmail()} </label>
+										<input
+											id="email"
+											name="email"
+											type="email"
+											disabled
+											bind:value={email}
+											class={input}
+											title={m.emailCannotBeChanged()}
+										/>
+									</div>
+								</ContactFields>
 							</div>
 						</Form>
 					</div>
