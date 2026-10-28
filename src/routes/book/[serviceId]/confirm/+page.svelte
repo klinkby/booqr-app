@@ -168,12 +168,12 @@
 			if (startDate) params.set('start', startDate.toISOString());
 			if (endDate) params.set('end', endDate.toISOString());
 
-			goto(`${resolve('book/done')}?${params.toString()}`);
+			goto(resolve(`book/done?${params.toString()}`));
 		} catch (err) {
 			if (err.status === 409) {
 				const dateStr = startDate ? DateUtils.toLocalDate(startDate) : '';
 
-				goto(`/book/${serviceId}/conflict?date=${dateStr}`);
+				goto(resolve(`book/${serviceId}/conflict?date=${dateStr}`));
 			} else {
 				bookError = apiError(err);
 			}
@@ -327,7 +327,7 @@
 						/>
 						<label for="acceptCancellation" class={choiceLabel}>
 							{m.cancellationPolicyLabel()}
-							<a href="{MARKETING_URL}/terms" target="_blank" rel="noopener" class={link}>
+							<a href="{MARKETING_URL}/terms" target="_blank" rel="external noopener" class={link}>
 								{m.termsAndConditionsLink()}
 							</a>.
 						</label>

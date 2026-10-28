@@ -171,9 +171,9 @@
 				<div
 					class="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-4 text-xs text-gray-500 sm:px-6 lg:px-8"
 				>
-					<a class={FOOTER_LINK} href="{MARKETING_URL}/license">© 2026 Klinkby</a>
+					<a class={FOOTER_LINK} href="{MARKETING_URL}/license" rel="external">© 2026 Klinkby</a>
 					<span aria-hidden="true" class="text-gray-300">·</span>
-					<a class={FOOTER_LINK} href="{MARKETING_URL}/terms">{m.termsAndConditions()}</a>
+					<a class={FOOTER_LINK} href="{MARKETING_URL}/terms" rel="external">{m.termsAndConditions()}</a>
 					<span aria-hidden="true" class="text-gray-300">·</span>
 					<LanguageToggle current={locale.current} alternate={locale.alternate} ontoggle={() => locale.toggle()} />
 				</div>

@@ -52,7 +52,7 @@
 			// Store access token (response should contain token)
 			if (auth.isLoggedIn) {
 				// Redirect to the page that triggered login, or home if none
-
+				// eslint-disable-next-line svelte/no-navigation-without-resolve -- returnUrl is an already-resolved same-origin path, validated by normalizeReturnUrl()
 				await goto(returnUrl);
 			} else {
 				error = m.authenticationFailed();

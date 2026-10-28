@@ -13,7 +13,7 @@
 	<a
 		href={helpUrl}
 		target="_blank"
-		rel="noopener noreferrer"
+		rel="external noopener noreferrer"
 		title={m.errorDetails()}
 		class="ml-1 inline-flex rounded-full align-text-bottom hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
 	>

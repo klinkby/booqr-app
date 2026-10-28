@@ -41,7 +41,7 @@
 			/>
 			<label for="acceptTerms" class={choiceLabel}>
 				{m.iAcceptThe()}
-				<a href="{MARKETING_URL}/terms" target="_blank" rel="noopener" class={link}>
+				<a href="{MARKETING_URL}/terms" target="_blank" rel="external noopener" class={link}>
 					{m.termsAndConditionsLink()}
 				</a>.
 			</label>

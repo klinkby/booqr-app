@@ -1,6 +1,7 @@
 <script>
 	import { auth, VacancyForm, apiError, ErrorMessage } from '#lib';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { DateUtils } from '#lib/dateUtils.js';
@@ -99,7 +100,7 @@
 
 	// Week navigation: update URL params so the load function re-fetches for the new range
 	function handleDatesChange(info) {
-		goto(`?from=${info.start.toISOString()}&to=${info.end.toISOString()}`, {
+		goto(resolve(`admin/plan?from=${info.start.toISOString()}&to=${info.end.toISOString()}`), {
 			replace: true,
 			reset: false,
 		});

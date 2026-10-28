@@ -82,7 +82,7 @@
 		params.set('location', locationId);
 		params.set('rebook', nonce);
 
-		goto(`/book/${serviceId}?${params.toString()}`);
+		goto(resolve(`book/${serviceId}?${params.toString()}`));
 	}
 
 	function handleDuplicateEvent(event) {
@@ -92,7 +92,7 @@
 		params.set('employee', employeeId);
 		params.set('location', locationId);
 
-		goto(`/book/${serviceId}?${params.toString()}`);
+		goto(resolve(`book/${serviceId}?${params.toString()}`));
 	}
 
 	async function handleCancelEvent(event) {

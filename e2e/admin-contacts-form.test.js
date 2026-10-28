@@ -242,6 +242,6 @@ test.describe('Admin Contact Form (role change)', () => {
 		const link = alert.getByRole('link', { name: 'Error details (opens in a new tab)' });
 		await expect(link).toHaveAttribute('href', type);
 		await expect(link).toHaveAttribute('target', '_blank');
-		await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+		await expect(link).toHaveAttribute('rel', 'external noopener noreferrer');
 	});
 });
