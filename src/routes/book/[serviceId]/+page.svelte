@@ -167,7 +167,7 @@
 		const params = new URLSearchParams(page.url.searchParams);
 		params.set('location', option.id);
 
-		goto(`?${params.toString()}`);
+		goto(resolve(`book/${page.params.serviceId}?${params.toString()}`));
 	}
 
 	function selectEmployee(option) {
@@ -177,7 +177,7 @@
 		params.delete('month');
 		params.delete('date');
 
-		goto(`?${params.toString()}`);
+		goto(resolve(`book/${page.params.serviceId}?${params.toString()}`));
 	}
 
 	function goToMonth(monthStr) {
@@ -186,7 +186,7 @@
 		params.set('month', monthStr);
 		params.delete('date');
 
-		goto(`?${params.toString()}`);
+		goto(resolve(`book/${page.params.serviceId}?${params.toString()}`));
 	}
 
 	function selectDay(dateStr) {
@@ -198,7 +198,7 @@
 		// after "Back" would show the wrong month for the breadcrumb's date.
 		params.set('month', dateStr.slice(0, 7));
 
-		goto(`?${params.toString()}`);
+		goto(resolve(`book/${page.params.serviceId}?${params.toString()}`));
 	}
 
 	function selectSlot(slot) {
@@ -212,7 +212,7 @@
 		const rebook = page.url.searchParams.get('rebook');
 		if (rebook) params.set('rebook', rebook);
 
-		goto(`/book/${page.params.serviceId}/confirm?${params.toString()}`);
+		goto(resolve(`book/${page.params.serviceId}/confirm?${params.toString()}`));
 	}
 
 	function handleBack() {
