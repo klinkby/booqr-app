@@ -62,4 +62,38 @@ test.describe('Profile Page', () => {
 		await page.getByRole('button', { name: 'Update', exact: true }).click();
 		await expect.poll(() => putBody).toEqual({ name: 'Renamed', phone: '4587654321' });
 	});
+
+	test('GDPR export downloads the takeout document as JSON', async ({ page }) => {
+		const takeout = {
+			schemaVersion: 1,
+			exportedAt: '2026-11-07T12:00:00Z',
+			tenantSlug: 'acme',
+			scope: 'CustomerGdpr',
+			users: [{ id: '1', name: 'Test Customer' }],
+			locations: [],
+			services: [],
+			bookings: [],
+			calendar: [],
+		};
+		await page.route('**/api/takeout/me', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(takeout) }),
+		);
+		await page.goto('/profile');
+
+		const downloadPromise = page.waitForEvent('download');
+		await page.getByRole('button', { name: 'Download', exact: true }).click();
+		const download = await downloadPromise;
+
+		expect(download.suggestedFilename()).toBe('booqr-takeout-acme-2026-11-07.json');
+		const chunks = [];
+		for await (const chunk of await download.createReadStream()) chunks.push(chunk);
+		expect(JSON.parse(Buffer.concat(chunks).toString('utf8'))).toEqual(takeout);
+	});
+
+	test('GDPR export shows an error when the request fails', async ({ page }) => {
+		await page.route('**/api/takeout/me', (route) => route.fulfill({ status: 500, body: '' }));
+		await page.goto('/profile');
+		await page.getByRole('button', { name: 'Download', exact: true }).click();
+		await expect(page.getByRole('alert')).toBeVisible();
+	});
 });

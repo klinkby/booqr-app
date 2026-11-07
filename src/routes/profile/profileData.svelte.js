@@ -1,8 +1,8 @@
-import { BookingService, LocationService, ServiceService, UserService } from '#lib/api/index.js';
+import { BookingService, DataTakeoutService, LocationService, ServiceService, UserService } from '#lib/api/index.js';
 import { auth } from '#lib/auth.svelte.js';
 import { authedQueryFn } from '#lib/queryClient.js';
 import { queryKeys } from '#lib/queryKeys.js';
-import { useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
+import { fetchResource, useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
 import { DateUtils } from '#lib/dateUtils.js';
 import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
@@ -123,5 +123,8 @@ export function useProfileData() {
 		},
 		saveProfile: (payload) => saveProfile(payload),
 		cancelBooking: (id) => cancelMutation.mutateAsync(id),
+		// GDPR data portability: the user's own takeout document. Always fetched
+		// fresh and never cached — it holds PII and must reflect the current state.
+		exportMyTakeout: () => fetchResource(() => DataTakeoutService.exportMyTakeout()),
 	};
 }

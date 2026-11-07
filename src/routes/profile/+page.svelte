@@ -5,7 +5,8 @@
 	import { onMount } from 'svelte';
 	import { useProfileData } from './profileData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import { alert, cardSection, input, label, sectionHeading, success } from '#lib/ui.js';
+	import { alert, cardSection, input, label, link, sectionHeading, success } from '#lib/ui.js';
+	import { takeoutFileName } from './takeout.js';
 
 	// Lazy-load the calendar (and its heavy `@event-calendar/core` dependency) so it
 	// splits into its own chunk instead of the shared bundle. Import the component's
@@ -27,6 +28,8 @@
 	let bookingError = $state(null);
 	let bookingMessage = $state(null);
 	let cancelling = $state(false);
+	let exporting = $state(false);
+	let exportError = $state(null);
 
 	// Auth guard: redirect unauthenticated users
 	$effect(() => {
@@ -111,6 +114,29 @@
 			cancelling = false;
 		}
 	}
+
+	// GDPR takeout: fetch the user's own data document and hand it to the browser
+	// as a JSON file download. The object URL is revoked right after the click so
+	// the PII doesn't linger in memory.
+	async function handleExport() {
+		if (exporting) return;
+		exporting = true;
+		exportError = null;
+		try {
+			const doc = await profile.exportMyTakeout();
+			const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = takeoutFileName(doc);
+			a.click();
+			URL.revokeObjectURL(url);
+		} catch (err) {
+			exportError = apiError(err);
+		} finally {
+			exporting = false;
+		}
+	}
 </script>
 
 {#if auth.isLoggedIn}
@@ -184,6 +210,34 @@
 								</ContactFields>
 							</div>
 						</Form>
+
+						{#if exportError}
+							<div role="alert" aria-live="assertive" class="{alert} mt-4"><ErrorMessage error={exportError} /></div>
+						{/if}
+						<!-- Inset by the card's own padding so the line aligns with the fields
+						     above. It's an action, so the link-styled word is a <button>; the
+						     rest of the sentence describes it for assistive tech. -->
+						<p class="{cardSection} flex items-center gap-1 text-sm text-gray-500">
+							<svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+								<path
+									d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								></path>
+							</svg>
+							<button
+								type="button"
+								class="{link} disabled:opacity-50"
+								onclick={handleExport}
+								disabled={exporting}
+								aria-busy={exporting}
+								aria-describedby="export-my-data-rest"
+							>
+								{m.exportMyDataLink()}
+							</button>
+							<span id="export-my-data-rest">{m.exportMyDataRest()}</span>
+						</p>
 					</div>
 				</section>
 			</div>
