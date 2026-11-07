@@ -2,7 +2,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { buttonPrimary, buttonSecondary, card, cardActions, cardSection, sectionHeading } from '#lib/ui.js';
 
-	let { open, title, message, confirmLabel, loading = false, onconfirm, oncancel } = $props();
+	let { open, title, message, confirmLabel, loading = false, onconfirm, oncancel, children = undefined } = $props();
 
 	const uid = $props.id();
 	const titleId = `${uid}-title`;
@@ -38,6 +38,9 @@
 	<div class={cardSection}>
 		<h2 id={titleId} class={sectionHeading}>{title}</h2>
 		<p id={messageId} class="mt-2 text-sm text-gray-700">{message}</p>
+		{#if children}
+			<div class="mt-4">{@render children()}</div>
+		{/if}
 	</div>
 	<div class={cardActions}>
 		<button type="button" class={buttonSecondary} disabled={loading} onclick={oncancel}>{m.cancel()}</button>

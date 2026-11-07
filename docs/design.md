@@ -163,6 +163,13 @@ other neutral actions) and `buttonDanger` (destructive actions that are not the 
 `text-red-700`, so Delete never out-shouts the primary action). All are `rounded-lg text-sm font-bold shadow-xs` with a
 `focus-visible` outline, so keyboard users get a ring and mouse clicks don't leave one behind.
 
+A native file picker uses `fileInput`: its browse button looks like `buttonSecondary`, and the chosen file name follows
+in `text-sm text-gray-700`. Pair it with a `<label class={label} for>` like any field.
+
+An inline action inside a sentence (e.g. "**Download** my data (GDPR takeout)" on `/profile`) is a `<button>` with the
+`link` token; only the verb is the control, the rest of the line is `text-sm text-gray-500` body text referenced by
+`aria-describedby`, with a decorative `size-4` outline icon in front.
+
 ### Migrating a form
 
 1. Pass `card` to `Form`; drop the page's own width wrapper (the layout centres form routes) and any `mt-*` above it.

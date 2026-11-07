@@ -126,5 +126,15 @@ export function useProfileData() {
 		// GDPR data portability: the user's own takeout document. Always fetched
 		// fresh and never cached — it holds PII and must reflect the current state.
 		exportMyTakeout: () => fetchResource(() => DataTakeoutService.exportMyTakeout()),
+		// Organization backup (admin only): same fresh, uncached read as above.
+		exportTenantTakeout: () => fetchResource(() => DataTakeoutService.exportTenantTakeout()),
+		// Restore a backup. A dry run only reports what would change. A real
+		// import can touch every resource, so it invalidates the whole cache
+		// rather than one key and resolves only after the refetch has settled.
+		importTakeout: async (doc, dryRun) => {
+			const result = await fetchResource(() => DataTakeoutService.importTakeout(doc, dryRun));
+			if (!dryRun) await queryClient.invalidateQueries();
+			return result;
+		},
 	};
 }

@@ -84,15 +84,16 @@ Native `<dialog>` confirmation, opened with `showModal()` while `open` is true. 
 `open` and runs the action. Escape and Cancel call `oncancel`; Escape is swallowed so `Form`'s document-level Escape
 (navigate away) does not fire. Renders a `card` with a `cardSection` heading and message, then a `cardActions` bar.
 
-| Prop           | Type         | Default  | Description                                          |
-| -------------- | ------------ | -------- | ---------------------------------------------------- |
-| `open`         | `boolean`    | required | Shows (`showModal`) or closes the dialog             |
-| `title`        | `string`     | required | Heading; names the dialog (`aria-labelledby`)        |
-| `message`      | `string`     | required | Body text; describes the dialog (`aria-describedby`) |
-| `confirmLabel` | `string`     | required | Confirm button label                                 |
-| `loading`      | `boolean`    | `false`  | Disables both buttons; confirm shows "Please wait…"  |
-| `onconfirm`    | `() => void` | required | Confirm button click                                 |
-| `oncancel`     | `() => void` | required | Cancel button, or Escape (ignored while `loading`)   |
+| Prop           | Type         | Default  | Description                                                     |
+| -------------- | ------------ | -------- | --------------------------------------------------------------- |
+| `open`         | `boolean`    | required | Shows (`showModal`) or closes the dialog                        |
+| `title`        | `string`     | required | Heading; names the dialog (`aria-labelledby`)                   |
+| `message`      | `string`     | required | Body text; describes the dialog (`aria-describedby`)            |
+| `confirmLabel` | `string`     | required | Confirm button label                                            |
+| `loading`      | `boolean`    | `false`  | Disables both buttons; confirm shows "Please wait…"             |
+| `onconfirm`    | `() => void` | required | Confirm button click                                            |
+| `oncancel`     | `() => void` | required | Cancel button, or Escape (ignored while `loading`)              |
+| `children`     | snippet      | —        | Optional extra content below the message (e.g. a summary table) |
 
 ### RequiredInput (`src/lib/components/RequiredInput.svelte`)
 

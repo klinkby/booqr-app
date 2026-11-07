@@ -38,6 +38,10 @@ export const buttonDanger = `${button} px-3.5 py-2 bg-white text-red-700 ring-1 
 // Narrow padding so four time slots fit across a phone screen.
 export const buttonSecondaryCompact = `${button} px-2 py-2 ${secondaryColours}`;
 export const iconButtonSecondary = `${button} p-2 ${secondaryColours}`;
+// Native file picker: the browse button mirrors buttonSecondary (written out with `file:`, as Tailwind can't prefix a
+// shared string), the chosen file name follows in body text.
+export const fileInput =
+	'block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3.5 file:py-2 file:text-sm file:font-bold file:text-gray-900 file:shadow-xs file:ring-1 file:ring-gray-300 file:ring-inset hover:file:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50';
 
 // `theme` option for @event-calendar/core: adds tokens to the library's own classes.
 export const calendarTheme = (theme) => ({
