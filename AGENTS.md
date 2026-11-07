@@ -73,7 +73,8 @@ It follows secure, accessible, and simply standards-first principles.
 - **Refresh Tokens**: Stored in httponly cookies, automatically sent with `credentials: 'include'`.
 - **Token Validation**: JWT structure (3 dot-separated parts) and `exp` claim validated before storage.
 - **Token Management**: `auth.accessToken = token` to store; `auth.clear()` to remove. `auth.isLoggedIn` is derived
-  from token presence.
+  from token presence. `auth.role` comes from the token's `role` claim; `auth.isEmployee` is true for `Employee` and
+  `Admin`, `auth.isAdmin` only for `Admin`.
 - **401 refresh-and-retry**: `authedQueryFn` in `src/lib/queryClient.js` wraps any API operation with automatic
   token refresh. Concurrent refreshes are coalesced via `refreshToken`. Use
   `authedQueryFn` directly only when writing data-hook infrastructure; ordinary API calls go through
@@ -197,7 +198,8 @@ Shared (do not duplicate per route):
 
 - **Routes**:
   - `/` — Customer booking wizard step 1, "Select a service" (`ServiceList`); `/profile` — My Profile (edit
-    name/phone, any logged-in user)
+    name/phone and download a personal GDPR takeout, any logged-in user; admins also get a Backup panel to download
+    the organization backup and restore one via a dry-run preview + `ConfirmDialog`)
   - `/book/[serviceId]` — Wizard steps 2–5 (location → employee → month → day), one thin coordinator keyed entirely
     off URL params (`?location=&employee=&month=&date=`). Steps 2/3 auto-skip when only one option exists.
     `bookingData.svelte.js` / `useBookingData()` derives availability client-side from vacancies: `bookingId === null`

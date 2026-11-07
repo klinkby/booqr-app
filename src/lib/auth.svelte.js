@@ -11,6 +11,7 @@ class AuthState {
 	userId = $derived(parseToken(this.#token)?.sub ?? null);
 	role = $derived(parseToken(this.#token)?.role ?? null);
 	isEmployee = $derived(this.role === 'Employee' || this.role === 'Admin');
+	isAdmin = $derived(this.role === 'Admin');
 
 	get accessToken() {
 		return this.#token;
