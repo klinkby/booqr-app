@@ -115,6 +115,8 @@
 	"profileUpdated": "Profile updated successfully.",
 	"legendEditProfile": "Edit profile information",
 	"emailCannotBeChanged": "Email cannot be changed",
+	"exportMyDataLink": "Download",
+	"exportMyDataRest": "my GDPR §20 data",
 	"myBookings": "My bookings",
 	"bookNewAppointment": "Book",
 	"noBookings": "You have no upcoming bookings.",
