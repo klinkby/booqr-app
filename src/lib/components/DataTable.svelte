@@ -53,22 +53,22 @@
 						</td>
 					{/each}
 					{#if hasActions}
-						<td class="px-4 py-4 text-right text-sm sm:px-6">
-							{#if rowActions}
-								{@render rowActions(row)}
-							{/if}
-							{#if onedit}
-								<button type="button" class="{link} {rowActions ? 'ml-3' : ''}" onclick={() => onedit(row)}
-									>{m.edit()}</button
-								>
-							{/if}
-							{#if ondelete}
-								<button
-									type="button"
-									class="ml-3 font-semibold text-red-700 hover:text-red-600"
-									onclick={() => ondelete(row)}>{m.delete()}</button
-								>
-							{/if}
+						<td class="px-4 py-4 text-sm sm:px-6">
+							<div class="flex justify-end gap-3">
+								{#if rowActions}
+									{@render rowActions(row)}
+								{/if}
+								{#if onedit}
+									<button type="button" class={link} onclick={() => onedit(row)}>{m.edit()}</button>
+								{/if}
+								{#if ondelete}
+									<button
+										type="button"
+										class="font-semibold text-red-700 hover:text-red-600"
+										onclick={() => ondelete(row)}>{m.delete()}</button
+									>
+								{/if}
+							</div>
 						</td>
 					{/if}
 				</tr>

@@ -31,6 +31,12 @@
 	// Ignored for non-employees; the API is authoritative either way.
 	const customerId = $derived(auth.isEmployee ? page.url.searchParams.get('customer') : null);
 	const linkValid = $derived(!!vacancyId && !!startIso);
+	// Restart the wizard without losing an employee's "book on behalf of" contact.
+	const chooseTimeHref = $derived.by(() => {
+		const base = resolve(`book/${serviceId}`);
+		const customerParam = page.url.searchParams.get('customer');
+		return customerParam ? `${base}?${new URLSearchParams({ customer: customerParam })}` : base;
+	});
 
 	const service = $derived(confirmData.services.find((s) => String(s.id) === String(serviceId)));
 	const startDate = $derived(startIso ? new Date(startIso) : null);
@@ -46,11 +52,13 @@
 	let vacancy = $state(null);
 	let vacancyError = $state(null);
 	let customer = $state(null);
+	let customerError = $state(null);
 
 	// Re-runs once the user signs in through the inline auth gate.
 	$effect(() => {
 		const id = customerId;
 		customer = null;
+		customerError = null;
 		if (!id) return;
 		confirmData
 			.getUser(id)
@@ -58,7 +66,7 @@
 				if (customerId === id) customer = user;
 			})
 			.catch((err) => {
-				if (customerId === id) vacancyError = apiError(err);
+				if (customerId === id) customerError = apiError(err);
 			});
 	});
 
@@ -186,14 +194,18 @@
 			if (locationName) params.set('location', locationName);
 			if (startDate) params.set('start', startDate.toISOString());
 			if (endDate) params.set('end', endDate.toISOString());
+			// Lets "Book another appointment" continue on the same contact's behalf.
+			if (customerId) params.set('customer', customerId);
 
 			goto(resolve(`book/done?${params.toString()}`));
 		} catch (err) {
 			if (err.status === 409) {
-				const dateStr = startDate ? DateUtils.toLocalDate(startDate) : '';
-				const customerQuery = customerId ? `&customer=${encodeURIComponent(customerId)}` : '';
+				// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
+				const conflictParams = new URLSearchParams();
+				conflictParams.set('date', startDate ? DateUtils.toLocalDate(startDate) : '');
+				if (customerId) conflictParams.set('customer', customerId);
 
-				goto(resolve(`book/${serviceId}/conflict?date=${dateStr}${customerQuery}`));
+				goto(resolve(`book/${serviceId}/conflict?${conflictParams}`));
 			} else {
 				bookError = apiError(err);
 			}
@@ -233,7 +245,8 @@
 {#if !linkValid}
 	<h1 bind:this={heading} tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.bookingLinkInvalid()}</h1>
 	<p class="mb-4 text-sm text-gray-500">{m.bookingLinkInvalidMessage()}</p>
-	<a href={resolve(`book/${serviceId}`)} class="{link} text-sm">
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- chooseTimeHref is built from resolve(); a query string is appended after -->
+	<a href={chooseTimeHref} class="{link} text-sm">
 		{m.chooseATime()}
 	</a>
 {:else if !auth.isLoggedIn}
@@ -295,8 +308,8 @@
 {:else}
 	<h1 bind:this={heading} tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.confirmAppointment()}</h1>
 
-	{#if vacancyError}
-		<p role="alert" class={alert}><ErrorMessage error={vacancyError} /></p>
+	{#if vacancyError || customerError}
+		<p role="alert" class={alert}><ErrorMessage error={vacancyError || customerError} /></p>
 	{:else if !vacancy || !service || (customerId && !customer)}
 		<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loading()}</p>
 	{:else}

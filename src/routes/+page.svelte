@@ -29,8 +29,11 @@
 	function handleSelect(service) {
 		// Carry an employee's "book on behalf of" contact (from /admin/contacts)
 		// into the wizard; the confirm step decides whether to honour it.
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
+		const params = new URLSearchParams();
 		const customer = page.url.searchParams.get('customer');
-		const query = customer ? `?customer=${encodeURIComponent(customer)}` : '';
+		if (customer) params.set('customer', customer);
+		const query = params.size ? `?${params}` : '';
 		goto(resolve(`book/${service.id}${query}`));
 	}
 </script>

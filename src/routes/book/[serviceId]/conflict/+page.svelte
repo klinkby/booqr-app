@@ -18,11 +18,10 @@
 	let differentDayHref = $derived(query({ customer: customerParam }));
 
 	function query(values) {
-		const qs = Object.entries(values)
-			.filter(([, v]) => v)
-			.map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-			.join('&');
-		return qs ? `${bookingBaseHref}?${qs}` : bookingBaseHref;
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
+		const params = new URLSearchParams();
+		for (const [k, v] of Object.entries(values)) if (v) params.set(k, v);
+		return params.size ? `${bookingBaseHref}?${params}` : bookingBaseHref;
 	}
 </script>
 
