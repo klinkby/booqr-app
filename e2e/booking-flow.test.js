@@ -306,6 +306,7 @@ test.describe('Customer booking flow', () => {
 
 		expect((await bookingRequest).postDataJSON()).toMatchObject({ customerId: '1' });
 		await expect(page).toHaveURL(/\/book\/done/);
+		await expect(page.getByRole('link', { name: 'Book another appointment' })).toHaveAttribute('href', '/?customer=1');
 	});
 
 	test('a slot taken between selection and submit lands on the conflict page', async ({ page }) => {

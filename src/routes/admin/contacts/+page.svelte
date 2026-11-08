@@ -43,6 +43,12 @@
 		return `${resolve('/')}?customer=${encodeURIComponent(row.id)}`;
 	}
 
+	// The name cell describes the row's "Book" link, so screen readers announce
+	// which contact it books for (WCAG 2.4.4) without extra UI copy.
+	function nameId(row) {
+		return `contact-name-${row.id}`;
+	}
+
 	function handleEdit(row) {
 		goto(resolve(`admin/contacts/${row.id}`));
 	}
@@ -63,7 +69,7 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			{row.name || row.email}
+			<span id={nameId(row)}>{row.name || row.email}</span>
 		{:else if column.key === 'phone'}
 			{#if row.phone}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- tel: URI, not app navigation -->
@@ -77,7 +83,7 @@
 	{/snippet}
 	{#snippet rowActions(row)}
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- bookHref() is built from resolve(); a query string is appended after -->
-		<a href={bookHref(row)} class={link}>{m.bookNewAppointment()}</a>
+		<a href={bookHref(row)} class={link} aria-describedby={nameId(row)}>{m.bookNewAppointment()}</a>
 	{/snippet}
 	<div class="mb-4 flex justify-between items-center">
 		<button class={buttonSecondary} onclick={handleCreate} type="button">{m.createContact()}</button>

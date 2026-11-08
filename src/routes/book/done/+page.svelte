@@ -29,6 +29,12 @@
 		return endDate ? `${day} – ${DateUtils.toLocalTime(endDate)}` : day;
 	});
 
+	// Booked on a contact's behalf (employee flow): book again for the same contact.
+	const customerParam = $derived(page.url.searchParams.get('customer'));
+	const bookAnotherHref = $derived(
+		customerParam ? `${resolve('/')}?${new URLSearchParams({ customer: customerParam })}` : resolve('/'),
+	);
+
 	const CONFETTI = [...Array(20).keys()];
 </script>
 
@@ -79,7 +85,8 @@
 	</p>
 	<div class="mt-8 flex flex-col-reverse justify-center gap-3 sm:flex-row">
 		<a href={resolve('/profile')} class={buttonSecondary}>{m.myBookings()}</a>
-		<a href={resolve('/')} class={buttonPrimary}>{m.bookAnotherAppointment()}</a>
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- bookAnotherHref is built from resolve(); a query string is appended after -->
+		<a href={bookAnotherHref} class={buttonPrimary}>{m.bookAnotherAppointment()}</a>
 	</div>
 </div>
 

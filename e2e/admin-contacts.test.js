@@ -69,6 +69,7 @@ test.describe('Admin Contacts Page', () => {
 		await expect(row.getByRole('link', { name: 'Carla Contact' })).toHaveCount(0);
 		await expect(row.getByRole('link', { name: '+45 12 34 56 78' })).toHaveAttribute('href', 'tel:+4512345678');
 		await expect(row.getByRole('link', { name: 'Book' })).toHaveAttribute('href', '/?customer=c1');
+		await expect(row.getByRole('link', { name: 'Book' })).toHaveAccessibleDescription('Carla Contact');
 		await expect(row.getByRole('button', { name: 'Edit' })).toBeVisible();
 	});
 });
