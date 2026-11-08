@@ -16,6 +16,7 @@
 		onedit = undefined,
 		ondelete = undefined,
 		cellContent = undefined,
+		rowActions = undefined,
 		caption = undefined,
 	} = $props();
 </script>
@@ -43,6 +44,7 @@
 		{onedit}
 		{ondelete}
 		{cellContent}
+		{rowActions}
 		{caption}
 	/>
 {/if}

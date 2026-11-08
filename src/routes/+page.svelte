@@ -3,6 +3,7 @@
 	import { alert, pageHeading } from '#lib/ui.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { useHomeData } from './homeData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
@@ -26,7 +27,11 @@
 	});
 
 	function handleSelect(service) {
-		goto(resolve(`book/${service.id}`));
+		// Carry an employee's "book on behalf of" contact (from /admin/contacts)
+		// into the wizard; the confirm step decides whether to honour it.
+		const customer = page.url.searchParams.get('customer');
+		const query = customer ? `?customer=${encodeURIComponent(customer)}` : '';
+		goto(resolve(`book/${service.id}${query}`));
 	}
 </script>
 

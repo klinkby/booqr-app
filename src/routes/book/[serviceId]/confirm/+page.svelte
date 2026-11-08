@@ -27,6 +27,9 @@
 	const vacancyId = $derived(page.url.searchParams.get('vacancy'));
 	const startIso = $derived(page.url.searchParams.get('start'));
 	const rebookNonce = $derived(page.url.searchParams.get('rebook'));
+	// Employees may book on a contact's behalf (`?customer=` from /admin/contacts).
+	// Ignored for non-employees; the API is authoritative either way.
+	const customerId = $derived(auth.isEmployee ? page.url.searchParams.get('customer') : null);
 	const linkValid = $derived(!!vacancyId && !!startIso);
 
 	const service = $derived(confirmData.services.find((s) => String(s.id) === String(serviceId)));
@@ -42,6 +45,22 @@
 
 	let vacancy = $state(null);
 	let vacancyError = $state(null);
+	let customer = $state(null);
+
+	// Re-runs once the user signs in through the inline auth gate.
+	$effect(() => {
+		const id = customerId;
+		customer = null;
+		if (!id) return;
+		confirmData
+			.getUser(id)
+			.then((user) => {
+				if (customerId === id) customer = user;
+			})
+			.catch((err) => {
+				if (customerId === id) vacancyError = apiError(err);
+			});
+	});
 
 	onMount(async () => {
 		if (!vacancyId) return;
@@ -127,7 +146,7 @@
 		bookLoading = true;
 		try {
 			await confirmData.addBooking({
-				customerId: null,
+				customerId: customerId || null,
 				vacancyId,
 				serviceId,
 				notes: notes || null,
@@ -172,8 +191,9 @@
 		} catch (err) {
 			if (err.status === 409) {
 				const dateStr = startDate ? DateUtils.toLocalDate(startDate) : '';
+				const customerQuery = customerId ? `&customer=${encodeURIComponent(customerId)}` : '';
 
-				goto(resolve(`book/${serviceId}/conflict?date=${dateStr}`));
+				goto(resolve(`book/${serviceId}/conflict?date=${dateStr}${customerQuery}`));
 			} else {
 				bookError = apiError(err);
 			}
@@ -277,10 +297,16 @@
 
 	{#if vacancyError}
 		<p role="alert" class={alert}><ErrorMessage error={vacancyError} /></p>
-	{:else if !vacancy || !service}
+	{:else if !vacancy || !service || (customerId && !customer)}
 		<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loading()}</p>
 	{:else}
 		<dl class="{card} mb-6 divide-y divide-gray-100">
+			{#if customer}
+				<div class="grid grid-cols-3 gap-4 px-4 py-3 sm:px-6">
+					<dt class="text-sm font-semibold text-gray-900">{m.customer()}</dt>
+					<dd class="col-span-2 text-sm text-gray-700">{customer.name || customer.email}</dd>
+				</div>
+			{/if}
 			<div class="grid grid-cols-3 gap-4 px-4 py-3 sm:px-6">
 				<dt class="text-sm font-semibold text-gray-900">{m.labelService()}</dt>
 				<dd class="col-span-2 text-sm text-gray-700">{service.name} ({DateUtils.formatDuration(service.duration)})</dd>

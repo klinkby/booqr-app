@@ -12,10 +12,11 @@
 		onnextpage = undefined,
 		onpreviouspage = undefined,
 		cellContent = undefined,
+		rowActions = undefined,
 		caption = undefined,
 	} = $props();
 
-	const hasActions = $derived(onedit || ondelete);
+	const hasActions = $derived(rowActions || onedit || ondelete);
 	const hasPaging = $derived(onnextpage || onpreviouspage);
 </script>
 
@@ -53,8 +54,13 @@
 					{/each}
 					{#if hasActions}
 						<td class="px-4 py-4 text-right text-sm sm:px-6">
+							{#if rowActions}
+								{@render rowActions(row)}
+							{/if}
 							{#if onedit}
-								<button type="button" class={link} onclick={() => onedit(row)}>{m.edit()}</button>
+								<button type="button" class="{link} {rowActions ? 'ml-3' : ''}" onclick={() => onedit(row)}
+									>{m.edit()}</button
+								>
 							{/if}
 							{#if ondelete}
 								<button

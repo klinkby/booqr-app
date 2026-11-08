@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { pageScreenshot, EMPLOYEES, FAKE_TOKEN, LOCATIONS, setupApiMocks } from './mocks.js';
+import { pageScreenshot, EMPLOYEES, FAKE_TOKEN, LOCATIONS, setupApiMocks, setupAuthToken } from './mocks.js';
 
 /** A day comfortably in the future, plus how many "Next month" clicks the month grid needs to reach it. */
 function pickTargetDay() {
@@ -277,6 +277,35 @@ test.describe('Customer booking flow', () => {
 		).toBeVisible();
 
 		await pageScreenshot(page, 'book-done');
+	});
+
+	test('an employee books on behalf of a contact via ?customer=', async ({ page }) => {
+		const { target, monthDiff } = pickTargetDay();
+		await mockSingleVacancy(page, target);
+		await setupAuthToken(page);
+
+		const bookingRequest = page.waitForRequest((r) => r.url().endsWith('/api/bookings') && r.method() === 'POST');
+		await page.route('**/api/bookings', (route) => {
+			if (route.request().method() !== 'POST') return route.fallback();
+			return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 'booking1' }) });
+		});
+
+		await page.goto('/?customer=1');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+		await page.getByRole('button', { name: 'Location A' }).click();
+		await advanceToMonth(page, monthDiff);
+		await page.getByRole('button', { name: String(target.getDate()), exact: true }).click();
+		await page.getByRole('button', { name: /09:00/ }).click();
+
+		await expect(page).toHaveURL(/\/confirm\?.*customer=1/);
+		await expect(page.locator('h1')).toHaveText('Confirm appointment');
+		await expect(page.getByRole('definition').filter({ hasText: 'Test Customer' })).toBeVisible();
+
+		await page.check('#acceptCancellation');
+		await page.getByRole('button', { name: 'Book now' }).click();
+
+		expect((await bookingRequest).postDataJSON()).toMatchObject({ customerId: '1' });
+		await expect(page).toHaveURL(/\/book\/done/);
 	});
 
 	test('a slot taken between selection and submit lands on the conflict page', async ({ page }) => {

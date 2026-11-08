@@ -211,6 +211,9 @@
 		// the old booking is deleted. Harmless if it lingers — it's a one-time nonce.
 		const rebook = page.url.searchParams.get('rebook');
 		if (rebook) params.set('rebook', rebook);
+		// Booking on behalf of a contact (employee flow from /admin/contacts).
+		const customer = page.url.searchParams.get('customer');
+		if (customer) params.set('customer', customer);
 
 		goto(resolve(`book/${page.params.serviceId}/confirm?${params.toString()}`));
 	}

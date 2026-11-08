@@ -29,7 +29,8 @@ footer inside the card with `buttonSecondary` buttons.
 | `columns`                         | `Array<{ key, label, hideOnMobile? }>` | required    | `key` maps to row property; `hideOnMobile` hides below `md` breakpoint |
 | `rows`                            | `Array<object>`                        | required    | Data rows                                                              |
 | `hasPreviousPage` / `hasNextPage` | `boolean`                              | `false`     | Enable paging buttons                                                  |
-| `onedit` / `ondelete`             | `(row) => void`                        | `undefined` | Row callbacks; Actions column hidden if both omitted                   |
+| `onedit` / `ondelete`             | `(row) => void`                        | `undefined` | Row callbacks; Actions column hidden if these and `rowActions` omitted |
+| `rowActions`                      | `snippet(row)`                         | `undefined` | Extra actions rendered before Edit (e.g. a `link`-styled `<a href>`)   |
 | `onnextpage` / `onpreviouspage`   | `() => void`                           | `undefined` | Paging callbacks; nav hidden if both omitted                           |
 | `cellContent`                     | `snippet(column, row)`                 | `undefined` | Custom cell renderer; falls back to `row[column.key]` when omitted     |
 | `caption`                         | `string`                               | `undefined` | sr-only `<caption>`; pass the page title                               |
@@ -38,7 +39,7 @@ footer inside the card with `buttonSecondary` buttons.
 
 Wraps `DataTable` with loading, error, and empty states. Loading and empty messages sit in a `card` + `cardSection`
 block (`text-sm text-gray-500`); the error uses the `alert` token — render it (not `DataTable` directly) for query-backed
-lists. Forwards `columns`, `rows`, `cellContent`, `caption`, the paging props, and `onedit`/`ondelete` straight through to
+lists. Forwards `columns`, `rows`, `cellContent`, `rowActions`, `caption`, the paging props, and `onedit`/`ondelete` straight through to
 `DataTable`; adds the two state props below. Pairs with `usePagedResourceQuery` (see the root `AGENTS.md`
 data-loading section).
 
@@ -51,6 +52,7 @@ data-loading section).
 | `onnextpage` / `onpreviouspage`   | `() => void`           | `undefined` | Forwarded to `DataTable`                                       |
 | `onedit` / `ondelete`             | `(row) => void`        | `undefined` | Forwarded to `DataTable`                                       |
 | `cellContent`                     | `snippet(column, row)` | `undefined` | Forwarded to `DataTable`                                       |
+| `rowActions`                      | `snippet(row)`         | `undefined` | Forwarded to `DataTable`                                       |
 | `caption`                         | `string`               | `undefined` | sr-only `<caption>`; pass the page title                       |
 
 When not loading and not errored, an empty `rows` renders a "No items found" message; otherwise it renders `DataTable`.

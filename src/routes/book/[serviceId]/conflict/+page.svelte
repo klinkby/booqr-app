@@ -11,7 +11,19 @@
 	});
 
 	let dateParam = $derived(page.url.searchParams.get('date'));
+	// Keep an employee's "book on behalf of" contact when starting over.
+	let customerParam = $derived(page.url.searchParams.get('customer'));
 	let bookingBaseHref = $derived(resolve(`book/${page.params.serviceId}`));
+	let anotherTimeHref = $derived(query({ date: dateParam, customer: customerParam }));
+	let differentDayHref = $derived(query({ customer: customerParam }));
+
+	function query(values) {
+		const qs = Object.entries(values)
+			.filter(([, v]) => v)
+			.map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+			.join('&');
+		return qs ? `${bookingBaseHref}?${qs}` : bookingBaseHref;
+	}
 </script>
 
 <h1 bind:this={heading} tabindex="-1" class="{pageHeading} mb-4 outline-none">{m.timeTaken()}</h1>
@@ -20,10 +32,10 @@
 
 <div class="flex flex-col gap-2">
 	<!-- eslint-disable svelte/no-navigation-without-resolve -- bookingBaseHref is already built from resolve(); a query string is appended after -->
-	<a href={dateParam ? `${bookingBaseHref}?date=${dateParam}` : bookingBaseHref} class="{link} text-sm">
+	<a href={anotherTimeHref} class="{link} text-sm">
 		{m.chooseAnotherTime()}
 	</a>
-	<a href={bookingBaseHref} class="{link} text-sm">
+	<a href={differentDayHref} class="{link} text-sm">
 		{m.chooseDifferentDay()}
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
