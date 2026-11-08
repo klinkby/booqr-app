@@ -1,15 +1,16 @@
 <script>
-	import { PaginatedTable, UserName } from '#lib';
+	import { PaginatedTable } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useContactsData } from './contactsData.svelte.js';
 	import ContactsFilterForm from './ContactsFilterForm.svelte';
 	import { roleLabel } from './roleLabel.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import { buttonSecondary, iconButtonSecondary } from '#lib/ui.js';
+	import { buttonSecondary, iconButtonSecondary, link } from '#lib/ui.js';
 
 	const columns = [
 		{ key: 'name', label: m.labelName() },
+		{ key: 'phone', label: m.labelPhone() },
 		{ key: 'role', label: m.labelRole(), hideOnMobile: true },
 	];
 
@@ -31,6 +32,17 @@
 		roles: selectedRole ? [selectedRole] : [],
 	}));
 
+	// `tel:` URI: keep only a leading `+` and digits (RFC 3966 global number).
+	function telHref(phone) {
+		return `tel:${String(phone).replace(/[^\d+]/g, '')}`;
+	}
+
+	// Employees book on a contact's behalf by starting the customer wizard with
+	// `?customer=`; the confirm step sends it as the booking's `customerId`.
+	function bookHref(row) {
+		return `${resolve('/')}?customer=${encodeURIComponent(row.id)}`;
+	}
+
 	function handleEdit(row) {
 		goto(resolve(`admin/contacts/${row.id}`));
 	}
@@ -51,12 +63,21 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			<UserName id={row.id} name={row.name || row.email} />
+			{row.name || row.email}
+		{:else if column.key === 'phone'}
+			{#if row.phone}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- tel: URI, not app navigation -->
+				<a href={telHref(row.phone)} class={link}>{row.phone}</a>
+			{/if}
 		{:else if column.key === 'role'}
 			{roleLabel(row.role)}
 		{:else}
 			{row[column.key]}
 		{/if}
+	{/snippet}
+	{#snippet rowActions(row)}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- bookHref() is built from resolve(); a query string is appended after -->
+		<a href={bookHref(row)} class={link}>{m.bookNewAppointment()}</a>
 	{/snippet}
 	<div class="mb-4 flex justify-between items-center">
 		<button class={buttonSecondary} onclick={handleCreate} type="button">{m.createContact()}</button>
@@ -106,6 +127,7 @@
 		onpreviouspage={contacts.previousPage}
 		onedit={handleEdit}
 		{cellContent}
+		{rowActions}
 		caption={m.titleContacts()}
 	/>
 </div>

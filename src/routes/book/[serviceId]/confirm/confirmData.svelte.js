@@ -83,6 +83,8 @@ export function useConfirmData() {
 		// Always-fresh detail fetch — the vacancy may have been taken by
 		// someone else between step 5 and landing here.
 		getVacancy: (id) => fetchResource(() => VacancyService.getVacancyById(id)),
+		// Contact being booked on behalf of (employee flow); always fresh.
+		getUser: (id) => fetchResource(() => UserService.getUserById(id)),
 		login: (credentials) => login(credentials),
 		signUp: (payload) => signUp(payload),
 		addBooking: (requestBody) => addBookingMutation.mutateAsync(requestBody),
