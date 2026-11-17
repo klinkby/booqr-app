@@ -200,6 +200,8 @@
 	"changeRole": "Change role",
 	"changeRoleConfirmTitle": "Change role?",
 	"changeRoleConfirmMessage": "Change the role of {name} from {from} to {to}? They will be signed out on all devices.",
+	"deleteConfirmTitle": "Delete {name}?",
+	"deleteConfirmMessage": "This can't be undone.",
 	"roleChanged": "Role changed.",
 	"changeRoleConflict": "Remove this user's future calendar entries before making them a customer.",
 	"createService": "Create service",

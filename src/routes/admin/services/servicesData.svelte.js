@@ -1,6 +1,6 @@
 import { ServiceService, UserService } from '#lib/api/index.js';
 import { queryKeys } from '#lib/queryKeys.js';
-import { useResourceQuery } from '#lib/resourceQuery.svelte.js';
+import { useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
 
 /**
  * Route-local data hook for the services list page. Fetches services and the
@@ -26,7 +26,10 @@ export function useServicesData() {
 		}));
 	});
 
+	const deleteService = useResourceMutation(queryKeys.services.all, (id) => ServiceService.deleteService(id));
+
 	return {
+		deleteService,
 		get rows() {
 			return rows;
 		},

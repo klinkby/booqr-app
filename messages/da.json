@@ -200,6 +200,8 @@
 	"changeRole": "Skift rolle",
 	"changeRoleConfirmTitle": "Skift rolle?",
 	"changeRoleConfirmMessage": "Skift rollen for {name} fra {from} til {to}? Vedkommende bliver logget ud på alle enheder.",
+	"deleteConfirmTitle": "Slet {name}?",
+	"deleteConfirmMessage": "Det kan ikke fortrydes.",
 	"roleChanged": "Rollen er ændret.",
 	"changeRoleConflict": "Fjern brugerens fremtidige kalenderposter, før vedkommende gøres til kunde.",
 	"createService": "Opret ydelse",

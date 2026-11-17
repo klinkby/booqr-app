@@ -1,12 +1,13 @@
 <script>
 	import { PaginatedTable } from '#lib';
+	import { auth } from '#lib/auth.svelte.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useContactsData } from './contactsData.svelte.js';
 	import ContactsFilterForm from './ContactsFilterForm.svelte';
 	import { roleLabel } from './roleLabel.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import { buttonSecondary, iconButtonSecondary, link } from '#lib/ui.js';
+	import { buttonSecondary, iconButtonSecondary, link, menuItem } from '#lib/ui.js';
 
 	const columns = [
 		{ key: 'name', label: m.labelName() },
@@ -53,6 +54,19 @@
 		goto(resolve(`admin/contacts/${row.id}`));
 	}
 
+	function handleDelete(row) {
+		return contacts.deleteContact(row.id);
+	}
+
+	// Never offer to delete the signed-in user's own account.
+	function canDelete(row) {
+		return String(row.id) !== String(auth.userId);
+	}
+
+	function contactName(row) {
+		return row.name || row.email;
+	}
+
 	function handleCreate() {
 		goto(resolve('admin/contacts/new'));
 	}
@@ -69,7 +83,7 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			<span id={nameId(row)}>{row.name || row.email}</span>
+			<span id={nameId(row)}>{contactName(row)}</span>
 		{:else if column.key === 'phone'}
 			{#if row.phone}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- tel: URI, not app navigation -->
@@ -83,7 +97,7 @@
 	{/snippet}
 	{#snippet rowActions(row)}
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- bookHref() is built from resolve(); a query string is appended after -->
-		<a href={bookHref(row)} class={link} aria-describedby={nameId(row)}>{m.bookNewAppointment()}</a>
+		<a href={bookHref(row)} role="menuitem" class={menuItem} aria-describedby={nameId(row)}>{m.bookNewAppointment()}</a>
 	{/snippet}
 	<div class="mb-4 flex justify-between items-center">
 		<button class={buttonSecondary} onclick={handleCreate} type="button">{m.createContact()}</button>
@@ -132,6 +146,9 @@
 		onnextpage={contacts.nextPage}
 		onpreviouspage={contacts.previousPage}
 		onedit={handleEdit}
+		ondelete={auth.isAdmin ? handleDelete : undefined}
+		rowName={contactName}
+		{canDelete}
 		{cellContent}
 		{rowActions}
 		caption={m.titleContacts()}

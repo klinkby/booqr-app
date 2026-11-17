@@ -17,7 +17,7 @@ How the Booqr app looks, and the rules that keep it consistent. Agents get the m
 - **One source per class string**: shared class strings live in `src/lib/ui.js` (`label`, `input`, `checkbox`, `radio`, `choiceLabel`,
   `groupHeading`, `sectionHeading`, `link`, `alert`, `success`, `card`, `cardSection`, `cardActions`, `cardAlert`,
   `cardSuccess`, `buttonPrimary`, `buttonSecondary`, `iconButtonSecondary`,
-  `buttonDanger`) and in components (`Form`, `RequiredInput`, `RequiredMark`, `PhoneInput`, `ContactFields`, `LimitedTextarea`,
+  `buttonDanger`, `menuTrigger`, `menuPanel`, `menuItem`, `menuItemDanger`) and in components (`Form`, `RequiredInput`, `RequiredMark`, `PhoneInput`, `ContactFields`, `LimitedTextarea`,
   `DataTable`, `PaginatedTable`, `NavBar`, `LanguageToggle`). Import them; never paste a copy into a page. A new pattern used twice becomes a token.
 - **Quiet by default**: a grey canvas, white surfaces and one accent colour (indigo). Decoration must carry meaning.
 - **Accessible by requirement**: WCAG AA, see [AGENTS.md › Semantic HTML5 & Accessibility](../AGENTS.md#semantic-html5--accessibility-required)
@@ -185,8 +185,10 @@ An inline action inside a sentence (e.g. "**Download** my data (GDPR takeout)" o
 Use `ConfirmDialog` (`src/lib/components/ConfirmDialog.svelte`) before an action that changes another user's data and
 cannot be undone with one click, such as changing a role. It is a native `<dialog>` in the `card` token: a `sectionHeading`
 title, a `text-sm text-gray-700` message, then a `cardActions` bar with Cancel (`buttonSecondary`) and the confirm action
-(`buttonPrimary`). Escape and Cancel close it without acting. The confirm label names the action (e.g. `m.changeRole()`),
-and the message states the consequence.
+(`buttonPrimary`, or `buttonDanger` with the `danger` prop for a delete). Escape and Cancel close it without acting. The
+confirm label names the action (e.g. `m.changeRole()`), and the message states the consequence. Deletes from a list use
+`m.deleteConfirmTitle({ name })` / `m.deleteConfirmMessage()` with `m.delete()` as the confirm label; `DataTable` renders
+this dialog itself.
 
 ## List pages
 
@@ -199,9 +201,19 @@ icon-only filter toggle (`src/lib/ui.js`). Low emphasis; the solid indigo button
 ### Table
 
 `PaginatedTable` → `DataTable` renders the table as a `card`: grey header row (`bg-gray-50`, `text-sm font-semibold`),
-rows divided with `divide-gray-900/10`, cells `px-4 py-4 sm:px-6`, actions right-aligned (Edit uses `link`, Delete is red
-text). Previous/Next sit in a grey bar inside the card's bottom edge, like a form's action bar. Loading and empty
+rows divided with `divide-gray-900/10`, cells `px-4 py-4 sm:px-6`. Row actions sit behind a right-aligned "⋮"
+[overflow menu](#overflow-menu): extra page actions first (e.g. Book on contacts), then Edit, then Delete last in red,
+which opens the [confirmation dialog](#confirmation-dialog). Previous/Next sit in a grey bar inside the card's bottom edge, like a form's action bar. Loading and empty
 states are a `card` with `text-sm text-gray-500`; errors use `alert`. Pages don't style tables themselves.
+
+### Overflow menu
+
+Shared by `DataTable` rows and the `/profile` booking list (`ListCalendar`). A `menuTrigger` "⋮" `<button>`
+(`aria-haspopup="menu"`, `aria-expanded`, `aria-controls`) opens a `menuPanel` popup (`role="menu"`, right-aligned to
+the trigger) of `role="menuitem"` buttons or links styled `menuItem`; a destructive item uses `menuItemDanger` and comes
+last. Opening focuses the first item; Escape closes and returns focus to the trigger; an outside click closes it.
+`DataTable` positions the panel `fixed` (the table card clips overflow), flipping it above the trigger near the
+viewport bottom, closes it on scroll/resize, and adds Arrow/Home/End navigation.
 
 ### Filter overlay
 

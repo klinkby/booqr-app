@@ -111,6 +111,11 @@
 			? [
 					{ name: m.navPlan(), href: '/admin/plan' },
 					{ name: m.navContacts(), href: '/admin/contacts' },
+				]
+			: []),
+		// Services and locations are admin-only: the API rejects writes from employees.
+		...(auth.isAdmin
+			? [
 					{ name: m.navServices(), href: '/admin/services' },
 					{ name: m.navLocations(), href: '/admin/locations' },
 				]

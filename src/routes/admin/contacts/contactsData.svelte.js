@@ -1,6 +1,6 @@
 import { UserService } from '#lib/api/index.js';
 import { queryKeys } from '#lib/queryKeys.js';
-import { usePagedResourceQuery } from '#lib/resourceQuery.svelte.js';
+import { usePagedResourceQuery, useResourceMutation } from '#lib/resourceQuery.svelte.js';
 
 /**
  * Route-local data hook for the contacts list page.
@@ -10,7 +10,7 @@ import { usePagedResourceQuery } from '#lib/resourceQuery.svelte.js';
  *   to the `k` query param, roles map to (possibly repeated) `role`.
  */
 export function useContactsData(getFilters = () => ({})) {
-	return usePagedResourceQuery(() => {
+	const query = usePagedResourceQuery(() => {
 		const { name, roles } = getFilters();
 		const k = name || undefined;
 		const role = roles && roles.length ? roles : undefined;
@@ -19,4 +19,6 @@ export function useContactsData(getFilters = () => ({})) {
 			fetcher: (start, num) => UserService.getUsers(k, role, start, num),
 		};
 	});
+	const deleteContact = useResourceMutation(queryKeys.users.all, (id) => UserService.deleteUser(id));
+	return Object.assign(query, { deleteContact });
 }

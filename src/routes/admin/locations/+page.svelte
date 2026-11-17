@@ -19,6 +19,10 @@
 		goto(resolve(`admin/locations/${row.id}`));
 	}
 
+	function handleDelete(row) {
+		return locations.deleteLocation(row.id);
+	}
+
 	function handleCreate() {
 		goto(resolve('admin/locations/new'));
 	}
@@ -37,6 +41,7 @@
 		onnextpage={locations.nextPage}
 		onpreviouspage={locations.previousPage}
 		onedit={handleEdit}
+		ondelete={handleDelete}
 		caption={m.titleLocations()}
 	/>
 </div>
