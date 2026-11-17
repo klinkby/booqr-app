@@ -78,6 +78,9 @@
 		allDaySlot: false,
 		slotMinTime: '06:00:00',
 		slotMaxTime: '18:00:00',
+		// 40px per 30-minute slot (library default 24px): a 45-minute event fits
+		// its time plus two lines of title, and a 15-minute one a single line.
+		slotHeight: 40,
 		// Localizes day headers and the title; 24h vs 12h drives the axis hour
 		// labels (slotLabelFormat) and event times (eventTimeFormat).
 		locale,
@@ -99,7 +102,36 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<Calendar bind:this={cal} {options} plugins={[TimeGrid, Interaction]} />
+<Calendar bind:this={cal} {options} plugins={[TimeGrid, Interaction]} {eventContent} />
+
+{#snippet eventContent(info)}
+	<!-- Mirrors the library's default time + title, plus a notes indicator when
+	     extendedProps.hasNotes. The whole event is the library's role="button"
+	     (eventClick), so the icon is not a nested control: clicking anywhere on
+	     the event reaches onEventClick. The title attribute gives the hover hint. -->
+	{#if info.event.extendedProps?.hasNotes}
+		<span title={m.notes()} class="absolute top-0.5 right-0.5 text-sky-600">
+			<svg
+				class="size-4"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				viewBox="0 0 24 24"
+				aria-hidden="true"
+				><path
+					d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
+				/></svg
+			>
+			<span class="sr-only">{m.notes()}</span>
+		</span>
+	{/if}
+	<!-- pr-4 keeps the time clear of the icon in the top-right corner. -->
+	{#if info.timeText}<time class="ec-event-time" class:pr-4={info.event.extendedProps?.hasNotes}>{info.timeText}</time
+		>{/if}
+	<h4 class="ec-event-title">{info.event.title}</h4>
+{/snippet}
 
 {#if slotMaxTime !== '24:00:00'}
 	<div class="mt-4 flex justify-end">

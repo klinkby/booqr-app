@@ -408,7 +408,7 @@
 				</tbody>
 			</table>
 			{#if restorePreview?.warnings?.length}
-				<ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-gray-700">
+				<ul class="mt-4 list-disc pl-5 text-xs text-gray-700">
 					{#each restorePreview.warnings as warning, i (i)}
 						<li>{warning.message}</li>
 					{/each}

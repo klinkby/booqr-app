@@ -1,6 +1,9 @@
 {
 	"loading": "Loading…",
 	"pleaseWait": "Please wait…",
+	"close": "Close",
+	"noteFrom": "Note from {customer}",
+	"notes": "Notes",
 	"cancel": "Cancel",
 	"submit": "Submit",
 	"update": "Update",

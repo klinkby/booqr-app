@@ -194,6 +194,39 @@ test.describe('Profile Page (admin backup)', () => {
 		expect(posts.map((p) => p.dryRun)).toEqual(['true', 'false']);
 	});
 
+	test('a long warning log scrolls inside the restore dialog, keeping its buttons on screen', async ({ page }) => {
+		const warnings = Array.from({ length: 200 }, (_, i) => ({
+			code: 'CalendarOverlapSkipped',
+			entity: 'calendar',
+			sourceId: i,
+			message: `Slot ${i} overlaps an existing calendar entry and was skipped.`,
+		}));
+		await mockTakeout(page, {
+			dryRunResponse: {
+				users: counts(1, 2, 0),
+				locations: counts(0, 1, 0),
+				services: counts(0, 0, 0),
+				bookings: counts(3, 0, 1),
+				calendar: counts(0, 0, 200),
+				warnings,
+			},
+		});
+		await page.goto('/profile');
+		await page.getByLabel('Restore backup (advanced)').setInputFiles({
+			name: 'backup.json',
+			mimeType: 'application/json',
+			buffer: Buffer.from(JSON.stringify(backup)),
+		});
+
+		const dialog = page.getByRole('dialog', { name: 'Restore backup?' });
+		await expect(dialog.getByText('Slot 199 overlaps', { exact: false })).toBeAttached();
+		await expect(dialog.getByRole('button', { name: 'Restore', exact: true })).toBeInViewport();
+		await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeInViewport();
+		// Focus starts on Cancel, not on the scrollable log.
+		await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+		await pageScreenshot(page, 'profile-restore-backup-long-log');
+	});
+
 	test('cancelling the preview does not import', async ({ page }) => {
 		const posts = await mockTakeout(page, { dryRunResponse: { warnings: [] } });
 		await page.goto('/profile');

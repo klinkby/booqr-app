@@ -190,6 +190,11 @@ confirm label names the action (e.g. `m.changeRole()`), and the message states t
 `m.deleteConfirmTitle({ name })` / `m.deleteConfirmMessage()` with `m.delete()` as the confirm label; `DataTable` renders
 this dialog itself.
 
+Dialogs never grow past the viewport (`max-h-[calc(100dvh-2rem)]`). The heading, message and action bar stay in view, and
+extra content (`ConfirmDialog` children, `MessageDialog` text) scrolls in a `dialogScroll` body. Focus starts on Cancel
+(or Close), the safe choice, not on the scroll body. Long machine output such as the restore preview's warning log is
+`text-xs` with no gap between items.
+
 ## List pages
 
 ### Top row
@@ -285,7 +290,7 @@ error, so use:
 | Appointment overlay         | `border-l-4 border-sky-500 bg-sky-50 text-sky-800`               | ≥ 6:1    |
 | Pending selection (unsaved) | `border border-dashed border-gray-400 bg-gray-100 text-gray-700` | ≥ 7:1    |
 
-Each is a token in `ui.js` passed through the event's `classNames`. Event text ("Booked", names, times) carries the
+Each is a token in `ui.js` passed through the event's `classNames`. Slots are 40px per 30 minutes (`slotHeight`; the library's 24px clips text), so a 45-minute event shows its time and two lines of title. An appointment whose customer left notes shows a `sky-600` information-circle icon in its top-right corner (hover title "Notes"); clicking the appointment opens the notes in a `MessageDialog` headed "Note from {customer}" (`m.noteFrom()`). The icon isn't its own button because the event is already the library's `role="button"`. Event text ("Booked", names, times) carries the
 meaning too, so colour is never the only signal. Around the calendar, the employee picker uses `input` and the
 "extend hours" button `buttonSecondary`; spacing follows the [scale](#spacing).
 

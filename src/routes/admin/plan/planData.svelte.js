@@ -116,7 +116,9 @@ export function usePlanData(getRange, getEmployeeId) {
 						eventType: 'appointment',
 						bookingId: b.id,
 						customerId: b.customerId,
+						customerName,
 						serviceId: b.serviceId,
+						hasNotes: b.hasNotes,
 					},
 				};
 			});
@@ -131,5 +133,9 @@ export function usePlanData(getRange, getEmployeeId) {
 		deleteVacancy,
 		// One-off, always-fresh detail fetch for the view panel.
 		getVacancy: (id) => fetchResource(() => VacancyService.getVacancyById(id)),
+		// The list only carries `hasNotes`; the note text comes from the same
+		// user's my-bookings detail, fetched fresh when the notes dialog opens.
+		getBookingNotes: async (bookingId) =>
+			(await fetchResource(() => UserService.getMyBookingById(getEmployeeId(), bookingId)))?.notes ?? '-',
 	};
 }

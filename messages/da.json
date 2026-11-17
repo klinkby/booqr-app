@@ -1,6 +1,9 @@
 {
 	"loading": "Indlæser…",
 	"pleaseWait": "Vent venligst…",
+	"close": "Luk",
+	"noteFrom": "Besked fra {customer}",
+	"notes": "Besked",
 	"cancel": "Annuller",
 	"submit": "Send",
 	"update": "Opdater",

@@ -1,5 +1,5 @@
 <script>
-	import { auth, VacancyForm, apiError, ErrorMessage } from '#lib';
+	import { auth, VacancyForm, apiError, ErrorMessage, MessageDialog } from '#lib';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -137,10 +137,29 @@
 		showForm = true;
 	}
 
+	// Customer notes dialog for an appointment (opened by clicking an event with hasNotes).
+	let notesDialog = $state({ open: false, loading: false, error: null, text: '', customerName: '' });
+	let notesRequest = 0; // ignores a slow response once another dialog was opened
+
+	async function showNotes(bookingId, customerName) {
+		const request = ++notesRequest;
+		notesDialog = { open: true, loading: true, error: null, text: '', customerName };
+		try {
+			const text = await plan.getBookingNotes(bookingId);
+			if (request === notesRequest) notesDialog = { ...notesDialog, loading: false, text };
+		} catch (err) {
+			if (request === notesRequest) notesDialog = { ...notesDialog, loading: false, error: apiError(err) };
+		}
+	}
+
 	async function handleEventClick(info) {
 		if (info.event.id === 'preview') return;
-		// Appointments are display-only on this calendar (no vacancy edit panel).
-		if (info.event.extendedProps?.eventType === 'appointment') return;
+		// Appointments have no edit panel; clicking one shows the customer's notes, if any.
+		if (info.event.extendedProps?.eventType === 'appointment') {
+			if (info.event.extendedProps.hasNotes)
+				showNotes(info.event.extendedProps.bookingId, info.event.extendedProps.customerName);
+			return;
+		}
 
 		formMode = 'view';
 		selectedVacancyId = info.event.id;
@@ -286,4 +305,13 @@
 			</div>
 		{/if}
 	</div>
+
+	<MessageDialog
+		open={notesDialog.open}
+		title={notesDialog.customerName ? m.noteFrom({ customer: notesDialog.customerName }) : m.notes()}
+		message={notesDialog.text}
+		loading={notesDialog.loading}
+		error={notesDialog.error}
+		onclose={() => (notesDialog.open = false)}
+	/>
 </div>
