@@ -50,17 +50,22 @@
 		return page.url.searchParams.get('location');
 	});
 
-	// Step 3 ("With whom?") is skipped when the service lists only one
-	// employee. Gated on the service's own `employees` array so the decision
-	// doesn't wait on the (separately fetched) employee roster to resolve.
+	// Step 3 ("With whom?") is skipped when only one employee can be offered.
+	// Gated on `serviceEmployees` — the service's ids resolved against the
+	// roster, i.e. exactly the options the step would list — not on the raw
+	// `service.employees` ids: a service can still reference an employee the
+	// roster no longer returns (deleted, or no longer an Employee), which
+	// would otherwise show the step with a single choice. While the roster is
+	// loading this is 0, so the wizard falls through to the month step's
+	// loading state rather than flashing "With whom?".
 	const showEmployeeStep = $derived(
-		!showLocationStep && (booking.service?.employees?.length ?? 0) > 1 && !page.url.searchParams.get('employee'),
+		!showLocationStep && booking.serviceEmployees.length > 1 && !page.url.searchParams.get('employee'),
 	);
 
 	const effectiveEmployeeId = $derived.by(() => {
-		const ids = booking.service?.employees ?? [];
-		if (ids.length <= 1) {
-			return ids[0] !== undefined ? String(ids[0]) : null;
+		const employees = booking.serviceEmployees;
+		if (employees.length <= 1) {
+			return employees[0] ? String(employees[0].id) : null;
 		}
 		return page.url.searchParams.get('employee');
 	});
