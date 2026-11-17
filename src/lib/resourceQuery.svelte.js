@@ -111,6 +111,14 @@ export function usePagedResourceQuery(options) {
 		};
 	});
 
+	// A page can empty out under us (e.g. its last row was deleted). The empty
+	// state hides the paging bar, so step back rather than strand the user.
+	$effect(() => {
+		if (start > 0 && !query.isPlaceholderData && query.data?.items?.length === 0) {
+			start = Math.max(0, start - PAGE_SIZE);
+		}
+	});
+
 	return {
 		get items() {
 			return query.data?.items ?? [];

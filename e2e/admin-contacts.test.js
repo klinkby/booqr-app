@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { pageScreenshot, setupApiMocks, setupAuthToken, FAKE_TOKEN } from './mocks.js';
+import { pageScreenshot, setupAdminToken, setupApiMocks, setupAuthToken, FAKE_TOKEN } from './mocks.js';
 
 test.describe('Admin Contacts Page', () => {
 	test.beforeEach(async ({ page, context }) => {
@@ -68,8 +68,81 @@ test.describe('Admin Contacts Page', () => {
 		await expect(row.getByRole('cell', { name: 'Carla Contact' })).toBeVisible();
 		await expect(row.getByRole('link', { name: 'Carla Contact' })).toHaveCount(0);
 		await expect(row.getByRole('link', { name: '+45 12 34 56 78' })).toHaveAttribute('href', 'tel:+4512345678');
-		await expect(row.getByRole('link', { name: 'Book' })).toHaveAttribute('href', '/?customer=c1');
-		await expect(row.getByRole('link', { name: 'Book' })).toHaveAccessibleDescription('Carla Contact');
-		await expect(row.getByRole('button', { name: 'Edit' })).toBeVisible();
+
+		// Book, Edit and Delete live in the row's overflow menu.
+		await row.getByRole('button', { name: 'Actions' }).click();
+		const menu = page.getByRole('menu', { name: 'Actions' });
+		const book = menu.getByRole('menuitem', { name: 'Book' });
+		await expect(book).toHaveAttribute('href', '/?customer=c1');
+		await expect(book).toHaveAccessibleDescription('Carla Contact');
+		await expect(menu.getByRole('menuitem', { name: 'Edit' })).toBeVisible();
+		// Delete is Admin-only on the API, so an Employee is never offered it.
+		await expect(menu.getByRole('menuitem', { name: 'Delete' })).toHaveCount(0);
+	});
+
+	test("the signed-in user's own row offers no Delete", async ({ page }) => {
+		await setupAdminToken(page);
+		await page.route('**/api/users*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					items: [
+						{ id: '1', name: 'Me Myself', email: 'test@example.com', role: 'Employee' },
+						{ id: 'c1', name: 'Carla Contact', email: 'carla@example.com', role: 'Customer' },
+					],
+				}),
+			}),
+		);
+
+		await page.goto('/admin/contacts');
+		await page
+			.getByRole('row', { name: /Me Myself/ })
+			.getByRole('button', { name: 'Actions' })
+			.click();
+		const menu = page.getByRole('menu', { name: 'Actions' });
+		await expect(menu.getByRole('menuitem', { name: 'Edit' })).toBeVisible();
+		await expect(menu.getByRole('menuitem', { name: 'Delete' })).toHaveCount(0);
+		await page.keyboard.press('Escape');
+
+		await page
+			.getByRole('row', { name: /Carla Contact/ })
+			.getByRole('button', { name: 'Actions' })
+			.click();
+		await expect(page.getByRole('menu', { name: 'Actions' }).getByRole('menuitem', { name: 'Delete' })).toBeVisible();
+	});
+
+	test('deleting a contact from the row menu asks for confirmation, then DELETEs', async ({ page }) => {
+		await setupAdminToken(page);
+		await page.route('**/api/users*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					items: [{ id: 'c1', name: 'Carla Contact', email: 'carla@example.com', role: 'Customer' }],
+				}),
+			}),
+		);
+		let deleted = null;
+		await page.route('**/api/users/c1', (route) => {
+			if (route.request().method() !== 'DELETE') return route.fallback();
+			deleted = route.request().url();
+			return route.fulfill({ status: 204 });
+		});
+
+		await page.goto('/admin/contacts');
+		await page
+			.getByRole('row', { name: /Carla Contact/ })
+			.getByRole('button', { name: 'Actions' })
+			.click();
+		await page.getByRole('menuitem', { name: 'Delete' }).click();
+
+		const dialog = page.getByRole('dialog', { name: 'Delete Carla Contact?' });
+		await expect(dialog).toBeVisible();
+		expect(deleted).toBeNull();
+		await dialog.getByRole('button', { name: 'Delete' }).click();
+
+		await expect(dialog).toBeHidden();
+		expect(deleted).toMatch(/\/api\/users\/c1$/);
 	});
 });

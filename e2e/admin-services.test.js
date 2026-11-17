@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { pageScreenshot, setupApiMocks, setupAuthToken, SERVICES, EMPLOYEES } from './mocks.js';
+import { pageScreenshot, setupAdminToken, setupApiMocks, setupAuthToken, SERVICES, EMPLOYEES } from './mocks.js';
 
 test.describe('Admin Services CRUD', () => {
 	test.beforeEach(async ({ page }) => {
 		await setupApiMocks(page);
-		await setupAuthToken(page);
+		await setupAdminToken(page);
 	});
 
 	test('list page shows services and the create button', async ({ page }) => {
@@ -17,6 +17,45 @@ test.describe('Admin Services CRUD', () => {
 		await expect(page.getByRole('button', { name: 'Create service' })).toBeVisible();
 
 		await pageScreenshot(page, 'admin-services');
+	});
+
+	test('row menu delete confirms, then DELETEs the service', async ({ page }) => {
+		const svc = SERVICES[0];
+		let deleteCalls = 0;
+		await page.route(`**/api/services/${svc.id}`, (route) => {
+			if (route.request().method() !== 'DELETE') return route.fallback();
+			deleteCalls++;
+			return route.fulfill({ status: 204 });
+		});
+
+		await page.goto('/admin/services');
+		await page
+			.getByRole('row', { name: new RegExp(svc.name) })
+			.getByRole('button', { name: 'Actions' })
+			.click();
+		await page.getByRole('menuitem', { name: 'Delete' }).click();
+		const dialog = page.getByRole('dialog', { name: `Delete ${svc.name}?` });
+		await dialog.getByRole('button', { name: 'Delete' }).click();
+		await expect(dialog).toBeHidden();
+		expect(deleteCalls).toBe(1);
+	});
+
+	test('a failed delete keeps the dialog open with the error', async ({ page }) => {
+		const svc = SERVICES[0];
+		await page.route(`**/api/services/${svc.id}`, (route) =>
+			route.request().method() === 'DELETE' ? route.fulfill({ status: 500 }) : route.fallback(),
+		);
+
+		await page.goto('/admin/services');
+		await page
+			.getByRole('row', { name: new RegExp(svc.name) })
+			.getByRole('button', { name: 'Actions' })
+			.click();
+		await page.getByRole('menuitem', { name: 'Delete' }).click();
+		const dialog = page.getByRole('dialog', { name: `Delete ${svc.name}?` });
+		await dialog.getByRole('button', { name: 'Delete' }).click();
+		await expect(dialog.getByRole('alert')).toBeVisible();
+		await expect(dialog).toBeVisible();
 	});
 
 	test('create button navigates to the new-service form', async ({ page }) => {
@@ -90,5 +129,18 @@ test.describe('Admin Services CRUD', () => {
 		await page.goto('/admin/services/new');
 		await page.getByRole('button', { name: 'Cancel' }).click();
 		await expect(page).toHaveURL('/admin/services');
+	});
+
+	test('an Employee has no Services nav link and is denied the page', async ({ page }) => {
+		await setupAuthToken(page);
+		await page.goto('/admin/services');
+		await expect(page.getByRole('alert')).toHaveText(/Access denied/);
+		await expect(page.getByRole('table')).toHaveCount(0);
+		await expect(
+			page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Services' }),
+		).toHaveCount(0);
+		await expect(
+			page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Contacts' }),
+		).toBeVisible();
 	});
 });

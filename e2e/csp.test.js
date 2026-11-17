@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { setupApiMocks, setupAuthToken } from './mocks.js';
+import { setupAdminToken, setupApiMocks } from './mocks.js';
 
 for (const path of ['/', '/profile', '/admin/plan', '/admin/services', '/admin/contacts', '/login', '/book/1']) {
 	test(`no CSP violations on ${path}`, async ({ page }) => {
@@ -13,7 +13,7 @@ for (const path of ['/', '/profile', '/admin/plan', '/admin/services', '/admin/c
 			);
 		});
 		await setupApiMocks(page);
-		await setupAuthToken(page);
+		await setupAdminToken(page);
 		await page.goto(path);
 		await page.waitForTimeout(1500);
 		violations.push(...(await page.evaluate(() => window.__v)));

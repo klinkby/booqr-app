@@ -217,7 +217,9 @@ Shared (do not duplicate per route):
   - `/admin/plan` — Weekly vacancy calendar, staff-facing (not the customer booking flow above). `planData.svelte.js`
     / `usePlanData()` fetches vacancies (range), locations and employees via svelte-query; mutations coarsely
     invalidate `vacancies.all`
-  - `/admin/services`, `/admin/services/new`, `/admin/services/[id]` — Service CRUD
+  - `/admin/services/**`, `/admin/locations/**` — Service and location CRUD; **Admin only** (the API rejects writes from
+    Employees). Each has a `+layout.svelte` wrapping `src/routes/admin/AdminOnly.svelte`; nav links shown only for
+    `auth.isAdmin`.
 - **Layout**: `src/routes/+layout.svelte` — `<NavBar>` with `links` array derived from `auth.isEmployee` /
   `auth.isLoggedIn`. Admin links merged into main nav; no secondary sub-nav. Also renders the page `<h1>`
   and footer; app shell in [docs/design.md › Layout](docs/design.md#layout).
@@ -228,6 +230,7 @@ Shared (do not duplicate per route):
 - **Auth Guard**: `src/routes/admin/+layout.svelte` redirects unauthenticated users to `/login` via `$effect`;
   shows "Access denied" for non-employees.
 - **Adding Admin Pages**: Create routes under `src/routes/admin/` — auth guard inherited automatically.
+  For admin-only (not Employee) routes, add a `+layout.svelte` that wraps children in `AdminOnly.svelte`.
 
 ### CRUD Pattern
 

@@ -1,8 +1,26 @@
 <script>
 	import { m } from '#lib/paraglide/messages.js';
-	import { buttonPrimary, buttonSecondary, card, cardActions, cardSection, sectionHeading } from '#lib/ui.js';
+	import {
+		buttonDanger,
+		buttonPrimary,
+		buttonSecondary,
+		card,
+		cardActions,
+		cardSection,
+		sectionHeading,
+	} from '#lib/ui.js';
 
-	let { open, title, message, confirmLabel, loading = false, onconfirm, oncancel, children = undefined } = $props();
+	let {
+		open,
+		title,
+		message,
+		confirmLabel,
+		loading = false,
+		danger = false,
+		onconfirm,
+		oncancel,
+		children = undefined,
+	} = $props();
 
 	const uid = $props.id();
 	const titleId = `${uid}-title`;
@@ -44,7 +62,7 @@
 	</div>
 	<div class={cardActions}>
 		<button type="button" class={buttonSecondary} disabled={loading} onclick={oncancel}>{m.cancel()}</button>
-		<button type="button" class={buttonPrimary} disabled={loading} onclick={onconfirm}
+		<button type="button" class={danger ? buttonDanger : buttonPrimary} disabled={loading} onclick={onconfirm}
 			>{loading ? m.pleaseWait() : confirmLabel}</button
 		>
 	</div>

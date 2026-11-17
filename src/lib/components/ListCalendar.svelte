@@ -3,7 +3,7 @@
 	import './calendar.css';
 	import { untrack } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
-	import { calendarTheme } from '#lib/ui.js';
+	import { calendarTheme, menuItem, menuItemDanger, menuPanel, menuTrigger } from '#lib/ui.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	let {
@@ -209,7 +209,7 @@
 					toggleMenu(info.event.id, e.currentTarget);
 				}}
 				onkeydown={onKeydown}
-				class="rounded-lg px-2 py-0.5 text-lg leading-none text-gray-500 hover:bg-gray-100"
+				class={menuTrigger}
 			>
 				⋮
 			</button>
@@ -219,7 +219,7 @@
 					id="booking-menu-{info.event.id}"
 					role="menu"
 					aria-label={m.bookingActions()}
-					class="absolute right-0 top-full z-20 mt-1 min-w-40 rounded-xl bg-white py-1 shadow-lg ring-1 ring-gray-900/5"
+					class="absolute right-0 top-full mt-1 {menuPanel}"
 				>
 					<button
 						type="button"
@@ -230,7 +230,7 @@
 							closeMenu();
 						}}
 						onkeydown={onKeydown}
-						class="block w-full px-3 py-1.5 text-left text-sm text-gray-900 hover:bg-gray-50"
+						class={menuItem}
 					>
 						{m.duplicateBooking()}
 					</button>
@@ -244,7 +244,7 @@
 								closeMenu();
 							}}
 							onkeydown={onKeydown}
-							class="block w-full px-3 py-1.5 text-left text-sm text-gray-900 hover:bg-gray-50"
+							class={menuItem}
 						>
 							{m.rescheduleBooking()}
 						</button>
@@ -257,7 +257,7 @@
 								closeMenu();
 							}}
 							onkeydown={onKeydown}
-							class="block w-full px-3 py-1.5 text-left text-sm text-red-700 hover:bg-red-50"
+							class={menuItemDanger}
 						>
 							{m.cancelBooking()}
 						</button>

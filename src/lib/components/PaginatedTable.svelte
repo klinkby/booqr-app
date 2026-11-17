@@ -17,6 +17,8 @@
 		ondelete = undefined,
 		cellContent = undefined,
 		rowActions = undefined,
+		rowName = (row) => row.name,
+		canDelete = () => true,
 		caption = undefined,
 	} = $props();
 </script>
@@ -45,6 +47,8 @@
 		{ondelete}
 		{cellContent}
 		{rowActions}
+		{rowName}
+		{canDelete}
 		{caption}
 	/>
 {/if}

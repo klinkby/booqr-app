@@ -20,40 +20,45 @@ Render behind `{#if Calendar}` with a `role="status"` fallback. See `/admin/plan
 
 ### DataTable (`src/lib/components/DataTable.svelte`)
 
-Generic accessible table with optional edit/delete row actions and pagination. Renders inside a `card` token; header
-`bg-gray-50`, divided rows, actions right-aligned (Edit uses `link`, Delete is red); the paging bar is a `bg-gray-50`
-footer inside the card with `buttonSecondary` buttons.
+Generic accessible table with optional row actions and pagination. Renders inside a `card` token; header
+`bg-gray-50`, divided rows; the paging bar is a `bg-gray-50` footer inside the card with `buttonSecondary` buttons.
+Row actions live in a right-aligned "⋮" overflow menu (docs/design.md › Overflow menu): `rowActions`, then Edit, then a
+red Delete. Delete opens a `ConfirmDialog` ("Delete {name}?") owned by the table; it awaits `ondelete(row)` with a
+spinner and, if the promise rejects, keeps the dialog open showing `apiError(err)`.
 
-| Prop                              | Type                                   | Default     | Description                                                            |
-| --------------------------------- | -------------------------------------- | ----------- | ---------------------------------------------------------------------- |
-| `columns`                         | `Array<{ key, label, hideOnMobile? }>` | required    | `key` maps to row property; `hideOnMobile` hides below `md` breakpoint |
-| `rows`                            | `Array<object>`                        | required    | Data rows                                                              |
-| `hasPreviousPage` / `hasNextPage` | `boolean`                              | `false`     | Enable paging buttons                                                  |
-| `onedit` / `ondelete`             | `(row) => void`                        | `undefined` | Row callbacks; Actions column hidden if these and `rowActions` omitted |
-| `rowActions`                      | `snippet(row)`                         | `undefined` | Extra actions rendered before Edit (e.g. a `link`-styled `<a href>`)   |
-| `onnextpage` / `onpreviouspage`   | `() => void`                           | `undefined` | Paging callbacks; nav hidden if both omitted                           |
-| `cellContent`                     | `snippet(column, row)`                 | `undefined` | Custom cell renderer; falls back to `row[column.key]` when omitted     |
-| `caption`                         | `string`                               | `undefined` | sr-only `<caption>`; pass the page title                               |
+| Prop                              | Type                                   | Default      | Description                                                                  |
+| --------------------------------- | -------------------------------------- | ------------ | ---------------------------------------------------------------------------- |
+| `columns`                         | `Array<{ key, label, hideOnMobile? }>` | required     | `key` maps to row property; `hideOnMobile` hides below `md` breakpoint       |
+| `rows`                            | `Array<object>`                        | required     | Data rows                                                                    |
+| `hasPreviousPage` / `hasNextPage` | `boolean`                              | `false`      | Enable paging buttons                                                        |
+| `onedit`                          | `(row) => void`                        | `undefined`  | Edit menu item; Actions column hidden if no `onedit`/`ondelete`/`rowActions` |
+| `ondelete`                        | `(row) => Promise \| void`             | `undefined`  | Called after the user confirms; return the mutation promise                  |
+| `rowActions`                      | `snippet(row)`                         | `undefined`  | Extra menu items before Edit: `role="menuitem"` + `menuItem` token           |
+| `rowName`                         | `(row) => string`                      | `row.name`   | Name shown in the delete confirmation title                                  |
+| `canDelete`                       | `(row) => boolean`                     | `() => true` | Hides the Delete item for rows it returns false for                          |
+| `onnextpage` / `onpreviouspage`   | `() => void`                           | `undefined`  | Paging callbacks; nav hidden if both omitted                                 |
+| `cellContent`                     | `snippet(column, row)`                 | `undefined`  | Custom cell renderer; falls back to `row[column.key]` when omitted           |
+| `caption`                         | `string`                               | `undefined`  | sr-only `<caption>`; pass the page title                                     |
 
 ### PaginatedTable (`src/lib/components/PaginatedTable.svelte`)
 
 Wraps `DataTable` with loading, error, and empty states. Loading and empty messages sit in a `card` + `cardSection`
 block (`text-sm text-gray-500`); the error uses the `alert` token — render it (not `DataTable` directly) for query-backed
-lists. Forwards `columns`, `rows`, `cellContent`, `rowActions`, `caption`, the paging props, and `onedit`/`ondelete` straight through to
+lists. Forwards `columns`, `rows`, `cellContent`, `rowActions`, `rowName`, `canDelete`, `caption`, the paging props, and `onedit`/`ondelete` straight through to
 `DataTable`; adds the two state props below. Pairs with `usePagedResourceQuery` (see the root `AGENTS.md`
 data-loading section).
 
-| Prop                              | Type                   | Default     | Description                                                    |
-| --------------------------------- | ---------------------- | ----------- | -------------------------------------------------------------- |
-| `columns` / `rows`                | —                      | `rows=[]`   | Forwarded to `DataTable`                                       |
-| `isLoading`                       | `boolean`              | `false`     | Shows a `role="status"` "Loading" message instead of the table |
-| `error`                           | `string \| null`       | `null`      | Shows a `role="alert"` error message instead of the table      |
-| `hasPreviousPage` / `hasNextPage` | `boolean`              | `false`     | Forwarded to `DataTable`                                       |
-| `onnextpage` / `onpreviouspage`   | `() => void`           | `undefined` | Forwarded to `DataTable`                                       |
-| `onedit` / `ondelete`             | `(row) => void`        | `undefined` | Forwarded to `DataTable`                                       |
-| `cellContent`                     | `snippet(column, row)` | `undefined` | Forwarded to `DataTable`                                       |
-| `rowActions`                      | `snippet(row)`         | `undefined` | Forwarded to `DataTable`                                       |
-| `caption`                         | `string`               | `undefined` | sr-only `<caption>`; pass the page title                       |
+| Prop                                   | Type                   | Default     | Description                                                    |
+| -------------------------------------- | ---------------------- | ----------- | -------------------------------------------------------------- |
+| `columns` / `rows`                     | —                      | `rows=[]`   | Forwarded to `DataTable`                                       |
+| `isLoading`                            | `boolean`              | `false`     | Shows a `role="status"` "Loading" message instead of the table |
+| `error`                                | `string \| null`       | `null`      | Shows a `role="alert"` error message instead of the table      |
+| `hasPreviousPage` / `hasNextPage`      | `boolean`              | `false`     | Forwarded to `DataTable`                                       |
+| `onnextpage` / `onpreviouspage`        | `() => void`           | `undefined` | Forwarded to `DataTable`                                       |
+| `onedit` / `ondelete`                  | `(row) => void`        | `undefined` | Forwarded to `DataTable`                                       |
+| `cellContent`                          | `snippet(column, row)` | `undefined` | Forwarded to `DataTable`                                       |
+| `rowActions` / `rowName` / `canDelete` | —                      | —           | Forwarded to `DataTable`                                       |
+| `caption`                              | `string`               | `undefined` | sr-only `<caption>`; pass the page title                       |
 
 When not loading and not errored, an empty `rows` renders a "No items found" message; otherwise it renders `DataTable`.
 
@@ -93,6 +98,7 @@ Native `<dialog>` confirmation, opened with `showModal()` while `open` is true. 
 | `message`      | `string`     | required | Body text; describes the dialog (`aria-describedby`)            |
 | `confirmLabel` | `string`     | required | Confirm button label                                            |
 | `loading`      | `boolean`    | `false`  | Disables both buttons; confirm shows "Please wait…"             |
+| `danger`       | `boolean`    | `false`  | Confirm button uses `buttonDanger` instead of `buttonPrimary`   |
 | `onconfirm`    | `() => void` | required | Confirm button click                                            |
 | `oncancel`     | `() => void` | required | Cancel button, or Escape (ignored while `loading`)              |
 | `children`     | snippet      | —        | Optional extra content below the message (e.g. a summary table) |

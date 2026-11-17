@@ -15,6 +15,15 @@ export const pageHeading = 'text-xl font-bold tracking-tight text-gray-900';
 // Full-width option button inside a divide-y card list (booking flow choice lists).
 export const choiceRow =
 	'flex w-full items-center gap-4 px-4 py-4 text-left hover:bg-gray-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:px-6';
+// Overflow ("⋮") menu: trigger button, popup panel (caller adds positioning), and its items.
+// Trigger is ≥24×24px (WCAG 2.5.8) and gray-600 so the glyph keeps 4.5:1 on its gray-100 hover.
+export const menuTrigger =
+	'rounded-lg px-2 py-1 text-lg leading-none text-gray-600 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600';
+export const menuPanel = 'z-20 min-w-40 rounded-xl bg-white py-1 shadow-lg ring-1 ring-gray-900/5';
+const menuItemBase =
+	'block w-full px-3 py-1.5 text-left text-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600';
+export const menuItem = `${menuItemBase} text-gray-900 hover:bg-gray-50`;
+export const menuItemDanger = `${menuItemBase} text-red-700 hover:bg-red-50`;
 export const cardActions =
 	'flex items-center justify-end gap-3 border-t border-gray-900/10 bg-gray-50 px-4 py-4 sm:px-6';
 // Full-width message bars inside a card (no rounding; the card clips them).

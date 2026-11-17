@@ -18,6 +18,9 @@
 	function handleEdit(row) {
 		goto(resolve(`admin/services/${row.id}`));
 	}
+	function handleDelete(row) {
+		return services.deleteService(row.id);
+	}
 	function handleCreate() {
 		goto(resolve('admin/services/new'));
 	}
@@ -54,6 +57,13 @@
 			{/if}
 		{/snippet}
 
-		<DataTable {columns} rows={services.rows} onedit={handleEdit} {cellContent} caption={m.titleServices()} />
+		<DataTable
+			{columns}
+			rows={services.rows}
+			onedit={handleEdit}
+			ondelete={handleDelete}
+			{cellContent}
+			caption={m.titleServices()}
+		/>
 	{/if}
 </div>
