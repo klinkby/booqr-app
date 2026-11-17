@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { pageScreenshot, EMPLOYEES, FAKE_TOKEN, LOCATIONS, setupApiMocks, setupAuthToken } from './mocks.js';
+import { pageScreenshot, EMPLOYEES, FAKE_TOKEN, LOCATIONS, SERVICES, setupApiMocks, setupAuthToken } from './mocks.js';
 
 /** A day comfortably in the future, plus how many "Next month" clicks the month grid needs to reach it. */
 function pickTargetDay() {
@@ -138,6 +138,87 @@ test.describe('Customer booking flow', () => {
 		await expect(page.locator('h1')).not.toHaveText('Where?');
 		await expect(page.locator('h1')).not.toHaveText('With whom?');
 		// What's left is the month grid, which opens on the current month.
+		const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+		await expect(page.locator('h1')).toHaveText(monthLabel);
+	});
+
+	test('the employee step is skipped when only one of several employees performs the service', async ({ page }) => {
+		// Explicit setup, independent of the shared defaults: two employees on the
+		// roster, but the service is assigned to only the first.
+		await page.route('**/api/employees*', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
+		);
+		await page.route('**/api/services*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ items: [{ ...SERVICES[0], employees: [EMPLOYEES[0].id] }] }),
+			}),
+		);
+		const { target } = pickTargetDay();
+		await mockSingleVacancy(page, target, { employeeId: EMPLOYEES[0].id });
+
+		await page.goto('/');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+		await expect(page.locator('h1')).toHaveText('Where?');
+		await page.getByRole('button', { name: 'Location A' }).click();
+
+		// Lands directly on the month grid, with the sole assigned employee auto-selected.
+		const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+		await expect(page.locator('h1')).toHaveText(monthLabel);
+		const summary = page.getByLabel('Your selections so far');
+		await expect(summary).toContainText(EMPLOYEES[0].name);
+		await expect(summary).not.toContainText(EMPLOYEES[1].name);
+	});
+
+	test('the employee step is skipped when the service also references an employee missing from the roster', async ({
+		page,
+	}) => {
+		// The service still lists an employee the roster no longer returns
+		// (e.g. deleted), leaving one bookable employee — the customer must not
+		// be asked to "choose" from a single option.
+		await page.route('**/api/employees*', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
+		);
+		await page.route('**/api/services*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ items: [{ ...SERVICES[0], employees: [EMPLOYEES[0].id, 'emp-removed'] }] }),
+			}),
+		);
+		const { target } = pickTargetDay();
+		await mockSingleVacancy(page, target, { employeeId: EMPLOYEES[0].id });
+
+		await page.goto('/');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+		await page.getByRole('button', { name: 'Location A' }).click();
+
+		const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+		await expect(page.locator('h1')).toHaveText(monthLabel);
+		await expect(page.getByLabel('Your selections so far')).toContainText(EMPLOYEES[0].name);
+	});
+
+	test('the employee step is shown when two employees perform the service', async ({ page }) => {
+		await page.route('**/api/employees*', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
+		);
+		await page.route('**/api/services*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ items: [{ ...SERVICES[0], employees: EMPLOYEES.map((e) => e.id) }] }),
+			}),
+		);
+		const { target } = pickTargetDay();
+		await mockSingleVacancy(page, target, { employeeId: EMPLOYEES[1].id });
+
+		await page.goto('/');
+		await page.getByRole('button', { name: /Haircut/ }).click();
+		await page.getByRole('button', { name: 'Location A' }).click();
+
+		await expect(page.locator('h1')).toHaveText('With whom?');
+		await page.getByRole('button', { name: EMPLOYEES[1].name }).click();
 		const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 		await expect(page.locator('h1')).toHaveText(monthLabel);
 	});
