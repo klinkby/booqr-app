@@ -9,7 +9,7 @@
  * @property {string} [created]
  * @property {string | null} [deleted]
  * @property {string} [modified]
- * @property {string | null} [_etag]
+ * @property {string} [_etag]
  */
 
 export {};

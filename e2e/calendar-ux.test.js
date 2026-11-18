@@ -228,9 +228,13 @@ test.describe('Calendar UX Adjustments', () => {
 		await page.route('**/api/users/*/my-bookings*', (route) =>
 			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [booking] }) }),
 		);
-		// The list only says hasNotes; the text comes from the my-bookings detail.
-		await page.route('**/api/users/*/my-bookings/appt-notes', (route) =>
-			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...booking, notes }) }),
+		// The list only says hasNotes; the text comes from GET /api/bookings/{id} (a Booking).
+		await page.route('**/api/bookings/appt-notes', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ id: booking.id, customerId: booking.customerId, serviceId: booking.serviceId, notes }),
+			}),
 		);
 
 		await page.goto('/admin/plan');

@@ -1,7 +1,7 @@
 /**
  * @typedef {object} CollectionResponseOfEmployee
  * @property {Employee[]} items
- * @property {string | null} [_etag]
+ * @property {string} [_etag]
  */
 
 export {};

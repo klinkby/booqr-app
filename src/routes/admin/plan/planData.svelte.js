@@ -1,4 +1,4 @@
-import { LocationService, ServiceService, UserService, VacancyService } from '#lib/api/index.js';
+import { BookingService, LocationService, ServiceService, UserService, VacancyService } from '#lib/api/index.js';
 import { DateUtils } from '#lib/dateUtils.js';
 import { m } from '#lib/paraglide/messages.js';
 import { eventAppointment } from '#lib/ui.js';
@@ -133,9 +133,9 @@ export function usePlanData(getRange, getEmployeeId) {
 		deleteVacancy,
 		// One-off, always-fresh detail fetch for the view panel.
 		getVacancy: (id) => fetchResource(() => VacancyService.getVacancyById(id)),
-		// The list only carries `hasNotes`; the note text comes from the same
-		// user's my-bookings detail, fetched fresh when the notes dialog opens.
+		// The list only carries `hasNotes`; the note text comes from the booking
+		// itself (staff may read any booking), fetched fresh when the dialog opens.
 		getBookingNotes: async (bookingId) =>
-			(await fetchResource(() => UserService.getMyBookingById(getEmployeeId(), bookingId)))?.notes ?? '-',
+			(await fetchResource(() => BookingService.getBookingById(bookingId)))?.notes ?? '-',
 	};
 }
