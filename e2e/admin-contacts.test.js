@@ -54,7 +54,7 @@ test.describe('Admin Contacts Page', () => {
 				contentType: 'application/json',
 				body: JSON.stringify({
 					items: [
-						{ id: 'c1', name: 'Carla Contact', email: 'carla@example.com', phone: '+45 12 34 56 78', role: 'Customer' },
+						{ id: 'c1', name: 'Carla Contact', email: 'carla@example.com', phone: '4512345678', role: 'Customer' },
 					],
 				}),
 			}),
@@ -67,7 +67,7 @@ test.describe('Admin Contacts Page', () => {
 		await expect(table.getByRole('columnheader', { name: 'Phone' })).toBeVisible();
 		await expect(row.getByRole('cell', { name: 'Carla Contact' })).toBeVisible();
 		await expect(row.getByRole('link', { name: 'Carla Contact' })).toHaveCount(0);
-		await expect(row.getByRole('link', { name: '+45 12 34 56 78' })).toHaveAttribute('href', 'tel:+4512345678');
+		await expect(row.getByRole('link', { name: '+45 12345678' })).toHaveAttribute('href', 'tel:+4512345678');
 
 		// Book, Edit and Delete live in the row's overflow menu.
 		await row.getByRole('button', { name: 'Actions' }).click();

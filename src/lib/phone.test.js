@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodePhone, encodePhone, nationalPattern, telHref } from './phone.js';
+import { decodePhone, encodePhone, formatPhone, nationalPattern, telHref } from './phone.js';
 
 describe('decodePhone', () => {
 	it('splits two- and three-digit calling codes', () => {
@@ -41,5 +41,18 @@ describe('telHref', () => {
 	});
 	it('drops formatting characters and does not double the plus', () => {
 		expect(telHref('+45 12 34-56 78')).toBe('tel:+4512345678');
+	});
+});
+
+describe('formatPhone', () => {
+	it('shows a known calling code with a plus, separated from the subscriber number', () => {
+		expect(formatPhone('4512345678')).toBe('+45 12345678');
+		expect(formatPhone('35812345')).toBe('+358 12345');
+	});
+	it('drops formatting characters first', () => {
+		expect(formatPhone('+45 12 34-56 78')).toBe('+45 12345678');
+	});
+	it('leaves a value without a known calling code as bare digits', () => {
+		expect(formatPhone('12345678')).toBe('12345678');
 	});
 });

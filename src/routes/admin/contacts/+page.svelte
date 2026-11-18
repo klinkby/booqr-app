@@ -7,6 +7,7 @@
 	import ContactsFilterForm from './ContactsFilterForm.svelte';
 	import { roleLabel } from './roleLabel.js';
 	import { m } from '#lib/paraglide/messages.js';
+	import { formatPhone, telHref } from '#lib/phone.js';
 	import { buttonSecondary, iconButtonSecondary, link, menuItem } from '#lib/ui.js';
 
 	const columns = [
@@ -32,11 +33,6 @@
 		name: debouncedNameFilter,
 		roles: selectedRole ? [selectedRole] : [],
 	}));
-
-	// `tel:` URI: keep only a leading `+` and digits (RFC 3966 global number).
-	function telHref(phone) {
-		return `tel:${String(phone).replace(/[^\d+]/g, '')}`;
-	}
 
 	// Employees book on a contact's behalf by starting the customer wizard with
 	// `?customer=`; the confirm step sends it as the booking's `customerId`.
@@ -87,7 +83,7 @@
 		{:else if column.key === 'phone'}
 			{#if row.phone}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- tel: URI, not app navigation -->
-				<a href={telHref(row.phone)} class={link}>{row.phone}</a>
+				<a href={telHref(row.phone)} class={link}>{formatPhone(row.phone)}</a>
 			{/if}
 		{:else if column.key === 'role'}
 			{roleLabel(row.role)}
