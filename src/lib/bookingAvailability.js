@@ -91,6 +91,27 @@ export class BookingAvailability {
 		return set;
 	}
 
+	/** Map<'YYYY-MM-DD' (local), number> — summed remaining vacancy time per day, in service-duration units. */
+	static computeSlotCapacityByDay(selectedVacancies, durationMs, nowMs) {
+		const map = new Map();
+		if (durationMs <= 0) return map;
+		for (const v of selectedVacancies) {
+			const startMs = Math.max(new Date(v.startTime).getTime(), nowMs);
+			const endMs = new Date(v.endTime).getTime();
+			if (endMs <= startMs) continue;
+			const day = DateUtils.toLocalDate(new Date(v.startTime));
+			map.set(day, (map.get(day) ?? 0) + (endMs - startMs) / durationMs);
+		}
+		return map;
+	}
+
+	/** Traffic-light level for a day's slot capacity: 'low' (< 2), 'medium' (< 4) or 'high'. */
+	static availabilityLevel(slots) {
+		if (slots < 2) return 'low';
+		if (slots < 4) return 'medium';
+		return 'high';
+	}
+
 	/** Concrete bookable slots on `dateStr` (local), sorted ascending by start time. */
 	static computeSlotsForDate(selectedVacancies, dateStr, durationMs, nowMs) {
 		if (durationMs <= 0 || !dateStr) return [];

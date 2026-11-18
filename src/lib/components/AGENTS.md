@@ -192,13 +192,13 @@ Presentational, no API imports; route pages own each step's `<h1>` and focus man
 `onclick`/callback props, not `<a href>` — the app is SPA-only (`ssr = false`), so progressive enhancement doesn't
 apply.
 
-| Component        | Props                                                                    | Notes                                                                           |
-| ---------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `ServiceList`    | `services: Array<{id,name,duration,description}>`, `onselect`            | Duration via `DateUtils.formatDuration()` — never raw seconds                   |
-| `ChoiceList`     | `options: Array<{id,primary,secondary?}>`, `onselect`, `emptyMessage?`   | Shared by "Where?" and "With whom?" steps                                       |
-| `MonthPicker`    | `days: Array<{date,dayOfMonth,inMonth,available,isPast}>`, `onSelectDay` | `<table>` grid; unavailable/past days are real `<button disabled>`              |
-| `TimeSlotList`   | `slots: Array<{vacancyId,startTime,endTime,...}>`, `onSelectSlot`        | `startTime`/`endTime` are local `Date` objects; "No available times" when empty |
-| `BookingSummary` | `items: string[]`                                                        | Breadcrumb, pre-formatted segments joined with " · "                            |
+| Component        | Props                                                                          | Notes                                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `ServiceList`    | `services: Array<{id,name,duration,description}>`, `onselect`                  | Duration via `DateUtils.formatDuration()` — never raw seconds                                                                      |
+| `ChoiceList`     | `options: Array<{id,primary,secondary?}>`, `onselect`, `emptyMessage?`         | Shared by "Where?" and "With whom?" steps                                                                                          |
+| `MonthPicker`    | `days: Array<{date,dayOfMonth,inMonth,available,isPast,level}>`, `onSelectDay` | `<table>` grid; unavailable/past days are real `<button disabled>`; `level` (`low`/`medium`/`high`) picks the traffic-light colour |
+| `TimeSlotList`   | `slots: Array<{vacancyId,startTime,endTime,...}>`, `onSelectSlot`              | `startTime`/`endTime` are local `Date` objects; "No available times" when empty                                                    |
+| `BookingSummary` | `items: string[]`                                                              | Breadcrumb, pre-formatted segments joined with " · "                                                                               |
 
 `ServiceList` and `ChoiceList` render one `card` holding a `divide-y` list of `choiceRow` buttons.
 

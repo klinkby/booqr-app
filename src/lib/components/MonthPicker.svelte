@@ -4,6 +4,13 @@
 
 	let { days = [], onSelectDay } = $props();
 
+	// Traffic-light colours for bookable days by remaining capacity (see docs/design.md › Booking).
+	const levelClasses = {
+		low: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+		medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+		high: 'bg-green-100 text-green-800 hover:bg-green-200',
+	};
+
 	// Chunk days into weeks of 7
 	let weeks = $derived.by(() => {
 		const result = [];
@@ -38,7 +45,9 @@
 							<td class="p-1">
 								<button
 									type="button"
-									class="mx-auto flex size-10 items-center justify-center rounded-full bg-indigo-50 font-bold text-indigo-700 hover:bg-indigo-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+									class="mx-auto flex size-10 items-center justify-center rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 {levelClasses[
+										day.level
+									] ?? levelClasses.high}"
 									onclick={() => onSelectDay(day.date)}
 								>
 									{day.dayOfMonth}

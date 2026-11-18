@@ -140,6 +140,59 @@ describe('computeDaysWithSlots', () => {
 	});
 });
 
+describe('computeSlotCapacityByDay', () => {
+	const duration = 30 * 60 * 1000;
+	const vac = (startMs, endMs) => ({
+		startTime: new Date(startMs).toISOString(),
+		endTime: new Date(endMs).toISOString(),
+	});
+
+	it('returns an empty map for a non-positive duration', () => {
+		expect(BookingAvailability.computeSlotCapacityByDay([vac(0, HOUR_MS)], 0, 0).size).toBe(0);
+	});
+
+	it('sums vacancies on the same local day and keeps other days separate', () => {
+		const a = localMs(2026, 6, 1, 9, 0);
+		const b = localMs(2026, 6, 1, 11, 0);
+		const c = localMs(2026, 6, 3, 9, 0);
+		const vacancies = [vac(a, a + HOUR_MS), vac(b, b + 90 * 60 * 1000), vac(c, c + HOUR_MS)];
+		const map = BookingAvailability.computeSlotCapacityByDay(vacancies, duration, 0);
+		expect(map.get('2026-06-01')).toBe(5); // 2 + 3 slots
+		expect(map.get('2026-06-03')).toBe(2);
+	});
+
+	it('clips each vacancy to nowMs', () => {
+		const start = localMs(2026, 6, 1, 9, 0);
+		const now = localMs(2026, 6, 1, 10, 0);
+		const map = BookingAvailability.computeSlotCapacityByDay([vac(start, start + 2 * HOUR_MS)], duration, now);
+		expect(map.get('2026-06-01')).toBe(2); // 10:00-11:00 remaining
+	});
+
+	it('skips a fully past vacancy', () => {
+		const start = localMs(2026, 6, 1, 9, 0);
+		const now = localMs(2026, 6, 1, 12, 0);
+		const map = BookingAvailability.computeSlotCapacityByDay([vac(start, start + HOUR_MS)], duration, now);
+		expect(map.has('2026-06-01')).toBe(false);
+	});
+});
+
+describe('availabilityLevel', () => {
+	it('maps fewer than 2 slots to low', () => {
+		expect(BookingAvailability.availabilityLevel(0)).toBe('low');
+		expect(BookingAvailability.availabilityLevel(1.9)).toBe('low');
+	});
+
+	it('maps 2 up to 4 slots to medium', () => {
+		expect(BookingAvailability.availabilityLevel(2)).toBe('medium');
+		expect(BookingAvailability.availabilityLevel(3.5)).toBe('medium');
+	});
+
+	it('maps 4 or more slots to high', () => {
+		expect(BookingAvailability.availabilityLevel(4)).toBe('high');
+		expect(BookingAvailability.availabilityLevel(10)).toBe('high');
+	});
+});
+
 describe('computeSlotsForDate', () => {
 	it('returns [] for empty dateStr or non-positive duration', () => {
 		expect(BookingAvailability.computeSlotsForDate([{}], '', 1000, 0)).toEqual([]);

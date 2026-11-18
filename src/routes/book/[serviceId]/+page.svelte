@@ -124,6 +124,7 @@
 				inMonth: dayNum >= 1 && dayNum <= daysInMonth,
 				available: booking.daysWithSlots.has(dateStr),
 				isPast: dateStr < todayStr,
+				level: booking.availabilityLevel(dateStr),
 			});
 		}
 		return days;

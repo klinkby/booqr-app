@@ -92,6 +92,15 @@ export function useBookingData(getParams) {
 		BookingAvailability.computeDaysWithSlots(selectedVacancies, durationMs, Date.now()),
 	);
 
+	// Traffic-light colouring of the month grid's bookable days.
+	const slotCapacityByDay = $derived.by(() =>
+		BookingAvailability.computeSlotCapacityByDay(selectedVacancies, durationMs, Date.now()),
+	);
+
+	function availabilityLevel(dateStr) {
+		return BookingAvailability.availabilityLevel(slotCapacityByDay.get(dateStr) ?? 0);
+	}
+
 	const sortedAvailableDates = $derived(Array.from(daysWithSlots).sort());
 
 	const nextAvailableDate = $derived.by(() => {
@@ -149,6 +158,7 @@ export function useBookingData(getParams) {
 			return previousAvailableDate;
 		},
 		slotsForDate,
+		availabilityLevel,
 		get isLoading() {
 			return (
 				vacanciesQuery.isLoading || servicesQuery.isLoading || employeesQuery.isLoading || locationsQuery.isLoading
