@@ -4,8 +4,6 @@ import { m } from '#lib/paraglide/messages.js';
 import { eventAppointment } from '#lib/ui.js';
 import { queryKeys } from '#lib/queryKeys.js';
 import { useResourceQuery, useResourceMutation, fetchResource } from '#lib/resourceQuery.svelte.js';
-import { authedQueryFn } from '#lib/queryClient.js';
-import { createQueries } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
 
 /**
@@ -44,7 +42,7 @@ export function usePlanData(getRange, getEmployeeId) {
 	// VacancyForm's employee selector which initialises from auth.userId (a User ID).
 	const employees = useResourceQuery(() => ({
 		queryKey: queryKeys.users.employees,
-		fetcher: () => UserService.getUsers(undefined, 'Employee', 0, 100),
+		fetcher: () => UserService.getUsers(undefined, 'Employee', undefined, 0, 100),
 	}));
 
 	// The selected employee's appointments (bookings where they are the
@@ -68,17 +66,27 @@ export function usePlanData(getRange, getEmployeeId) {
 
 	// Customer names for the appointment labels. On the plan calendar the viewer
 	// is the *employee* on each booking, so the customer is a different user whose
-	// name must be fetched by id. One detail query per distinct customerId, keyed
-	// under `users.detail` so results share the cache other user-detail views fill.
-	const customerIds = $derived(
-		bookings.items.map((b) => b.customerId).filter((id, i, ids) => id && ids.indexOf(id) === i),
+	// name must be fetched by id. Names accumulate in `customerNames` for the life
+	// of the page, so only customers not seen in an earlier week are fetched — in
+	// one batched /api/users?Id=…&Id=… request (bookings are capped at Num=100,
+	// matching the API's 100-id cap). Known customers keep their label while a
+	// week loads instead of flashing blank. Sorted so the same set always hits the
+	// same cache entry.
+	const customerNames = new SvelteMap();
+	const missingCustomerIds = $derived(
+		bookings.items
+			.map((b) => b.customerId)
+			.filter((id, i, ids) => id && ids.indexOf(id) === i && !customerNames.has(id))
+			.sort((a, b) => a - b),
 	);
-	const customerQueries = createQueries(() => ({
-		queries: customerIds.map((id) => ({
-			queryKey: queryKeys.users.detail(id),
-			queryFn: () => authedQueryFn(() => UserService.getUserById(id)),
-		})),
+	const customers = useResourceQuery(() => ({
+		queryKey: queryKeys.users.byIds(missingCustomerIds),
+		enabled: missingCustomerIds.length > 0,
+		fetcher: () => UserService.getUsers(undefined, undefined, missingCustomerIds, 0, 100),
 	}));
+	$effect(() => {
+		for (const u of customers.items) customerNames.set(u.id, u.name ?? '');
+	});
 
 	const addVacancy = useResourceMutation(queryKeys.vacancies.all, (requestBody) =>
 		VacancyService.addVacancy(requestBody),
@@ -99,11 +107,9 @@ export function usePlanData(getRange, getEmployeeId) {
 			// Join each booking's serviceId → name and customerId → name, then map
 			// to a calendar event. Mirrors profileData's `bookingEvents`.
 			const serviceMap = new SvelteMap(services.items.map((s) => [s.id, s.name]));
-			// customerIds and customerQueries share an index, so zip them into a map.
-			const customerMap = new SvelteMap(customerIds.map((id, i) => [id, customerQueries[i]?.data?.name ?? '']));
 			return bookings.items.map((b) => {
 				const serviceName = serviceMap.get(b.serviceId) ?? '';
-				const customerName = customerMap.get(b.customerId) ?? '';
+				const customerName = customerNames.get(b.customerId) ?? '';
 				return {
 					id: `appt-${b.id}`,
 					start: DateUtils.utcToLocalIso(b.startTime),

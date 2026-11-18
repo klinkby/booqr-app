@@ -59,6 +59,9 @@ export const queryKeys = {
 		// `k` (name) and `roles` (array) vary per contacts-filter state; each
 		// combination caches separately while still sharing the `all` prefix.
 		paged: (k, roles) => [...queryKeys.users.all, 'paged', k ?? null, roles ?? null],
+		// Batch lookup via /api/users?Id=1&Id=2. Callers pass a sorted, de-duplicated
+		// id list so the same set always maps to the same cache entry.
+		byIds: (ids) => [...queryKeys.users.all, 'byIds', ids],
 		// UserService.getUsers(role='Employee') → /api/users?Role=Employee.
 		// IDs match user IDs stored in services.employees / vacancy.employeeId.
 		employees: ['users', 'employees'],

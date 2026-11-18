@@ -100,18 +100,20 @@ export class UserService {
      * User
      * @param k
      * @param role
+     * @param id
      * @param start
      * @param num
      * @returns CollectionResponseOfUser OK
      * @throws ApiError
      */
-    static getUsers(k, role, start, num) {
+    static getUsers(k, role, id, start, num) {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/users',
             query: {
                 'K': k,
                 'Role': role,
+                'Id': id,
                 'Start': start,
                 'Num': num,
             },

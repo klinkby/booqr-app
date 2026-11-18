@@ -49,6 +49,27 @@ export function encodePhone(code, national) {
 }
 
 /**
+ * Display form of the API's phone value: `+code national` when the calling code is known,
+ * otherwise the bare digits (never guess a code the value doesn't carry).
+ * @param {string} value e.g. "4512345678"
+ * @returns {string} e.g. "+45 12345678"
+ */
+export function formatPhone(value) {
+	const { code, national, matched } = decodePhone(String(value ?? '').replace(/\D/g, ''));
+	return matched ? `+${code} ${national}` : national;
+}
+
+/**
+ * `tel:` URI (RFC 3966 global number) for the API's phone value. The API stores the calling
+ * code without a leading `+`, so it is always added; any formatting characters are dropped.
+ * @param {string} value e.g. "4512345678"
+ * @returns {string} e.g. "tel:+4512345678"
+ */
+export function telHref(value) {
+	return `tel:+${String(value ?? '').replace(/\D/g, '')}`;
+}
+
+/**
  * HTML `pattern` for the subscriber number of a calling code.
  * @param {string} code
  * @returns {string}
