@@ -13,6 +13,13 @@ vi.mock('#lib/paraglide/messages.js', () => ({
 
 const { DateUtils } = await import('./dateUtils.js');
 
+describe('formatDayMonth', () => {
+	it('formats as "day. month"', () => {
+		expect(DateUtils.formatDayMonth(new Date(2026, 11, 10), 'en')).toBe('10. December');
+		expect(DateUtils.formatDayMonth(new Date(2026, 11, 10), 'da')).toBe('10. december');
+	});
+});
+
 describe('parseDurationSeconds', () => {
 	it('returns 0 for nullish / empty input', () => {
 		expect(DateUtils.parseDurationSeconds(null)).toBe(0);

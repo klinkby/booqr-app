@@ -2,7 +2,13 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { card } from '#lib/ui.js';
 
-	let { days = [], onSelectDay } = $props();
+	let { days = [], selectedDate = null, onSelectDay } = $props();
+
+	// Traffic-light colours for bookable days by remaining capacity (see docs/design.md › Booking).
+	const levelClasses = {
+		low: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+		high: 'bg-green-100 text-green-800 hover:bg-green-200',
+	};
 
 	// Chunk days into weeks of 7
 	let weeks = $derived.by(() => {
@@ -38,10 +44,14 @@
 							<td class="p-1">
 								<button
 									type="button"
-									class="mx-auto flex size-10 items-center justify-center rounded-full bg-indigo-50 font-bold text-indigo-700 hover:bg-indigo-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+									class="mx-auto flex size-10 items-center justify-center rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 {levelClasses[
+										day.level
+									]} {day.date === selectedDate ? 'ring-3 ring-indigo-600 ring-offset-2' : ''}"
+									aria-pressed={day.date === selectedDate}
 									onclick={() => onSelectDay(day.date)}
 								>
 									{day.dayOfMonth}
+									{#if day.level === 'low'}<span class="sr-only">&nbsp;{m.fewTimesLeft()}</span>{/if}
 								</button>
 							</td>
 						{:else}

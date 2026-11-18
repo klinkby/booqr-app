@@ -25,7 +25,7 @@
 	// Same long format as the wizard and confirm page.
 	const whenLabel = $derived.by(() => {
 		if (!startDate) return '';
-		const day = `${startDate.getDate()}. ${startDate.toLocaleDateString(getLocale(), { month: 'long' })} ${startDate.getFullYear()} · ${DateUtils.toLocalTime(startDate)}`;
+		const day = `${DateUtils.formatDayMonth(startDate, getLocale())} ${startDate.getFullYear()} · ${DateUtils.toLocalTime(startDate)}`;
 		return endDate ? `${day} – ${DateUtils.toLocalTime(endDate)}` : day;
 	});
 

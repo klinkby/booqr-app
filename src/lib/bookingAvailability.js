@@ -79,16 +79,27 @@ export class BookingAvailability {
 		});
 	}
 
-	/** Set<'YYYY-MM-DD'> (local) — every day, across the fetched horizon, with at least one bookable slot. */
+	/** Map<'YYYY-MM-DD' (local), number> — bookable slot count for every day, across the fetched horizon, with at least one. */
 	static computeDaysWithSlots(selectedVacancies, durationMs, nowMs) {
-		const set = new Set();
-		if (durationMs <= 0) return set;
+		const map = new Map();
+		if (durationMs <= 0) return map;
 		for (const v of selectedVacancies) {
 			for (const slot of BookingAvailability.slotsForVacancy(v, durationMs, nowMs)) {
-				set.add(DateUtils.toLocalDate(slot));
+				const day = DateUtils.toLocalDate(slot);
+				map.set(day, (map.get(day) ?? 0) + 1);
 			}
 		}
-		return set;
+		return map;
+	}
+
+	/** First 'YYYY-MM-DD' in the sorted `dates` that falls in `month` ('YYYY-MM'), or null. */
+	static firstDateInMonth(dates, month) {
+		return dates.find((d) => d.startsWith(month)) ?? null;
+	}
+
+	/** Traffic-light level for a day's bookable slot count: 'low' (< 2) or 'high'. */
+	static availabilityLevel(slots = 0) {
+		return slots < 2 ? 'low' : 'high';
 	}
 
 	/** Concrete bookable slots on `dateStr` (local), sorted ascending by start time. */

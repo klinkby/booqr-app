@@ -44,9 +44,7 @@
 	const endDate = $derived(startDate && durationMs ? new Date(startDate.getTime() + durationMs) : null);
 	// Same long format as the wizard's day heading.
 	const dateLabel = $derived(
-		startDate
-			? `${startDate.getDate()}. ${startDate.toLocaleDateString(getLocale(), { month: 'long' })} ${startDate.getFullYear()}`
-			: '',
+		startDate ? `${DateUtils.formatDayMonth(startDate, getLocale())} ${startDate.getFullYear()}` : '',
 	);
 
 	let vacancy = $state(null);
@@ -221,16 +219,14 @@
 		heading?.focus();
 	});
 
-	// "12 September" — matches the day format used in the booking wizard's
-	// own breadcrumb and Prev/Next hover text (see `targetDayLabel` in
-	// `book/[serviceId]/+page.svelte`); one date format across the whole
-	// wizard, per the spec's explicit call-out (A10).
+	// "12. September" via `DateUtils.formatDayMonth` — one day format across
+	// the whole wizard, per the spec's explicit call-out (A10).
 	const breadcrumbItems = $derived.by(() => {
 		const items = [];
 		if (service) items.push(service.name);
 		if (locationName) items.push(locationName);
 		if (employeeName) items.push(employeeName);
-		if (startDate) items.push(`${startDate.getDate()} ${startDate.toLocaleDateString(getLocale(), { month: 'long' })}`);
+		if (startDate) items.push(DateUtils.formatDayMonth(startDate, getLocale()));
 		if (startDate) items.push(DateUtils.toLocalTime(startDate));
 		return items;
 	});

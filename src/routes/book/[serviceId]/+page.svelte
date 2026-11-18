@@ -14,7 +14,10 @@
 
 	// `month` has no circular dependency, so it's declared before `booking` —
 	// `useResourceQuery`'s thunk reads it synchronously at setup time.
-	const effectiveMonth = $derived(page.url.searchParams.get('month') || currentMonthStr);
+	// A deep link with only `?date=` (e.g. from the conflict page) opens that date's month.
+	const effectiveMonth = $derived(
+		page.url.searchParams.get('month') || page.url.searchParams.get('date')?.slice(0, 7) || currentMonthStr,
+	);
 
 	// `locationId`/`employeeId` DO depend on `booking.allLocations`/
 	// `booking.service` (declared below, after `booking` exists) — exposed as
@@ -30,7 +33,6 @@
 	const booking = useBookingData(() => ({
 		serviceId: page.params.serviceId,
 		month: effectiveMonth,
-		date: page.url.searchParams.get('date'),
 		get locationId() {
 			return effectiveLocationId;
 		},
@@ -70,24 +72,15 @@
 		return page.url.searchParams.get('employee');
 	});
 
-	const showTimeStep = $derived(!showLocationStep && !showEmployeeStep && !!page.url.searchParams.get('date'));
-	const showMonthStep = $derived(!showLocationStep && !showEmployeeStep && !showTimeStep);
-
-	const currentStep = $derived.by(() => {
-		if (showLocationStep) return 'location';
-		if (showEmployeeStep) return 'employee';
-		if (showTimeStep) return 'time';
-		return 'month';
-	});
-
 	// Moves focus to the (freshly re-rendered) step heading whenever the
 	// rendered state changes — every branch below, including loading/error/
-	// not-found, renders exactly one <h1>. `currentStep` alone isn't enough:
-	// while data is still loading it's stuck on 'month' (the fallback), so an
-	// effect keyed on it only would never re-fire once the real month-grid
-	// heading replaces the loading text.
+	// not-found, renders exactly one <h1>. The step flags alone aren't enough:
+	// while data is still loading they fall through to the month step, so an
+	// effect keyed on them only would never re-fire once the real month-grid
+	// heading replaces the loading text. Selecting a day doesn't re-run it.
 	$effect(() => {
-		currentStep;
+		showLocationStep;
+		showEmployeeStep;
 		booking.isLoading;
 		booking.error;
 		booking.service;
@@ -118,12 +111,14 @@
 			const dayNum = i - firstWeekday + 1;
 			const cellDate = new Date(year, month - 1, dayNum);
 			const dateStr = DateUtils.toLocalDate(cellDate);
+			const available = booking.daysWithSlots.has(dateStr);
 			days.push({
 				date: dateStr,
 				dayOfMonth: cellDate.getDate(),
 				inMonth: dayNum >= 1 && dayNum <= daysInMonth,
-				available: booking.daysWithSlots.has(dateStr),
+				available,
 				isPast: dateStr < todayStr,
+				level: available ? booking.availabilityLevel(dateStr) : null,
 			});
 		}
 		return days;
@@ -132,13 +127,13 @@
 	const disablePrevMonth = $derived(effectiveMonth <= currentMonthStr);
 	const disableNextMonth = $derived(!booking.hasLaterMonthAvailability);
 
-	const selectedDate = $derived(page.url.searchParams.get('date'));
+	// The URL's `?date=` wins; otherwise the first available day of the visible month is preselected
+	// (derived only — never written back into the URL).
+	const effectiveDate = $derived(page.url.searchParams.get('date') ?? booking.firstAvailableInMonth(effectiveMonth));
 
-	const dateLabel = $derived.by(() => {
-		if (!selectedDate) return '';
-		const d = new Date(selectedDate + 'T00:00');
-		return `${d.getDate()}. ${d.toLocaleDateString(getLocale(), { month: 'long' })} ${d.getFullYear()}`;
-	});
+	const dateLabel = $derived(
+		effectiveDate ? DateUtils.formatDayMonth(new Date(effectiveDate + 'T00:00'), getLocale()) : '',
+	);
 
 	function addMonthsStr(monthStr, delta) {
 		const [year, month] = monthStr.split('-').map(Number);
@@ -146,13 +141,9 @@
 		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 	}
 
-	function targetDayLabel(dateStr) {
-		if (!dateStr) return '';
-		const d = new Date(dateStr + 'T00:00');
-		return `${d.getDate()} ${d.toLocaleDateString(getLocale(), { month: 'long' })}`;
-	}
+	const slots = $derived(effectiveDate ? booking.slotsForDate(effectiveDate) : []);
 
-	const slots = $derived(selectedDate ? booking.slotsForDate(selectedDate) : []);
+	let timesRegion = $state();
 
 	const breadcrumbItems = $derived.by(() => {
 		const items = [];
@@ -161,7 +152,7 @@
 		if (loc) items.push(loc.name);
 		const emp = booking.serviceEmployees.find((e) => String(e.id) === effectiveEmployeeId);
 		if (emp?.name) items.push(emp.name);
-		if (selectedDate) items.push(targetDayLabel(selectedDate));
+		if (dateLabel) items.push(dateLabel);
 		return items;
 	});
 
@@ -194,16 +185,21 @@
 		goto(resolve(`book/${page.params.serviceId}?${params.toString()}`));
 	}
 
-	function selectDay(dateStr) {
+	async function selectDay(dateStr) {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
 		const params = new URLSearchParams(page.url.searchParams);
 		params.set('date', dateStr);
-		// Keep `month` in sync — the Prev/Next-available-day jump on step 5 can
-		// cross a month boundary, and without this the month grid you land on
-		// after "Back" would show the wrong month for the breadcrumb's date.
 		params.set('month', dateStr.slice(0, 7));
 
-		goto(resolve(`book/${page.params.serviceId}?${params.toString()}`));
+		// `replace` so Back doesn't step through every day viewed; `keepFocus`/`noScroll` leave focus on the clicked day.
+		await goto(resolve(`book/${page.params.serviceId}?${params.toString()}`), {
+			replace: true,
+			noScroll: true,
+			keepFocus: true,
+		});
+		// On narrow screens the times sit below the fold; bring them into view (user selection only).
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		timesRegion?.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
 	}
 
 	function selectSlot(slot) {
@@ -255,7 +251,7 @@
 	{:else if showEmployeeStep}
 		<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.withWhom()}</h1>
 		<ChoiceList options={employeeOptions} onselect={selectEmployee} emptyMessage={m.noOneAvailable()} />
-	{:else if showMonthStep}
+	{:else}
 		{#if booking.isLoading}
 			<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{monthLabel}</h1>
 			<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loadingAvailability()}</p>
@@ -296,52 +292,16 @@
 					>
 				</button>
 			</div>
-			<MonthPicker days={monthDays} onSelectDay={selectDay} />
+			<MonthPicker days={monthDays} selectedDate={effectiveDate} onSelectDay={selectDay} />
+			<div bind:this={timesRegion} class="mt-6">
+				{#if effectiveDate}
+					<!-- Live on the heading only, so switching day announces the date, not every time slot. -->
+					<h2 aria-live="polite" class="{pageHeading} mb-4 text-center">{dateLabel}</h2>
+					<TimeSlotList {slots} onSelectSlot={selectSlot} />
+				{:else}
+					<p class="text-sm text-gray-500">{m.chooseADay()}</p>
+				{/if}
+			</div>
 		{/if}
-	{:else if showTimeStep}
-		<div class="mb-6 flex items-center justify-between gap-4">
-			<button
-				type="button"
-				disabled={!booking.previousAvailableDate}
-				onclick={() => selectDay(booking.previousAvailableDate)}
-				title={booking.previousAvailableDate
-					? m.previousAvailable({ date: targetDayLabel(booking.previousAvailableDate) })
-					: undefined}
-				aria-label={booking.previousAvailableDate
-					? m.previousAvailable({ date: targetDayLabel(booking.previousAvailableDate) })
-					: m.previousAvailableNone()}
-				class={iconButtonSecondary}
-			>
-				<svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
-					><path
-						fill-rule="evenodd"
-						d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
-						clip-rule="evenodd"
-					/></svg
-				>
-			</button>
-			<h1 tabindex="-1" class="{pageHeading} outline-none">{dateLabel}</h1>
-			<button
-				type="button"
-				disabled={!booking.nextAvailableDate}
-				onclick={() => selectDay(booking.nextAvailableDate)}
-				title={booking.nextAvailableDate
-					? m.nextAvailable({ date: targetDayLabel(booking.nextAvailableDate) })
-					: undefined}
-				aria-label={booking.nextAvailableDate
-					? m.nextAvailable({ date: targetDayLabel(booking.nextAvailableDate) })
-					: m.nextAvailableNone()}
-				class={iconButtonSecondary}
-			>
-				<svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
-					><path
-						fill-rule="evenodd"
-						d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-						clip-rule="evenodd"
-					/></svg
-				>
-			</button>
-		</div>
-		<TimeSlotList {slots} onSelectSlot={selectSlot} />
 	{/if}
 {/if}

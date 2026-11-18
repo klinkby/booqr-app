@@ -435,40 +435,64 @@ test.describe('Customer booking flow', () => {
 		await pageScreenshot(page, 'book-service-conflict');
 	});
 
-	test('Prev/Next on the time step jump to the nearest available day, crossing months', async ({ page }) => {
+	test('month view preselects the first available day and switches times on click', async ({ page }) => {
 		const { near, far } = await mockTwoScatteredVacancies(page);
-		const nearMonthLabel = near.toLocaleDateString('en-US', { month: 'long' });
-		const farMonthLabel = far.toLocaleDateString('en-US', { month: 'long' });
-
-		await page.goto(
-			`/book/svc1?date=${near.getFullYear()}-${String(near.getMonth() + 1).padStart(2, '0')}-${String(near.getDate()).padStart(2, '0')}`,
+		// Same month as `near` (or a later one) — add a second day in near's month so there are two to click.
+		const second = new Date(near);
+		second.setDate(near.getDate() + 1);
+		if (second.getMonth() !== near.getMonth()) second.setDate(near.getDate() - 1);
+		const iso = (d) => d.toISOString();
+		const endOf = (d) => {
+			const e = new Date(d);
+			e.setHours(11, 0, 0, 0);
+			return e;
+		};
+		const items = [near, second, far].map((d, i) => ({
+			id: `e2e-${i}`,
+			startTime: iso(d),
+			endTime: iso(i === 1 ? endOf(d) : new Date(d.getTime() + 3600_000)),
+			employeeId: 'emp1',
+			locationId: 1,
+			bookingId: null,
+		}));
+		await page.route('**/api/vacancies*', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items }) }),
 		);
-		await page.getByRole('button', { name: 'Location A' }).click();
 
+		// `near` (today + 5) can fall in next month, so open its month explicitly.
+		const month = `${near.getFullYear()}-${String(near.getMonth() + 1).padStart(2, '0')}`;
+		await page.goto(`/book/svc1?location=1&month=${month}`);
+		const firstDay = near < second ? near : second;
+		const otherDay = near < second ? second : near;
+		const firstButton = page.getByRole('button', { name: String(firstDay.getDate()), exact: true });
+		const otherButton = page.getByRole('button', { name: String(otherDay.getDate()), exact: true });
+
+		// Preselected: first available day is pressed and its times are listed; URL is untouched.
+		await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
+		await expect(page.getByRole('heading', { level: 2 })).toContainText(`${firstDay.getDate()}.`);
 		await expect(page.getByRole('button', { name: /09:00/ })).toBeVisible();
+		expect(page.url()).not.toContain('date=');
 
-		// The time step's Prev/Next buttons show only a bare "‹"/"›" glyph and
-		// rely on `aria-label` (set to the target-date hover text) for their
-		// accessible name — so these must be selected by that label.
-		const nextButton = page.getByRole('button', { name: /Next available/ });
-		await expect(nextButton).toBeEnabled();
-		await expect(nextButton).toHaveAttribute(
-			'aria-label',
-			new RegExp(`Next available: ${far.getDate()} ${farMonthLabel}`),
-		);
-		await nextButton.click();
-
-		// Landed directly on the far day — not the adjacent calendar day —
-		// crossing a month boundary in the process.
-		await expect(page.locator('h1')).toContainText(farMonthLabel);
+		await otherButton.click();
+		await expect(otherButton).toHaveAttribute('aria-pressed', 'true');
+		await expect(firstButton).toHaveAttribute('aria-pressed', 'false');
+		await expect(page.getByRole('heading', { level: 2 })).toContainText(`${otherDay.getDate()}.`);
+		await expect(page).toHaveURL(/date=\d{4}-\d{2}-\d{2}/);
 		await expect(page.getByRole('button', { name: /09:00/ })).toBeVisible();
+	});
 
-		const prevButton = page.getByRole('button', { name: /Previous available/ });
-		await expect(prevButton).toBeEnabled();
-		await expect(prevButton).toHaveAttribute(
-			'aria-label',
-			new RegExp(`Previous available: ${near.getDate()} ${nearMonthLabel}`),
+	test("a ?date= deep link opens that date's month with the day selected", async ({ page }) => {
+		const { far } = await mockTwoScatteredVacancies(page);
+		const date = `${far.getFullYear()}-${String(far.getMonth() + 1).padStart(2, '0')}-${String(far.getDate()).padStart(2, '0')}`;
+
+		await page.goto(`/book/svc1?location=1&date=${date}`);
+
+		await expect(page.locator('h1')).toContainText(far.toLocaleDateString('en-US', { month: 'long' }));
+		await expect(page.getByRole('button', { name: String(far.getDate()), exact: true })).toHaveAttribute(
+			'aria-pressed',
+			'true',
 		);
+		await expect(page.getByRole('button', { name: /09:00/ })).toBeVisible();
 	});
 
 	test('a full hour of time slots fits on one row on a narrow phone', async ({ page }) => {

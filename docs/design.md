@@ -235,7 +235,7 @@ a separate `debounced*` state plus `$effect`/`setTimeout`, syncing immediately o
 
 ## Booking flow
 
-The customer path: home (`/`, pick a service), the wizard (`/book/[serviceId]`: location, employee, month, time),
+The customer path: home (`/`, pick a service), the wizard (`/book/[serviceId]`: location, employee, month with times),
 confirm (sign-in gate, then confirm and book), and the conflict and done pages. It is the most visited part of the app,
 so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isFormPage` covers `/` and `/book/**`).
 
@@ -247,10 +247,15 @@ so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isF
   `choiceRow` button: the name in `text-sm font-semibold text-gray-900`, secondary lines `text-sm text-gray-500`, and a
   decorative chevron on the right. A service's duration sits right-aligned before the chevron.
 - **Month and day.** Prev/next are `iconButtonSecondary` chevrons around the heading. The month grid is a `card`
-  (`p-4 sm:p-6`); bookable days are round `indigo-50` buttons with `indigo-700` bold numbers, other days plain
-  `gray-400` text (disabled).
-- **Times.** Slots are `buttonSecondaryCompact` buttons (narrow `px-2` padding) with tabular numbers in a
-  `card` grid, four per row on phones so a full hour of 15-minute slots fits on one line.
+  (`p-4 sm:p-6`); bookable days are round buttons with bold numbers, coloured like a traffic light by remaining capacity
+  in bookable times: `orange-100`/`orange-800` under 2 with a screen-reader-only "Few times left", otherwise
+  `green-100`/`green-800`; other days plain `gray-400` text (disabled). The selected day (`aria-pressed="true"`) gets a
+  thick `ring-3 ring-indigo-600 ring-offset-2`. The month's first available day is preselected, and changing month
+  preselects the new month's first available day; if the visible month has none, a "Choose a day" line is shown.
+- **Times.** Below the grid (`mt-6`) sit a centred `<h2>` in `pageHeading`, matching the month heading, with the
+  selected day and month (no year; `aria-live="polite"`, so switching day announces the date) and the slots: `buttonSecondaryCompact` buttons (narrow
+  `px-2` padding) with tabular numbers in a `card` grid, four per row on phones so a full hour of 15-minute slots fits
+  on one line.
 - **Confirm.** The appointment details are a `card` with a `divide-y` description list (term `text-sm font-semibold`,
   value `text-sm text-gray-700`), followed by a `<Form card>` with the cancellation checkbox, notes and "Book now".
   The sign-in gate uses the same card form as `/login`: "Forgot your password?" sits right of the Password label

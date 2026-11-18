@@ -30,12 +30,12 @@ describe('nextGridTimeMs', () => {
 	});
 });
 
-describe('slotsForVacancy', () => {
-	const vac = (startMs, endMs) => ({
-		startTime: new Date(startMs).toISOString(),
-		endTime: new Date(endMs).toISOString(),
-	});
+const vac = (startMs, endMs) => ({
+	startTime: new Date(startMs).toISOString(),
+	endTime: new Date(endMs).toISOString(),
+});
 
+describe('slotsForVacancy', () => {
 	it('enumerates every 15-minute start that leaves room for the duration', () => {
 		const start = localMs(2026, 6, 1, 9, 0);
 		const end = start + HOUR_MS; // one-hour window
@@ -124,7 +124,7 @@ describe('computeCandidateVacancies', () => {
 });
 
 describe('computeDaysWithSlots', () => {
-	it('returns an empty set for a non-positive duration', () => {
+	it('returns an empty map for a non-positive duration', () => {
 		expect(BookingAvailability.computeDaysWithSlots([{}], 0, 0).size).toBe(0);
 	});
 
@@ -135,8 +135,36 @@ describe('computeDaysWithSlots', () => {
 			{ startTime: new Date(day1).toISOString(), endTime: new Date(day1 + HOUR_MS).toISOString() },
 			{ startTime: new Date(day3).toISOString(), endTime: new Date(day3 + HOUR_MS).toISOString() },
 		];
-		const set = BookingAvailability.computeDaysWithSlots(vacancies, 30 * 60 * 1000, 0);
-		expect([...set].sort()).toEqual(['2026-06-01', '2026-06-03']);
+		const map = BookingAvailability.computeDaysWithSlots(vacancies, 30 * 60 * 1000, 0);
+		expect([...map.keys()].sort()).toEqual(['2026-06-01', '2026-06-03']);
+	});
+
+	it('counts the bookable 15-minute starts per day', () => {
+		const a = localMs(2026, 6, 1, 9, 0);
+		const b = localMs(2026, 6, 1, 11, 0);
+		const map = BookingAvailability.computeDaysWithSlots([vac(a, a + HOUR_MS), vac(b, b + HOUR_MS)], 30 * 60 * 1000, 0);
+		expect(map.get('2026-06-01')).toBe(6); // 09:00/15/30 + 11:00/15/30
+	});
+});
+
+describe('firstDateInMonth', () => {
+	it('returns the first date in the month, or null', () => {
+		const dates = ['2026-11-28', '2026-12-03', '2026-12-10'];
+		expect(BookingAvailability.firstDateInMonth(dates, '2026-12')).toBe('2026-12-03');
+		expect(BookingAvailability.firstDateInMonth(dates, '2027-01')).toBeNull();
+	});
+});
+
+describe('availabilityLevel', () => {
+	it('maps fewer than 2 slots to low', () => {
+		expect(BookingAvailability.availabilityLevel(0)).toBe('low');
+		expect(BookingAvailability.availabilityLevel(1)).toBe('low');
+		expect(BookingAvailability.availabilityLevel()).toBe('low');
+	});
+
+	it('maps 2 or more slots to high', () => {
+		expect(BookingAvailability.availabilityLevel(2)).toBe('high');
+		expect(BookingAvailability.availabilityLevel(10)).toBe('high');
 	});
 });
 

@@ -26,9 +26,8 @@ const HORIZON_MONTHS_AHEAD = 6;
  *
  * All params are read **inside** the query thunks so navigation refetches.
  *
- * @param {() => { serviceId: string, locationId: string|null, employeeId: string|null, month: string, date: string|null }} getParams
- *   `month` is the anchor 'YYYY-MM' for the visible grid; `date` is the
- *   selected 'YYYY-MM-DD' or null.
+ * @param {() => { serviceId: string, locationId: string|null, employeeId: string|null, month: string }} getParams
+ *   `month` is the anchor 'YYYY-MM' for the visible grid.
  */
 export function useBookingData(getParams) {
 	const vacanciesQuery = useResourceQuery(() => {
@@ -86,31 +85,21 @@ export function useBookingData(getParams) {
 		);
 	});
 
-	// Drives the month grid AND, via `sortedAvailableDates`, which day
-	// Prev/Next jump to.
+	// Day → bookable slot count. Drives the month grid, its traffic-light
+	// colours AND, via `sortedAvailableDates`, which day is preselected.
 	const daysWithSlots = $derived.by(() =>
 		BookingAvailability.computeDaysWithSlots(selectedVacancies, durationMs, Date.now()),
 	);
 
-	const sortedAvailableDates = $derived(Array.from(daysWithSlots).sort());
+	function availabilityLevel(dateStr) {
+		return BookingAvailability.availabilityLevel(daysWithSlots.get(dateStr));
+	}
 
-	const nextAvailableDate = $derived.by(() => {
-		const { date } = getParams();
-		const reference = date || BookingAvailability.todayStr();
-		return sortedAvailableDates.find((d) => d > reference) ?? null;
-	});
+	const sortedAvailableDates = $derived(Array.from(daysWithSlots.keys()).sort());
 
-	const previousAvailableDate = $derived.by(() => {
-		const { date } = getParams();
-		const today = BookingAvailability.todayStr();
-		const reference = date || today;
-		let result = null;
-		for (const d of sortedAvailableDates) {
-			if (d >= reference) break;
-			if (d >= today) result = d;
-		}
-		return result;
-	});
+	function firstAvailableInMonth(month) {
+		return BookingAvailability.firstDateInMonth(sortedAvailableDates, month);
+	}
 
 	// True once any available day falls in a month later than the displayed
 	// one — drives the month grid's Next-month disabled state.
@@ -142,13 +131,9 @@ export function useBookingData(getParams) {
 		get hasLaterMonthAvailability() {
 			return hasLaterMonthAvailability;
 		},
-		get nextAvailableDate() {
-			return nextAvailableDate;
-		},
-		get previousAvailableDate() {
-			return previousAvailableDate;
-		},
+		firstAvailableInMonth,
 		slotsForDate,
+		availabilityLevel,
 		get isLoading() {
 			return (
 				vacanciesQuery.isLoading || servicesQuery.isLoading || employeesQuery.isLoading || locationsQuery.isLoading
