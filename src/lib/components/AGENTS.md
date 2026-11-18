@@ -103,6 +103,25 @@ Native `<dialog>` confirmation, opened with `showModal()` while `open` is true. 
 | `oncancel`     | `() => void` | required | Cancel button, or Escape (ignored while `loading`)              |
 | `children`     | snippet      | —        | Optional extra content below the message (e.g. a summary table) |
 
+Capped at the viewport height: the heading, message and buttons stay in view and `children` scrolls (`dialogScroll`
+token). Focus starts on Cancel.
+
+### MessageDialog (`src/lib/components/MessageDialog.svelte`)
+
+Read-only native `<dialog>` for a block of plain text (the plan calendar's customer notes). Same card layout as
+`ConfirmDialog`, with a single Close button (`m.close()`). The text keeps its line breaks (`whitespace-pre-wrap`); the
+dialog grows to the viewport height (less 1rem each side) and only the text scrolls beyond that, keeping the heading and
+Close in view. Escape and Close call `onclose`.
+
+| Prop      | Type               | Default  | Description                                       |
+| --------- | ------------------ | -------- | ------------------------------------------------- |
+| `open`    | `boolean`          | required | Shows (`showModal`) or closes the dialog          |
+| `title`   | `string`           | required | Heading; names the dialog (`aria-labelledby`)     |
+| `message` | `string`           | `''`     | Body text, rendered as plain text                 |
+| `loading` | `boolean`          | `false`  | Shows a `role="status"` "Loading" message instead |
+| `error`   | `string \| object` | `null`   | `apiError()` result, shown in an `alert` instead  |
+| `onclose` | `() => void`       | required | Close button, or Escape                           |
+
 ### RequiredInput (`src/lib/components/RequiredInput.svelte`)
 
 Required text input with the design-manual asterisk. Spreads all props onto the `<input>` (`id`, `name`, `type`,
@@ -143,8 +162,10 @@ DateUtils.toLocalTime(new Date()); // → "10:00"
 - **Calendar → API**: `new Date(localString).toISOString()`
 - **Never** `.toISOString().slice()` for form date/time extraction — gives UTC, not local
 
-Config: 6 AM–6 PM default (expandable to midnight), Monday week start, no all-day slot, `p`/`n`/`t` keyboard
-shortcuts. Event colours come from the `ui.js` event tokens passed as `classNames` (docs/design.md › Calendar).
+Config: 6 AM–6 PM default (expandable to midnight), 40px per 30-minute slot, Monday week start, no all-day slot, `p`/`n`/`t` keyboard
+shortcuts. Event colours come from the `ui.js` event tokens passed as `classNames` (docs/design.md › Calendar). An event with
+`extendedProps.hasNotes` gets a `sky-600` (i) icon in its top-right corner (title and sr-only text `m.notes()`); it is
+not a separate control, so clicking the event reaches `onEventClick`.
 
 ### VacancyForm (`src/lib/components/VacancyForm.svelte`)
 

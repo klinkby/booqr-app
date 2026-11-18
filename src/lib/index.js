@@ -9,6 +9,7 @@ export { default as LimitedTextarea } from './components/LimitedTextarea.svelte'
 export { default as ContactFields } from './components/ContactFields.svelte';
 export { default as PhoneInput } from './components/PhoneInput.svelte';
 export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
+export { default as MessageDialog } from './components/MessageDialog.svelte';
 // Calendar and ListCalendar are intentionally NOT re-exported here: they pull the
 // heavy `@event-calendar/core` dependency (with a CSS side-effect import that defeats
 // tree-shaking across this barrel). Import them lazily by direct path instead —

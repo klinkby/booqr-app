@@ -204,4 +204,51 @@ test.describe('Calendar UX Adjustments', () => {
 
 		await pageScreenshot(page, 'admin-plan-select-employee');
 	});
+
+	test('appointment with customer notes shows an (i) icon and opens the notes in a dialog', async ({ page }) => {
+		const today = new Date();
+		const day = today.getDay();
+		const daysFromMonday = day === 0 ? 6 : day - 1;
+		const start = new Date(today);
+		start.setDate(today.getDate() - daysFromMonday + 2); // Wednesday of the visible week
+		start.setHours(9, 0, 0, 0);
+		const end = new Date(start.getTime() + 45 * 60 * 1000);
+		const booking = {
+			id: 'appt-notes',
+			startTime: start.toISOString(),
+			endTime: end.toISOString(),
+			serviceId: 'svc1',
+			locationId: 1,
+			employeeId: 'emp1',
+			customerId: '1',
+			hasNotes: true,
+		};
+		const notes = 'Sore left shoulder.\nPlease use unscented oil.';
+
+		await page.route('**/api/users/*/my-bookings*', (route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [booking] }) }),
+		);
+		// The list only says hasNotes; the text comes from GET /api/bookings/{id} (a Booking).
+		await page.route('**/api/bookings/appt-notes', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ id: booking.id, customerId: booking.customerId, serviceId: booking.serviceId, notes }),
+			}),
+		);
+
+		await page.goto('/admin/plan');
+		const appointment = page.locator('.ec-event', { hasText: 'Test Customer, Haircut' });
+		await expect(appointment).toBeVisible({ timeout: 5000 });
+		await expect(appointment.locator('[title="Notes"]')).toBeVisible();
+
+		await appointment.click();
+		const dialog = page.getByRole('dialog', { name: 'Note from Test Customer' });
+		await expect(dialog).toBeVisible();
+		await expect(dialog).toContainText('Please use unscented oil.');
+		await pageScreenshot(page, 'admin-plan-appointment-notes');
+
+		await dialog.getByRole('button', { name: 'Close' }).click();
+		await expect(dialog).toBeHidden();
+	});
 });

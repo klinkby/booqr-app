@@ -7,6 +7,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export { TakeoutScope } from './models/TakeoutScope';
 export { TakeoutWarningCode } from './models/TakeoutWarningCode';
+export { ActivityService } from './services/ActivityService';
 export { AuthenticationService } from './services/AuthenticationService';
 export { BookingService } from './services/BookingService';
 export { DataTakeoutService } from './services/DataTakeoutService';

@@ -5,7 +5,7 @@ export class BookingService {
      * Get a single booking
      * Booking
      * @param id
-     * @returns void
+     * @returns Booking OK
      * @throws ApiError
      */
     static getBookingById(id) {
@@ -16,10 +16,10 @@ export class BookingService {
                 'id': id,
             },
             errors: {
-                302: `Found`,
                 400: `Bad Request`,
                 401: `Unauthorized`,
                 403: `Forbidden`,
+                404: `Not Found`,
             },
         });
     }
@@ -48,7 +48,7 @@ export class BookingService {
      * Add a booking
      * Booking
      * @param requestBody
-     * @returns any Created
+     * @returns CreatedResponse Created
      * @throws ApiError
      */
     static addBooking(requestBody) {

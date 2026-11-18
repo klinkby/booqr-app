@@ -29,6 +29,10 @@ export const cardActions =
 // Full-width message bars inside a card (no rounding; the card clips them).
 export const cardAlert = 'bg-red-50 px-4 py-4 text-sm text-red-800 sm:px-6';
 export const cardSuccess = 'bg-green-50 px-4 py-4 text-sm text-green-800 sm:px-6';
+// Scrolling body of a viewport-capped <dialog> (ConfirmDialog, MessageDialog). Chrome makes scrollers keyboard-focusable,
+// so it gets the standard focus ring; the stable gutter stops the text reflowing when the scrollbar appears.
+export const dialogScroll =
+	'min-h-0 overflow-y-auto [scrollbar-gutter:stable] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600';
 export const card = 'overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5';
 export const cardSection = 'px-4 py-4 sm:px-6';
 // Calendar event colours (docs/design.md › Calendar).
