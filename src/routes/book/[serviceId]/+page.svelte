@@ -131,22 +131,14 @@
 	// (derived only — never written back into the URL).
 	const effectiveDate = $derived(page.url.searchParams.get('date') ?? booking.firstAvailableInMonth(effectiveMonth));
 
-	const dateLabel = $derived.by(() => {
-		if (!effectiveDate) return '';
-		const d = new Date(effectiveDate + 'T00:00');
-		return `${d.getDate()}. ${d.toLocaleDateString(getLocale(), { month: 'long' })}`;
-	});
+	const dateLabel = $derived(
+		effectiveDate ? DateUtils.formatDayMonth(new Date(effectiveDate + 'T00:00'), getLocale()) : '',
+	);
 
 	function addMonthsStr(monthStr, delta) {
 		const [year, month] = monthStr.split('-').map(Number);
 		const d = new Date(year, month - 1 + delta, 1);
 		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-	}
-
-	function targetDayLabel(dateStr) {
-		if (!dateStr) return '';
-		const d = new Date(dateStr + 'T00:00');
-		return `${d.getDate()} ${d.toLocaleDateString(getLocale(), { month: 'long' })}`;
 	}
 
 	const slots = $derived(effectiveDate ? booking.slotsForDate(effectiveDate) : []);
@@ -160,7 +152,7 @@
 		if (loc) items.push(loc.name);
 		const emp = booking.serviceEmployees.find((e) => String(e.id) === effectiveEmployeeId);
 		if (emp?.name) items.push(emp.name);
-		if (effectiveDate) items.push(targetDayLabel(effectiveDate));
+		if (dateLabel) items.push(dateLabel);
 		return items;
 	});
 

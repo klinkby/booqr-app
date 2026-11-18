@@ -23,6 +23,11 @@ export class DateUtils {
 		return DateUtils.toLocalDate(d) === value ? d : null;
 	}
 
+	/** "10. December" — the day format used across the booking flow. */
+	static formatDayMonth(d, locale) {
+		return `${d.getDate()}. ${d.toLocaleDateString(locale, { month: 'long' })}`;
+	}
+
 	static toLocalTime(d) {
 		return `${DateUtils.#pad(d.getHours())}:${DateUtils.#pad(d.getMinutes())}`;
 	}
