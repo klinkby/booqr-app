@@ -248,8 +248,8 @@ so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isF
   decorative chevron on the right. A service's duration sits right-aligned before the chevron.
 - **Month and day.** Prev/next are `iconButtonSecondary` chevrons around the heading. The month grid is a `card`
   (`p-4 sm:p-6`); bookable days are round buttons with bold numbers, coloured like a traffic light by remaining capacity
-  in service-length slots: `orange-100`/`orange-800` under 2, `yellow-100`/`yellow-800` under 4, otherwise
-  `green-100`/`green-800`; other days plain `gray-400` text (disabled).
+  in service-length slots: `orange-100`/`orange-800` under 2, otherwise `green-100`/`green-800`; other days plain
+  `gray-400` text (disabled).
 - **Times.** Slots are `buttonSecondaryCompact` buttons (narrow `px-2` padding) with tabular numbers in a
   `card` grid, four per row on phones so a full hour of 15-minute slots fits on one line.
 - **Confirm.** The appointment details are a `card` with a `divide-y` description list (term `text-sm font-semibold`,

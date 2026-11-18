@@ -182,13 +182,8 @@ describe('availabilityLevel', () => {
 		expect(BookingAvailability.availabilityLevel(1.9)).toBe('low');
 	});
 
-	it('maps 2 up to 4 slots to medium', () => {
-		expect(BookingAvailability.availabilityLevel(2)).toBe('medium');
-		expect(BookingAvailability.availabilityLevel(3.5)).toBe('medium');
-	});
-
-	it('maps 4 or more slots to high', () => {
-		expect(BookingAvailability.availabilityLevel(4)).toBe('high');
+	it('maps 2 or more slots to high', () => {
+		expect(BookingAvailability.availabilityLevel(2)).toBe('high');
 		expect(BookingAvailability.availabilityLevel(10)).toBe('high');
 	});
 });

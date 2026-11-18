@@ -105,11 +105,9 @@ export class BookingAvailability {
 		return map;
 	}
 
-	/** Traffic-light level for a day's slot capacity: 'low' (< 2), 'medium' (< 4) or 'high'. */
+	/** Traffic-light level for a day's slot capacity: 'low' (< 2) or 'high'. */
 	static availabilityLevel(slots) {
-		if (slots < 2) return 'low';
-		if (slots < 4) return 'medium';
-		return 'high';
+		return slots < 2 ? 'low' : 'high';
 	}
 
 	/** Concrete bookable slots on `dateStr` (local), sorted ascending by start time. */

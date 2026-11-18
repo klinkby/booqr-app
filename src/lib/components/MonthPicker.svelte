@@ -7,7 +7,6 @@
 	// Traffic-light colours for bookable days by remaining capacity (see docs/design.md › Booking).
 	const levelClasses = {
 		low: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
-		medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
 		high: 'bg-green-100 text-green-800 hover:bg-green-200',
 	};
 
