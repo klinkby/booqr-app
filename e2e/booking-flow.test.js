@@ -345,6 +345,10 @@ test.describe('Customer booking flow', () => {
 		// once in the appointment detail list.
 		await expect(page.getByLabel('Your selections so far')).toContainText(EMPLOYEES[0].name);
 		await expect(page.getByText(EMPLOYEES[0].name).last()).toBeVisible();
+		await expect(page.getByLabel('Optional notes for the employee')).toHaveAttribute(
+			'placeholder',
+			'(no health information)',
+		);
 
 		await pageScreenshot(page, 'book-service-confirm');
 

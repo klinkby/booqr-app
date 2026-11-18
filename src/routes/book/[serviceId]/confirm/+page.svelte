@@ -375,7 +375,12 @@
 						<p id="acceptCancellationError" class="mt-2 text-sm text-red-700">{cancellationError}</p>
 					{/if}
 				</div>
-				<LimitedTextarea id="notes" label={m.notesForEmployeeOptional()} bind:value={notes} />
+				<LimitedTextarea
+					id="notes"
+					label={m.notesForEmployeeOptional()}
+					placeholder={m.notesPlaceholder()}
+					bind:value={notes}
+				/>
 			</div>
 		</Form>
 	{/if}
