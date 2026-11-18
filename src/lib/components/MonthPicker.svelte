@@ -50,6 +50,7 @@
 									onclick={() => onSelectDay(day.date)}
 								>
 									{day.dayOfMonth}
+									{#if day.level === 'low'}<span class="sr-only">&nbsp;{m.fewTimesLeft()}</span>{/if}
 								</button>
 							</td>
 						{:else}
