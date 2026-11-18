@@ -168,6 +168,7 @@ export async function setupApiMocks(page) {
 	await page.route('**/api/employees*', (route) =>
 		route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) }),
 	);
+	const TEST_CUSTOMER = { id: '1', name: 'Test Customer', email: 'test@example.com', phone: '4512345678' };
 	// Playwright matches routes in REVERSE registration order (last wins), so
 	// register from least- to most-specific: the generic users collection
 	// first, then my-bookings, then the single-user detail last.
@@ -179,7 +180,11 @@ export async function setupApiMocks(page) {
 		if (request.method() === 'POST') {
 			return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 'newUser1' }) });
 		}
-		return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: EMPLOYEES }) });
+		// Batch lookup (`?Id=1&Id=2`, e.g. plan-calendar customer names): return
+		// only the requested users, drawn from the roster plus the test customer.
+		const ids = new URL(request.url()).searchParams.getAll('Id');
+		const items = ids.length ? [...EMPLOYEES, TEST_CUSTOMER].filter((u) => ids.includes(String(u.id))) : EMPLOYEES;
+		return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items }) });
 	});
 	// Bookings list for the profile page: return current month bookings.
 	await page.route('**/api/users/*/my-bookings*', (route) =>
@@ -196,7 +201,7 @@ export async function setupApiMocks(page) {
 			return route.fulfill({
 				status: 200,
 				contentType: 'application/json',
-				body: JSON.stringify({ id: '1', name: 'Test Customer', email: 'test@example.com', phone: '4512345678' }),
+				body: JSON.stringify(TEST_CUSTOMER),
 			});
 		}
 		return route.fallback();

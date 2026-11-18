@@ -71,7 +71,7 @@ export function useProfileData() {
 
 	const employees = useResourceQuery(() => ({
 		queryKey: queryKeys.users.employees,
-		fetcher: () => UserService.getUsers(undefined, 'Employee', 0, 100),
+		fetcher: () => UserService.getUsers(undefined, 'Employee', undefined, 0, 100),
 	}));
 
 	return {
