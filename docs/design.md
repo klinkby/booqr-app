@@ -203,6 +203,9 @@ Put the "Create" button and any filter toggle together in one `flex justify-betw
 with `mb-4` (not centered below it). Both are secondary buttons: `buttonSecondary` for "Create", `iconButtonSecondary` for the
 icon-only filter toggle (`src/lib/ui.js`). Low emphasis; the solid indigo button is reserved for a form's submit.
 
+A list with no "Create" button but a single inline control (the `/admin/log` "From" date input) right-aligns it in a
+`flex justify-end` row with `mb-4`, labelled above with the `label` token.
+
 ### Table
 
 `PaginatedTable` → `DataTable` renders the table as a `card`: grey header row (`bg-gray-50`, `text-sm font-semibold`),

@@ -89,3 +89,27 @@ describe('hmmToDuration', () => {
 		expect(DateUtils.formatHmm(DateUtils.hmmToDuration('1:45'))).toBe('1:45');
 	});
 });
+
+describe('parseLocalDate', () => {
+	it('parses a real date as local midnight', () => {
+		const d = DateUtils.parseLocalDate('2026-01-15');
+		expect([d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes()]).toEqual([2026, 0, 15, 0, 0]);
+	});
+
+	it('accepts a leap day', () => {
+		expect(DateUtils.parseLocalDate('2028-02-29')).not.toBeNull();
+	});
+
+	it('rejects impossible dates instead of rolling over', () => {
+		expect(DateUtils.parseLocalDate('2026-02-31')).toBeNull();
+		expect(DateUtils.parseLocalDate('2026-02-29')).toBeNull();
+		expect(DateUtils.parseLocalDate('2026-13-01')).toBeNull();
+		expect(DateUtils.parseLocalDate('2026-00-10')).toBeNull();
+	});
+
+	it('rejects malformed and empty input', () => {
+		for (const value of [null, undefined, '', '2026-1-5', '15-01-2026', '2026-01-15T00:00', 'abc']) {
+			expect(DateUtils.parseLocalDate(value)).toBeNull();
+		}
+	});
+});

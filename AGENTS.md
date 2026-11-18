@@ -220,6 +220,9 @@ Shared (do not duplicate per route):
   - `/admin/services/**`, `/admin/locations/**` — Service and location CRUD; **Admin only** (the API rejects writes from
     Employees). Each has a `+layout.svelte` wrapping `src/routes/admin/AdminOnly.svelte`; nav links shown only for
     `auth.isAdmin`.
+  - `/admin/log` — Activity log; **Admin only** (`AdminOnly` layout). Paged `ActivityService.getActivities` from
+    `?from=YYYY-MM-DD` (local midnight, sent as UTC `FromTime`; defaults to today) picked with a native date input
+    right-aligned above the table. User IDs link to `/admin/contacts/{id}`. Hook: `logData.svelte.js`.
 - **Layout**: `src/routes/+layout.svelte` — `<NavBar>` with `links` array derived from `auth.isEmployee` /
   `auth.isLoggedIn`. Admin links merged into main nav; no secondary sub-nav. Also renders the page `<h1>`
   and footer; app shell in [docs/design.md › Layout](docs/design.md#layout).

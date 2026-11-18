@@ -44,6 +44,12 @@ export const queryKeys = {
 		// NOT invalidated by user mutations (separate resource).
 		all: ['employees'],
 	},
+	activities: {
+		// ActivityService.getActivities → /api/activities (admin only); keyed on
+		// the FromTime ISO string so each picked date caches separately.
+		all: ['activities'],
+		paged: (fromTime) => [...queryKeys.activities.all, 'paged', fromTime],
+	},
 	users: {
 		// Every UserService.getUsers / getUserById-derived view lives under this
 		// prefix so a single coarse invalidate(`users.all`) refreshes them all:

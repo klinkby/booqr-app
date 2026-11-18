@@ -91,6 +91,7 @@
 				contacts: m.titleContacts(),
 				services: m.titleServices(),
 				locations: m.titleLocations(),
+				log: m.titleLog(),
 			}[seg.at(-1)] ?? null
 		);
 	}
@@ -113,11 +114,12 @@
 					{ name: m.navContacts(), href: '/admin/contacts' },
 				]
 			: []),
-		// Services and locations are admin-only: the API rejects writes from employees.
+		// Services, locations and the activity log are admin-only: the API rejects employees.
 		...(auth.isAdmin
 			? [
 					{ name: m.navServices(), href: '/admin/services' },
 					{ name: m.navLocations(), href: '/admin/locations' },
+					{ name: m.navLog(), href: '/admin/log' },
 				]
 			: []),
 		...(auth.isLoggedIn ? [{ name: m.navMyProfile(), href: '/profile' }] : []),

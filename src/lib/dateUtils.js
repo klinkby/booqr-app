@@ -9,6 +9,20 @@ export class DateUtils {
 		return `${d.getFullYear()}-${DateUtils.#pad(d.getMonth() + 1)}-${DateUtils.#pad(d.getDate())}`;
 	}
 
+	/**
+	 * Parses a `YYYY-MM-DD` string as local midnight. Returns `null` unless the
+	 * date really exists — `new Date('2026-02-31T00:00')` silently rolls over
+	 * to 3 March, so the result must round-trip back to the input.
+	 *
+	 * @param {string | null | undefined} value
+	 * @returns {Date | null}
+	 */
+	static parseLocalDate(value) {
+		if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+		const d = new Date(`${value}T00:00`);
+		return DateUtils.toLocalDate(d) === value ? d : null;
+	}
+
 	static toLocalTime(d) {
 		return `${DateUtils.#pad(d.getHours())}:${DateUtils.#pad(d.getMinutes())}`;
 	}
