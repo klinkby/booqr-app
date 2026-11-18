@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodePhone, encodePhone, nationalPattern } from './phone.js';
+import { decodePhone, encodePhone, nationalPattern, telHref } from './phone.js';
 
 describe('decodePhone', () => {
 	it('splits two- and three-digit calling codes', () => {
@@ -32,5 +32,14 @@ describe('nationalPattern', () => {
 		expect(new RegExp(`^${nationalPattern('45')}$`).test('1234567')).toBe(false);
 		expect(new RegExp(`^${nationalPattern('48')}$`).test('123456789')).toBe(true);
 		expect(new RegExp(`^${nationalPattern('358')}$`).test('401234567')).toBe(true);
+	});
+});
+
+describe('telHref', () => {
+	it('prefixes the stored calling code with a plus sign', () => {
+		expect(telHref('4512345678')).toBe('tel:+4512345678');
+	});
+	it('drops formatting characters and does not double the plus', () => {
+		expect(telHref('+45 12 34-56 78')).toBe('tel:+4512345678');
 	});
 });
