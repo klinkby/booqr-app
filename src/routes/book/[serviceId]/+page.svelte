@@ -7,7 +7,7 @@
 	import { useBookingData } from './bookingData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
-	import { alert, iconButtonSecondary, link, pageHeading, sectionHeading } from '#lib/ui.js';
+	import { alert, iconButtonSecondary, link, pageHeading } from '#lib/ui.js';
 
 	const todayStr = DateUtils.toLocalDate(new Date());
 	const currentMonthStr = todayStr.slice(0, 7);
@@ -311,7 +311,7 @@
 			<div bind:this={timesRegion} class="mt-6">
 				{#if effectiveDate}
 					<!-- Live on the heading only, so switching day announces the date, not every time slot. -->
-					<h2 aria-live="polite" class="{sectionHeading} mb-4 text-center">{dateLabel}</h2>
+					<h2 aria-live="polite" class="{pageHeading} mb-4 text-center">{dateLabel}</h2>
 					<TimeSlotList {slots} onSelectSlot={selectSlot} />
 				{:else}
 					<p class="text-sm text-gray-500">{m.chooseADay()}</p>
