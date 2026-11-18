@@ -30,12 +30,12 @@ describe('nextGridTimeMs', () => {
 	});
 });
 
-describe('slotsForVacancy', () => {
-	const vac = (startMs, endMs) => ({
-		startTime: new Date(startMs).toISOString(),
-		endTime: new Date(endMs).toISOString(),
-	});
+const vac = (startMs, endMs) => ({
+	startTime: new Date(startMs).toISOString(),
+	endTime: new Date(endMs).toISOString(),
+});
 
+describe('slotsForVacancy', () => {
 	it('enumerates every 15-minute start that leaves room for the duration', () => {
 		const start = localMs(2026, 6, 1, 9, 0);
 		const end = start + HOUR_MS; // one-hour window
@@ -142,10 +142,6 @@ describe('computeDaysWithSlots', () => {
 
 describe('computeSlotCapacityByDay', () => {
 	const duration = 30 * 60 * 1000;
-	const vac = (startMs, endMs) => ({
-		startTime: new Date(startMs).toISOString(),
-		endTime: new Date(endMs).toISOString(),
-	});
 
 	it('returns an empty map for a non-positive duration', () => {
 		expect(BookingAvailability.computeSlotCapacityByDay([vac(0, HOUR_MS)], 0, 0).size).toBe(0);
@@ -173,6 +169,14 @@ describe('computeSlotCapacityByDay', () => {
 		const now = localMs(2026, 6, 1, 12, 0);
 		const map = BookingAvailability.computeSlotCapacityByDay([vac(start, start + HOUR_MS)], duration, now);
 		expect(map.has('2026-06-01')).toBe(false);
+	});
+});
+
+describe('firstDateInMonth', () => {
+	it('returns the first date in the month, or null', () => {
+		const dates = ['2026-11-28', '2026-12-03', '2026-12-10'];
+		expect(BookingAvailability.firstDateInMonth(dates, '2026-12')).toBe('2026-12-03');
+		expect(BookingAvailability.firstDateInMonth(dates, '2027-01')).toBeNull();
 	});
 });
 

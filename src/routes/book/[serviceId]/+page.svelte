@@ -33,7 +33,6 @@
 	const booking = useBookingData(() => ({
 		serviceId: page.params.serviceId,
 		month: effectiveMonth,
-		date: page.url.searchParams.get('date'),
 		get locationId() {
 			return effectiveLocationId;
 		},
@@ -73,22 +72,15 @@
 		return page.url.searchParams.get('employee');
 	});
 
-	const showMonthStep = $derived(!showLocationStep && !showEmployeeStep);
-
-	const currentStep = $derived.by(() => {
-		if (showLocationStep) return 'location';
-		if (showEmployeeStep) return 'employee';
-		return 'month';
-	});
-
 	// Moves focus to the (freshly re-rendered) step heading whenever the
 	// rendered state changes — every branch below, including loading/error/
-	// not-found, renders exactly one <h1>. `currentStep` alone isn't enough:
-	// while data is still loading it's stuck on 'month' (the fallback), so an
-	// effect keyed on it only would never re-fire once the real month-grid
-	// heading replaces the loading text.
+	// not-found, renders exactly one <h1>. The step flags alone aren't enough:
+	// while data is still loading they fall through to the month step, so an
+	// effect keyed on them only would never re-fire once the real month-grid
+	// heading replaces the loading text. Selecting a day doesn't re-run it.
 	$effect(() => {
-		currentStep;
+		showLocationStep;
+		showEmployeeStep;
 		booking.isLoading;
 		booking.error;
 		booking.service;
@@ -119,13 +111,14 @@
 			const dayNum = i - firstWeekday + 1;
 			const cellDate = new Date(year, month - 1, dayNum);
 			const dateStr = DateUtils.toLocalDate(cellDate);
+			const available = booking.daysWithSlots.has(dateStr);
 			days.push({
 				date: dateStr,
 				dayOfMonth: cellDate.getDate(),
 				inMonth: dayNum >= 1 && dayNum <= daysInMonth,
-				available: booking.daysWithSlots.has(dateStr),
+				available,
 				isPast: dateStr < todayStr,
-				level: booking.availabilityLevel(dateStr),
+				level: available ? booking.availabilityLevel(dateStr) : null,
 			});
 		}
 		return days;
@@ -266,7 +259,7 @@
 	{:else if showEmployeeStep}
 		<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{m.withWhom()}</h1>
 		<ChoiceList options={employeeOptions} onselect={selectEmployee} emptyMessage={m.noOneAvailable()} />
-	{:else if showMonthStep}
+	{:else}
 		{#if booking.isLoading}
 			<h1 tabindex="-1" class="{pageHeading} mb-6 outline-none">{monthLabel}</h1>
 			<p role="status" aria-live="polite" class="text-sm text-gray-500">{m.loadingAvailability()}</p>

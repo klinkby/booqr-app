@@ -26,9 +26,8 @@ const HORIZON_MONTHS_AHEAD = 6;
  *
  * All params are read **inside** the query thunks so navigation refetches.
  *
- * @param {() => { serviceId: string, locationId: string|null, employeeId: string|null, month: string, date: string|null }} getParams
- *   `month` is the anchor 'YYYY-MM' for the visible grid; `date` is the
- *   selected 'YYYY-MM-DD' or null.
+ * @param {() => { serviceId: string, locationId: string|null, employeeId: string|null, month: string }} getParams
+ *   `month` is the anchor 'YYYY-MM' for the visible grid.
  */
 export function useBookingData(getParams) {
 	const vacanciesQuery = useResourceQuery(() => {
@@ -104,7 +103,7 @@ export function useBookingData(getParams) {
 	const sortedAvailableDates = $derived(Array.from(daysWithSlots).sort());
 
 	function firstAvailableInMonth(month) {
-		return sortedAvailableDates.find((d) => d.startsWith(month)) ?? null;
+		return BookingAvailability.firstDateInMonth(sortedAvailableDates, month);
 	}
 
 	// True once any available day falls in a month later than the displayed

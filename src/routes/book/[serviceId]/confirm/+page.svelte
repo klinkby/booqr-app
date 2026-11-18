@@ -222,7 +222,7 @@
 	});
 
 	// "12 September" — matches the day format used in the booking wizard's
-	// own breadcrumb and Prev/Next hover text (see `targetDayLabel` in
+	// own breadcrumb (see `targetDayLabel` in
 	// `book/[serviceId]/+page.svelte`); one date format across the whole
 	// wizard, per the spec's explicit call-out (A10).
 	const breadcrumbItems = $derived.by(() => {

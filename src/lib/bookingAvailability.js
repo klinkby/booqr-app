@@ -105,6 +105,11 @@ export class BookingAvailability {
 		return map;
 	}
 
+	/** First 'YYYY-MM-DD' in the sorted `dates` that falls in `month` ('YYYY-MM'), or null. */
+	static firstDateInMonth(dates, month) {
+		return dates.find((d) => d.startsWith(month)) ?? null;
+	}
+
 	/** Traffic-light level for a day's slot capacity: 'low' (< 2) or 'high'. */
 	static availabilityLevel(slots) {
 		return slots < 2 ? 'low' : 'high';

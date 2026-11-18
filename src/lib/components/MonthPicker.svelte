@@ -46,8 +46,8 @@
 									type="button"
 									class="mx-auto flex size-10 items-center justify-center rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 {levelClasses[
 										day.level
-									] ?? levelClasses.high} {day.date === selectedDate ? 'ring-3 ring-indigo-600 ring-offset-2' : ''}"
-									aria-pressed={day.date === selectedDate ? 'true' : 'false'}
+									]} {day.date === selectedDate ? 'ring-3 ring-indigo-600 ring-offset-2' : ''}"
+									aria-pressed={day.date === selectedDate}
 									onclick={() => onSelectDay(day.date)}
 								>
 									{day.dayOfMonth}
