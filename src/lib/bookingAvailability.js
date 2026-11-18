@@ -79,28 +79,15 @@ export class BookingAvailability {
 		});
 	}
 
-	/** Set<'YYYY-MM-DD'> (local) — every day, across the fetched horizon, with at least one bookable slot. */
+	/** Map<'YYYY-MM-DD' (local), number> — bookable slot count for every day, across the fetched horizon, with at least one. */
 	static computeDaysWithSlots(selectedVacancies, durationMs, nowMs) {
-		const set = new Set();
-		if (durationMs <= 0) return set;
-		for (const v of selectedVacancies) {
-			for (const slot of BookingAvailability.slotsForVacancy(v, durationMs, nowMs)) {
-				set.add(DateUtils.toLocalDate(slot));
-			}
-		}
-		return set;
-	}
-
-	/** Map<'YYYY-MM-DD' (local), number> — summed remaining vacancy time per day, in service-duration units. */
-	static computeSlotCapacityByDay(selectedVacancies, durationMs, nowMs) {
 		const map = new Map();
 		if (durationMs <= 0) return map;
 		for (const v of selectedVacancies) {
-			const startMs = Math.max(new Date(v.startTime).getTime(), nowMs);
-			const endMs = new Date(v.endTime).getTime();
-			if (endMs <= startMs) continue;
-			const day = DateUtils.toLocalDate(new Date(v.startTime));
-			map.set(day, (map.get(day) ?? 0) + (endMs - startMs) / durationMs);
+			for (const slot of BookingAvailability.slotsForVacancy(v, durationMs, nowMs)) {
+				const day = DateUtils.toLocalDate(slot);
+				map.set(day, (map.get(day) ?? 0) + 1);
+			}
 		}
 		return map;
 	}
@@ -110,8 +97,8 @@ export class BookingAvailability {
 		return dates.find((d) => d.startsWith(month)) ?? null;
 	}
 
-	/** Traffic-light level for a day's slot capacity: 'low' (< 2) or 'high'. */
-	static availabilityLevel(slots) {
+	/** Traffic-light level for a day's bookable slot count: 'low' (< 2) or 'high'. */
+	static availabilityLevel(slots = 0) {
 		return slots < 2 ? 'low' : 'high';
 	}
 

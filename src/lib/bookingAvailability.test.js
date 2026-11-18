@@ -124,7 +124,7 @@ describe('computeCandidateVacancies', () => {
 });
 
 describe('computeDaysWithSlots', () => {
-	it('returns an empty set for a non-positive duration', () => {
+	it('returns an empty map for a non-positive duration', () => {
 		expect(BookingAvailability.computeDaysWithSlots([{}], 0, 0).size).toBe(0);
 	});
 
@@ -135,40 +135,15 @@ describe('computeDaysWithSlots', () => {
 			{ startTime: new Date(day1).toISOString(), endTime: new Date(day1 + HOUR_MS).toISOString() },
 			{ startTime: new Date(day3).toISOString(), endTime: new Date(day3 + HOUR_MS).toISOString() },
 		];
-		const set = BookingAvailability.computeDaysWithSlots(vacancies, 30 * 60 * 1000, 0);
-		expect([...set].sort()).toEqual(['2026-06-01', '2026-06-03']);
-	});
-});
-
-describe('computeSlotCapacityByDay', () => {
-	const duration = 30 * 60 * 1000;
-
-	it('returns an empty map for a non-positive duration', () => {
-		expect(BookingAvailability.computeSlotCapacityByDay([vac(0, HOUR_MS)], 0, 0).size).toBe(0);
+		const map = BookingAvailability.computeDaysWithSlots(vacancies, 30 * 60 * 1000, 0);
+		expect([...map.keys()].sort()).toEqual(['2026-06-01', '2026-06-03']);
 	});
 
-	it('sums vacancies on the same local day and keeps other days separate', () => {
+	it('counts the bookable 15-minute starts per day', () => {
 		const a = localMs(2026, 6, 1, 9, 0);
 		const b = localMs(2026, 6, 1, 11, 0);
-		const c = localMs(2026, 6, 3, 9, 0);
-		const vacancies = [vac(a, a + HOUR_MS), vac(b, b + 90 * 60 * 1000), vac(c, c + HOUR_MS)];
-		const map = BookingAvailability.computeSlotCapacityByDay(vacancies, duration, 0);
-		expect(map.get('2026-06-01')).toBe(5); // 2 + 3 slots
-		expect(map.get('2026-06-03')).toBe(2);
-	});
-
-	it('clips each vacancy to nowMs', () => {
-		const start = localMs(2026, 6, 1, 9, 0);
-		const now = localMs(2026, 6, 1, 10, 0);
-		const map = BookingAvailability.computeSlotCapacityByDay([vac(start, start + 2 * HOUR_MS)], duration, now);
-		expect(map.get('2026-06-01')).toBe(2); // 10:00-11:00 remaining
-	});
-
-	it('skips a fully past vacancy', () => {
-		const start = localMs(2026, 6, 1, 9, 0);
-		const now = localMs(2026, 6, 1, 12, 0);
-		const map = BookingAvailability.computeSlotCapacityByDay([vac(start, start + HOUR_MS)], duration, now);
-		expect(map.has('2026-06-01')).toBe(false);
+		const map = BookingAvailability.computeDaysWithSlots([vac(a, a + HOUR_MS), vac(b, b + HOUR_MS)], 30 * 60 * 1000, 0);
+		expect(map.get('2026-06-01')).toBe(6); // 09:00/15/30 + 11:00/15/30
 	});
 });
 
@@ -183,7 +158,8 @@ describe('firstDateInMonth', () => {
 describe('availabilityLevel', () => {
 	it('maps fewer than 2 slots to low', () => {
 		expect(BookingAvailability.availabilityLevel(0)).toBe('low');
-		expect(BookingAvailability.availabilityLevel(1.9)).toBe('low');
+		expect(BookingAvailability.availabilityLevel(1)).toBe('low');
+		expect(BookingAvailability.availabilityLevel()).toBe('low');
 	});
 
 	it('maps 2 or more slots to high', () => {

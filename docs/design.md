@@ -248,7 +248,7 @@ so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isF
   decorative chevron on the right. A service's duration sits right-aligned before the chevron.
 - **Month and day.** Prev/next are `iconButtonSecondary` chevrons around the heading. The month grid is a `card`
   (`p-4 sm:p-6`); bookable days are round buttons with bold numbers, coloured like a traffic light by remaining capacity
-  in service-length slots: `orange-100`/`orange-800` under 2 with a screen-reader-only "Few times left", otherwise
+  in bookable times: `orange-100`/`orange-800` under 2 with a screen-reader-only "Few times left", otherwise
   `green-100`/`green-800`; other days plain `gray-400` text (disabled). The selected day (`aria-pressed="true"`) gets a
   thick `ring-3 ring-indigo-600 ring-offset-2`. The month's first available day is preselected, and changing month
   preselects the new month's first available day; if the visible month has none, a "Choose a day" line is shown.

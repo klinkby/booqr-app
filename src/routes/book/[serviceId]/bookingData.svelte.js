@@ -85,22 +85,17 @@ export function useBookingData(getParams) {
 		);
 	});
 
-	// Drives the month grid AND, via `sortedAvailableDates`, which day is
-	// preselected in the visible month.
+	// Day → bookable slot count. Drives the month grid, its traffic-light
+	// colours AND, via `sortedAvailableDates`, which day is preselected.
 	const daysWithSlots = $derived.by(() =>
 		BookingAvailability.computeDaysWithSlots(selectedVacancies, durationMs, Date.now()),
 	);
 
-	// Traffic-light colouring of the month grid's bookable days.
-	const slotCapacityByDay = $derived.by(() =>
-		BookingAvailability.computeSlotCapacityByDay(selectedVacancies, durationMs, Date.now()),
-	);
-
 	function availabilityLevel(dateStr) {
-		return BookingAvailability.availabilityLevel(slotCapacityByDay.get(dateStr) ?? 0);
+		return BookingAvailability.availabilityLevel(daysWithSlots.get(dateStr));
 	}
 
-	const sortedAvailableDates = $derived(Array.from(daysWithSlots).sort());
+	const sortedAvailableDates = $derived(Array.from(daysWithSlots.keys()).sort());
 
 	function firstAvailableInMonth(month) {
 		return BookingAvailability.firstDateInMonth(sortedAvailableDates, month);
