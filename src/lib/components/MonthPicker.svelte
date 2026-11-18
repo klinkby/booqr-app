@@ -2,7 +2,7 @@
 	import { m } from '#lib/paraglide/messages.js';
 	import { card } from '#lib/ui.js';
 
-	let { days = [], onSelectDay } = $props();
+	let { days = [], selectedDate = null, onSelectDay } = $props();
 
 	// Traffic-light colours for bookable days by remaining capacity (see docs/design.md › Booking).
 	const levelClasses = {
@@ -46,7 +46,8 @@
 									type="button"
 									class="mx-auto flex size-10 items-center justify-center rounded-full font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 {levelClasses[
 										day.level
-									] ?? levelClasses.high}"
+									] ?? levelClasses.high} {day.date === selectedDate ? 'ring-3 ring-indigo-600 ring-offset-2' : ''}"
+									aria-pressed={day.date === selectedDate ? 'true' : 'false'}
 									onclick={() => onSelectDay(day.date)}
 								>
 									{day.dayOfMonth}

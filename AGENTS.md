@@ -200,12 +200,14 @@ Shared (do not duplicate per route):
   - `/` — Customer booking wizard step 1, "Select a service" (`ServiceList`); `/profile` — My Profile (edit
     name/phone and download a personal GDPR takeout, any logged-in user; admins also get a Backup panel to download
     the organization backup and restore one via a dry-run preview + `ConfirmDialog`)
-  - `/book/[serviceId]` — Wizard steps 2–5 (location → employee → month → day), one thin coordinator keyed entirely
+  - `/book/[serviceId]` — Wizard steps 2–4 (location → employee → month + times), one thin coordinator keyed entirely
     off URL params (`?location=&employee=&month=&date=`). Steps 2/3 auto-skip when only one option exists.
     `bookingData.svelte.js` / `useBookingData()` derives availability client-side from vacancies: `bookingId === null`
     plus a window ≥ the service's duration is bookable (server splits a vacancy on booking — see
-    `vacancy-split-on-booking` project memory). 15-minute grid, past times excluded, Prev/Next jump to the nearest
-    day **with** availability (not the adjacent calendar day).
+    `vacancy-split-on-booking` project memory). 15-minute grid, past times excluded. The month step and time step are
+    one view: the month grid with the selected day ringed, and that day's times below it. The selected day is
+    `?date=` or, absent that, the first available day of the visible month (derived, not written to the URL);
+    `?date=` alone also opens its month. Selecting a day uses `goto(..., { replace: true, noScroll: true, keepFocus: true })`.
   - `/book/[serviceId]/confirm` — Step 6, inline auth gate (login or sign-up; rendered in place on this URL, never a
     redirect to `/login`) when signed out, else step 7 (confirm & book). Reads `?vacancy=&start=`.
   - `/book/[serviceId]/conflict` — Step 8; reached only on a 409 from `addBooking` (slot taken by someone else first).
