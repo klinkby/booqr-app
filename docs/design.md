@@ -252,9 +252,10 @@ so it gets the calmest layout: one centred `max-w-2xl` column (the layout's `isF
   `green-100`/`green-800`; other days plain `gray-400` text (disabled). The selected day (`aria-pressed="true"`) gets a
   thick `ring-3 ring-indigo-600 ring-offset-2`. The month's first available day is preselected, and changing month
   preselects the new month's first available day; if the visible month has none, a "Choose a day" line is shown.
-- **Times.** Below the grid (`mt-6`) sit a `sectionHeading` `<h2>` with the selected date (`aria-live="polite"`, so
-  switching day announces the date) and the slots: `buttonSecondaryCompact` buttons (narrow `px-2` padding) with tabular numbers in a
-  `card` grid, four per row on phones so a full hour of 15-minute slots fits on one line.
+- **Times.** Below the grid (`mt-6`) sit a centred `sectionHeading` `<h2>` with the selected day and month (no year;
+  `aria-live="polite"`, so switching day announces the date) and the slots: `buttonSecondaryCompact` buttons (narrow
+  `px-2` padding) with tabular numbers in a `card` grid, four per row on phones so a full hour of 15-minute slots fits
+  on one line.
 - **Confirm.** The appointment details are a `card` with a `divide-y` description list (term `text-sm font-semibold`,
   value `text-sm text-gray-700`), followed by a `<Form card>` with the cancellation checkbox, notes and "Book now".
   The sign-in gate uses the same card form as `/login`: "Forgot your password?" sits right of the Password label

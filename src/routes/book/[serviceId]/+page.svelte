@@ -141,7 +141,7 @@
 	const dateLabel = $derived.by(() => {
 		if (!effectiveDate) return '';
 		const d = new Date(effectiveDate + 'T00:00');
-		return `${d.getDate()}. ${d.toLocaleDateString(getLocale(), { month: 'long' })} ${d.getFullYear()}`;
+		return `${d.getDate()}. ${d.toLocaleDateString(getLocale(), { month: 'long' })}`;
 	});
 
 	function addMonthsStr(monthStr, delta) {
@@ -311,7 +311,7 @@
 			<div bind:this={timesRegion} class="mt-6">
 				{#if effectiveDate}
 					<!-- Live on the heading only, so switching day announces the date, not every time slot. -->
-					<h2 aria-live="polite" class="{sectionHeading} mb-4">{dateLabel}</h2>
+					<h2 aria-live="polite" class="{sectionHeading} mb-4 text-center">{dateLabel}</h2>
 					<TimeSlotList {slots} onSelectSlot={selectSlot} />
 				{:else}
 					<p class="text-sm text-gray-500">{m.chooseADay()}</p>
