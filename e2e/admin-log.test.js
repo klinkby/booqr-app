@@ -71,6 +71,28 @@ test.describe('Admin activity log', () => {
 			.toBe(new Date('2026-01-15T00:00').toISOString());
 	});
 
+	test('an impossible date falls back to today', async ({ page }) => {
+		await setupAdminToken(page);
+		await page.goto('/admin/log?from=2026-02-31');
+		const today = new Date();
+		await expect(page.getByLabel('From')).toHaveValue(localDate(today));
+		today.setHours(0, 0, 0, 0);
+		await expect.poll(() => requests.at(-1)?.searchParams.get('FromTime')).toBe(today.toISOString());
+	});
+
+	test('returning to the log refetches instead of serving the cache', async ({ page }) => {
+		await setupAdminToken(page);
+		await page.goto('/admin/log');
+		await expect(page.getByRole('table')).toBeVisible();
+		const nav = page.getByRole('navigation');
+		await nav.getByRole('link', { name: 'Plan' }).first().click();
+		await expect(page).toHaveURL(/\/admin\/plan/);
+		const before = requests.length;
+		await nav.getByRole('link', { name: 'Log' }).first().click();
+		await expect(page).toHaveURL('/admin/log');
+		await expect.poll(() => requests.length).toBeGreaterThan(before);
+	});
+
 	test('employees do not see the log link', async ({ page }) => {
 		await setupAuthToken(page);
 		await page.goto('/admin/plan');

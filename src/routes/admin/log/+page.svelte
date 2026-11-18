@@ -17,24 +17,22 @@
 		{ key: 'action', label: m.labelAction() },
 	];
 
-	const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-	// `?from=YYYY-MM-DD` (local date) drives the query; default is today.
-	let fromDate = $derived.by(() => {
-		const param = page.url.searchParams.get('from');
-		return param && DATE_PATTERN.test(param) && !isNaN(new Date(`${param}T00:00`))
-			? param
-			: DateUtils.toLocalDate(new Date());
-	});
+	// `?from=YYYY-MM-DD` (local date) drives the query; a missing or
+	// impossible date (e.g. 2026-02-31) falls back to today.
+	let fromMidnight = $derived(
+		DateUtils.parseLocalDate(page.url.searchParams.get('from')) ??
+			DateUtils.parseLocalDate(DateUtils.toLocalDate(new Date())),
+	);
+	let fromDate = $derived(DateUtils.toLocalDate(fromMidnight));
 
 	// Local midnight of the picked date, sent to the API as UTC.
-	const log = useLogData(() => new Date(`${fromDate}T00:00`).toISOString());
+	const log = useLogData(() => fromMidnight.toISOString());
 
 	let error = $derived(log.error ? apiError(log.error) : null);
 
 	function handleDateChange(event) {
 		const value = event.currentTarget.value;
-		if (!DATE_PATTERN.test(value)) return;
+		if (!DateUtils.parseLocalDate(value)) return;
 		goto(resolve(`admin/log?from=${value}`), { replace: true, keepFocus: true, noScroll: true });
 	}
 

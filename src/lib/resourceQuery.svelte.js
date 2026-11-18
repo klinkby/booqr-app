@@ -73,7 +73,11 @@ export function useResourceMutation(invalidateKey, mutator) {
  *
  * Must be called once during component/hook setup.
  *
- * @param {() => { queryKey: Array, fetcher: (start: number, num: number) => Promise<{items: Array}>, enabled?: boolean }} options
+ * `staleTime` overrides the client default (Infinity) for resources that
+ * change outside this app's mutations, e.g. `0` for the append-only activity
+ * log so it refetches every time the page mounts.
+ *
+ * @param {() => { queryKey: Array, fetcher: (start: number, num: number) => Promise<{items: Array}>, enabled?: boolean, staleTime?: number }} options
  * @returns {{
  *   readonly items: Array,
  *   readonly isLoading: boolean,
@@ -102,10 +106,11 @@ export function usePagedResourceQuery(options) {
 	});
 
 	const query = createQuery(() => {
-		const { queryKey, fetcher, enabled = true } = options();
+		const { queryKey, fetcher, enabled = true, staleTime } = options();
 		return {
 			queryKey: [...queryKey, start],
 			enabled,
+			...(staleTime === undefined ? {} : { staleTime }),
 			queryFn: () => authedQueryFn(() => fetcher(start, PAGE_SIZE)),
 			placeholderData: (prev) => prev,
 		};

@@ -14,6 +14,9 @@ export function useLogData(getFromTime) {
 		return {
 			queryKey: queryKeys.activities.paged(fromTime),
 			fetcher: (start, num) => ActivityService.getActivities(fromTime, undefined, start, num),
+			// The log grows outside this app's mutations, so never serve it from
+			// cache alone: refetch whenever the page mounts.
+			staleTime: 0,
 		};
 	});
 }
