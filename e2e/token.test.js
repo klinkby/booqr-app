@@ -36,8 +36,8 @@ test.describe('Login flow with token validation', () => {
 		expect(body.email).toBe(email);
 		expect(body.password).toBe(password);
 
-		// Verify redirect and nav state after login (home page may add date-range query params)
-		await expect(page).toHaveURL(/^http:\/\/localhost:4173\/(\?|$)/);
+		// Verify redirect and nav state after login (no returnUrl lands on the profile)
+		await expect(page).toHaveURL('/profile');
 		await expect(page.locator('nav button:has-text("Sign out")')).toBeVisible();
 		await expect(page.locator('nav a[href="/login"]')).not.toBeVisible();
 
@@ -46,6 +46,6 @@ test.describe('Login flow with token validation', () => {
 		expect(accessToken).toBeTruthy();
 
 		// Capture screenshot
-		await pageScreenshot(page, 'home-login-success');
+		await pageScreenshot(page, 'profile-login-success');
 	});
 });

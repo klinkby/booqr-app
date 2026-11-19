@@ -3,9 +3,12 @@
 	import { resolve } from '$app/paths';
 	import { m } from '#lib/paraglide/messages.js';
 	import favicon from '#lib/assets/favicon.svg';
+	import { buttonSecondary } from '#lib/ui.js';
 
 	let { links = [], brandName = 'App', onlogout = undefined } = $props();
 	let isOpen = $state(false);
+	// Signed out the menu would hold only Sign in, so on mobile that link replaces the menu button.
+	let soloLink = $derived(links.length === 1 && !onlogout ? links[0] : null);
 
 	const ITEM = 'rounded-md px-3 py-2 text-sm font-semibold';
 	const LINK = `${ITEM} text-gray-600 hover:bg-gray-100 hover:text-gray-900`;
@@ -76,28 +79,35 @@
 				</ul>
 			</nav>
 
-			<button
-				type="button"
-				onclick={() => (isOpen = !isOpen)}
-				aria-expanded={isOpen}
-				aria-label={m.navToggleMenu()}
-				class="-mr-2 rounded-md p-2 text-gray-600 hover:bg-gray-100 md:hidden"
-			>
-				<svg
-					class="size-6"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.5"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-					><path d={isOpen ? 'M6 18L18 6M6 6l12 12' : 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5'} /></svg
+			{#if soloLink}
+				<a href={resolve(soloLink.href)} class="{buttonSecondary} items-center gap-1.5 md:hidden">
+					{#if soloLink.icon}{@render icon(soloLink.icon)}{/if}
+					{soloLink.name}
+				</a>
+			{:else}
+				<button
+					type="button"
+					onclick={() => (isOpen = !isOpen)}
+					aria-expanded={isOpen}
+					aria-label={m.navToggleMenu()}
+					class="-mr-2 rounded-md p-2 text-gray-600 hover:bg-gray-100 md:hidden"
 				>
-			</button>
+					<svg
+						class="size-6"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						viewBox="0 0 24 24"
+						aria-hidden="true"
+						><path d={isOpen ? 'M6 18L18 6M6 6l12 12' : 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5'} /></svg
+					>
+				</button>
+			{/if}
 		</div>
 
-		{#if isOpen}
+		{#if isOpen && !soloLink}
 			<div class="border-t border-gray-200 py-3 md:hidden">
 				<ul class="space-y-1">
 					{#each links as { name, href, icon: iconName } (href)}

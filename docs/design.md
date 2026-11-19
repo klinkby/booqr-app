@@ -125,7 +125,8 @@ The mark represents booking without relying on a tenant name and uses bold, simp
   icon.
 - **Sign in** (signed out) is a normal nav link with the matching sign-in icon (arrow into the rectangle; sign out
   points out of it). Both icons are `size-4`, `aria-hidden`, from NavBar's `ICONS` map, in the mobile menu too.
-- Below `md` the links collapse behind the menu button.
+- Below `md` the links collapse behind the menu button. Signed out, the only link is Sign in, so it shows as a
+  `buttonSecondary` (with its icon) in place of the menu button.
 
 ### Page heading
 

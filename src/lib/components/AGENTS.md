@@ -216,6 +216,9 @@ rendered by the root layout (`<h1>` in `<main>`), not by the header.
 A link may set an optional `icon` key (currently `'signIn'`); NavBar draws it before the label from its `ICONS` map of
 Heroicons outline paths. Sign out uses the `signOut` entry from the same map.
 
+With a single link and no `onlogout` (signed out: just Sign in), mobile shows that link as a `buttonSecondary`
+instead of the hamburger.
+
 Active link: exact match for `/`, `startsWith` for all other routes. Typical usage:
 
 ```svelte

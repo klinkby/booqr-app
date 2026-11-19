@@ -81,10 +81,10 @@ It follows secure, accessible, and simply standards-first principles.
   `useResourceQuery` / `useResourceMutation` / `fetchResource`, which delegate to `authedQueryFn` internally.
 - **On refresh failure**: `auth.clear()`, then redirect to
   `` `/login?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}` ``.
-- **Login page returnUrl**: Read with `let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/');`.
+- **Login page returnUrl**: Read with `let returnUrl = $derived($page.url.searchParams.get('returnUrl') || '/profile');`.
   (`$page` store deprecation warning in Svelte 5 runes is expected and harmless.)
 - **Login**: `AuthenticationService.login()`, set `auth.accessToken` from `response.access_token`, clear password
-  from memory (`password = ''`), redirect to `returnUrl` or `/`.
+  from memory (`password = ''`), redirect to `returnUrl` or `/profile`.
 - **Logout**: `AuthenticationService.logout()`, `auth.clear()`, `goto('/')`.
 
 ## Multi-tenancy

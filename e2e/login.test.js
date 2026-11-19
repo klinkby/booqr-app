@@ -50,7 +50,7 @@ test.describe('Login Page', () => {
 		expect(postBody).toMatchObject({ email: 'test@example.com', password: 'TestPassword1!' });
 	});
 
-	test('a successful login with no returnUrl lands on home', async ({ page }) => {
+	test('a successful login with no returnUrl lands on the profile', async ({ page }) => {
 		await page.route('**/api/auth/login', (route) =>
 			route.fulfill({
 				status: 200,
@@ -65,7 +65,7 @@ test.describe('Login Page', () => {
 		await page.fill('#password', 'TestPassword1!');
 		await page.getByRole('button', { name: 'Sign in' }).click();
 
-		await expect(page).toHaveURL('/');
+		await expect(page).toHaveURL('/profile');
 	});
 
 	test('a failed login shows an error and stays on the login page', async ({ page }) => {
@@ -90,7 +90,7 @@ test.describe('Login Page', () => {
 		await expect(alert).not.toHaveText('');
 	});
 
-	test('an unsafe returnUrl is normalized to home', async ({ page }) => {
+	test('an unsafe returnUrl is normalized to the profile', async ({ page }) => {
 		await page.route('**/api/auth/login', (route) =>
 			route.fulfill({
 				status: 200,
@@ -106,6 +106,6 @@ test.describe('Login Page', () => {
 		await page.fill('#password', 'TestPassword1!');
 		await page.getByRole('button', { name: 'Sign in' }).click();
 
-		await expect(page).toHaveURL('/');
+		await expect(page).toHaveURL('/profile');
 	});
 });
