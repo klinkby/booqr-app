@@ -19,20 +19,23 @@
 	let mode = $state('login'); // 'login' | 'signup'
 	let signUpSent = $state(false);
 
+	// Where a login lands when no safe returnUrl was given.
+	const DEFAULT_RETURN_URL = resolve('/profile');
+
 	// Use $derived for reactive access to URL search params (Svelte 5 best practice)
 	function normalizeReturnUrl(raw) {
 		if (!raw || typeof raw !== 'string') {
-			return '/';
+			return DEFAULT_RETURN_URL;
 		}
 
 		// Only allow same-origin, absolute paths starting with a single "/"
 		if (!raw.startsWith('/') || raw.startsWith('//')) {
-			return '/';
+			return DEFAULT_RETURN_URL;
 		}
 
 		// Disallow explicit schemes (e.g., "http://", "javascript:", etc.)
 		if (raw.includes('://')) {
-			return '/';
+			return DEFAULT_RETURN_URL;
 		}
 
 		return raw;
@@ -51,7 +54,7 @@
 			auth.accessToken = response.access_token;
 			// Store access token (response should contain token)
 			if (auth.isLoggedIn) {
-				// Redirect to the page that triggered login, or home if none
+				// Redirect to the page that triggered login, or the profile if none
 				// eslint-disable-next-line svelte/no-navigation-without-resolve -- returnUrl is an already-resolved same-origin path, validated by normalizeReturnUrl()
 				await goto(returnUrl);
 			} else {
