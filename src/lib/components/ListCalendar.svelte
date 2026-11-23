@@ -15,6 +15,7 @@
 		onMoveEvent = undefined,
 		onCancelEvent = undefined,
 		onDuplicateEvent = undefined,
+		emptyMessage = undefined,
 	} = $props();
 
 	let cal;
@@ -68,6 +69,8 @@
 	// English uses 12-hour. Drive it explicitly off the locale rather than
 	// relying on the library's per-locale default.
 	const hour12 = locale !== 'da';
+	// Empty-state text, fixed at construction: `emptyMessage` overrides the default.
+	const empty = untrack(() => emptyMessage) ?? m.noBookings();
 
 	const options = {
 		// listYear lists every booking across the whole year in one scrolling
@@ -117,8 +120,9 @@
 		// presence check is a one-time decision at construction (untrack), and the
 		// handler is invoked lazily so it always calls the current prop.
 		...(untrack(() => !!onEventClick) && { eventClick: (info) => onEventClick(info) }),
-		// Localized empty state (the library's own default is untranslated).
-		noEventsContent: () => m.noBookings(),
+		// Localized empty state (the library's own default is untranslated). A consumer
+		// may override it via `emptyMessage`; read once at construction like the other options.
+		noEventsContent: () => empty,
 	};
 </script>
 

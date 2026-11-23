@@ -79,7 +79,8 @@
 <div>
 	{#snippet cellContent(column, row)}
 		{#if column.key === 'name'}
-			<span id={nameId(row)}>{contactName(row)}</span>
+			<!-- The name links to the contact's upcoming appointments; the id is kept for the Book item's aria-describedby. -->
+			<a href={resolve(`admin/contacts/${row.id}/bookings`)} id={nameId(row)} class={link}>{contactName(row)}</a>
 		{:else if column.key === 'phone'}
 			{#if row.phone}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- tel: URI, not app navigation -->

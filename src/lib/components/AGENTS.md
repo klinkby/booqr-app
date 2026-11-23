@@ -3,7 +3,8 @@
 Import all from `'#lib'`. To add: create `.svelte` in `src/lib/components/` and add
 `export { default as Name } from './components/Name.svelte';` to `src/lib/index.js`.
 
-**Exception — `Calendar` and `ListCalendar`** are NOT exported from the `#lib` barrel.
+**Exception — `Calendar` and `ListCalendar`** are NOT exported from the `#lib` barrel. `ListCalendar` takes an optional
+`emptyMessage` string (default `m.noBookings()`), read once at construction, for the empty-state text.
 They pull the heavy `@event-calendar/core` dependency (whose CSS side-effect import
 defeats tree-shaking across the barrel), so they're lazy-loaded by direct path to keep
 them out of the shared bundle:

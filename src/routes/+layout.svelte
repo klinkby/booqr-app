@@ -82,6 +82,11 @@
 			if (entry) return seg[2] === 'new' ? entry.create : entry.edit;
 		}
 
+		// admin/contacts/<id>/bookings — matched on the full route shape, not the last segment.
+		if (seg.length === 4 && seg[0] === 'admin' && seg[1] === 'contacts' && seg[3] === 'bookings') {
+			return m.titleUpcomingAppointments();
+		}
+
 		return (
 			{
 				login: m.titleSignIn(),

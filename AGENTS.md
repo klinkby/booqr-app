@@ -159,6 +159,8 @@ Shared (do not duplicate per route):
   `<QueryClientProvider client={queryClient}>` once for the entire app.
 - `src/lib/queryKeys.js` — central `queryKeys` registry; one block per resource (`all` prefix + factory fns). Single
   source of truth so a query and its invalidation can't drift.
+- `src/lib/bookingLookups.svelte.js` — `useBookingLookups()`: shared services/locations/employees name lists; pass it
+  with bookings to `toBookingEvents` (`src/lib/bookingEvents.js`) to build `ListCalendar` events.
 - `src/lib/resourceQuery.svelte.js` — generic primitives:
   - `useResourceQuery(options)` — reactive collection fetch, unwraps `{ items }`, exposes `items`/`isLoading`/`isFetching`/`error`.
   - `usePagedResourceQuery(options)` — same as above but with internal `start` offset; also exposes `hasPreviousPage`/`hasNextPage`/`nextPage()`/`previousPage()` for use with `PaginatedTable`.
@@ -227,6 +229,9 @@ Shared (do not duplicate per route):
   - `/admin/log` — Activity log; **Admin only** (`AdminOnly` layout). Paged `ActivityService.getActivities` from
     `?from=YYYY-MM-DD` (local midnight, sent as UTC `FromTime`; defaults to today) picked with a native date input
     right-aligned above the table. User IDs link to `/admin/contacts/{id}`. Hook: `logData.svelte.js`.
+  - `/admin/contacts/[id]/bookings` — a contact's upcoming appointments (from now) in `ListCalendar`, reached by clicking
+    the contact's name in the contacts list. Book new / Duplicate / Reschedule run the wizard with `?customer=`; Cancel
+    deletes the booking. Hook: `bookingsData.svelte.js`.
 - **Layout**: `src/routes/+layout.svelte` — `<NavBar>` with `links` array derived from `auth.isEmployee` /
   `auth.isLoggedIn`. Admin links merged into main nav; no secondary sub-nav. Also renders the page `<h1>`
   and footer; app shell in [docs/design.md › Layout](docs/design.md#layout).
