@@ -3,8 +3,7 @@
 Import all from `'#lib'`. To add: create `.svelte` in `src/lib/components/` and add
 `export { default as Name } from './components/Name.svelte';` to `src/lib/index.js`.
 
-**Exception — `Calendar` and `ListCalendar`** are NOT exported from the `#lib` barrel. `ListCalendar` takes an optional
-`emptyMessage` string (default `m.noBookings()`), read once at construction, for the empty-state text.
+**Exception — `Calendar` and `ListCalendar`** are NOT exported from the `#lib` barrel.
 They pull the heavy `@event-calendar/core` dependency (whose CSS side-effect import
 defeats tree-shaking across the barrel), so they're lazy-loaded by direct path to keep
 them out of the shared bundle:
@@ -16,8 +15,8 @@ onMount(async () => {
 });
 ```
 
-Render behind `{#if Calendar}` with a `role="status"` fallback. See `/admin/plan` and
-`/profile` pages.
+Render behind `{#if Calendar}` with a `role="status"` fallback. See `/admin/plan`, `/profile` and
+`/admin/contacts/[id]/bookings` pages.
 
 ### DataTable (`src/lib/components/DataTable.svelte`)
 
@@ -206,6 +205,23 @@ returns focus to the trigger without reaching document-level Escape handlers. Us
 
 Build the wizard URLs for Duplicate/Reschedule with `duplicateBookingPath` / `rescheduleBookingPath` from
 `#lib/bookingWizard.js` (the latter stores the one-time rebook nonce).
+
+### ListCalendar (`src/lib/components/ListCalendar.svelte`)
+
+Year list of bookings (`listYear`), lazy-loaded (see the barrel exception above). Each row is
+"**time service** (employee) @ location" plus a `BookingMenu`; the toolbar has year prev/next (capped to years that
+hold bookings) and a primary Book button. Build `events` with `toBookingEvents` (`#lib/bookingEvents.js`) and
+`useBookingLookups()`; the caller decides `extendedProps.manageable`. Used by `/profile` and
+`/admin/contacts/[id]/bookings`.
+
+| Prop                                                 | Type              | Default          | Description                                       |
+| ---------------------------------------------------- | ----------------- | ---------------- | ------------------------------------------------- |
+| `events`                                             | `Array`           | `[]`             | `toBookingEvents()` output                        |
+| `emptyMessage`                                       | `string`          | `m.noBookings()` | Empty-state text; read once at construction       |
+| `onBookNew`                                          | `() => void`      | `undefined`      | Toolbar Book button                               |
+| `onDuplicateEvent` / `onMoveEvent` / `onCancelEvent` | `(event) => void` | `undefined`      | Row menu: Duplicate / Reschedule / Cancel booking |
+| `onEventClick`                                       | `(info) => void`  | `undefined`      | Only if set do rows become clickable              |
+| `onDatesChange`                                      | `(info) => void`  | `undefined`      | Library `datesSet` callback                       |
 
 ### Customer booking wizard components
 

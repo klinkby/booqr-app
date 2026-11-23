@@ -201,7 +201,10 @@ Shared (do not duplicate per route):
 - **Routes**:
   - `/` — Customer booking wizard step 1, "Select a service" (`ServiceList`); `/profile` — My Profile (edit
     name/phone and download a personal GDPR takeout, any logged-in user; admins also get a Backup panel to download
-    the organization backup and restore one via a dry-run preview + `ConfirmDialog`)
+    the organization backup and restore one via a dry-run preview + `ConfirmDialog`). Its `ListCalendar` lists the
+    user's bookings; a customer may Reschedule/Cancel only bookings starting ≥ 24h out (`MANAGE_CUTOFF_MS` in
+    `profileData.svelte.js`, sets `extendedProps.manageable`), otherwise only Duplicate. Employees and admins are
+    exempt, as is staff acting on a contact's bookings (`/admin/contacts/[id]/bookings`)
   - `/book/[serviceId]` — Wizard steps 2–4 (location → employee → month + times), one thin coordinator keyed entirely
     off URL params (`?location=&employee=&month=&date=`). Steps 2/3 auto-skip when only one option exists.
     `bookingData.svelte.js` / `useBookingData()` derives availability client-side from vacancies: `bookingId === null`
@@ -318,4 +321,5 @@ CI for regression detection.
   assertions timezone-independent; messages are stubbed globally in `vitest.config.js` (each `m.x()` returns `'x'`); `vi.mock('#lib/paraglide/messages.js', …)` only when asserting specific copy.
 - **Before committing**: `npm run lint` (ESLint + Prettier check) and `npm run format`.
 - **Linting rules**: `#each` blocks must have keys `(item.id)`; use `SvelteMap` instead of `new Map()` for reactive
-  state; no useless mustaches.
+  state; no useless mustaches. `prefer-svelte-reactivity` also flags `new Date()` in `.svelte.js` hooks — keep
+  non-reactive date work in plain `.js` (`DateUtils`, e.g. `DateUtils.nowUtcIso()`; `BookingAvailability`).
