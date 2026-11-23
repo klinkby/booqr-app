@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { pageScreenshot, setupApiMocks, setupAuthToken } from './mocks.js';
+import { pageScreenshot, setupAdminToken, setupApiMocks, setupAuthToken, setupCustomerToken } from './mocks.js';
 
+// The 24h cutoff applies to customers only, so these run as a Customer.
 test.describe('My Bookings overflow menu', () => {
 	test.beforeEach(async ({ page, context }) => {
 		await setupApiMocks(page);
-		await setupAuthToken(page);
+		await setupCustomerToken(page);
 		await context.clearCookies();
 		await page.goto('/profile');
 	});
@@ -171,7 +172,7 @@ test.describe('My Bookings 24h cutoff is timezone-correct', () => {
 
 	test('a booking ~23h out (across the UTC offset) offers only Duplicate', async ({ page, context }) => {
 		await setupApiMocks(page);
-		await setupAuthToken(page);
+		await setupCustomerToken(page);
 		await context.clearCookies();
 		// Override just my-bookings (last route wins) with a single ~23h-out booking.
 		const start = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString();
@@ -209,3 +210,23 @@ test.describe('My Bookings 24h cutoff is timezone-correct', () => {
 		await expect(page.getByRole('menuitem', { name: /cancel booking/i })).toHaveCount(0);
 	});
 });
+
+// Employees and admins are exempt from the 24h cutoff: Reschedule and Cancel stay
+// available even on the booking ~2h out.
+for (const [role, setupToken] of [
+	['Employee', setupAuthToken],
+	['Admin', setupAdminToken],
+]) {
+	test(`${role} can reschedule and cancel a booking within 24 hours`, async ({ page, context }) => {
+		await setupApiMocks(page);
+		await setupToken(page);
+		await context.clearCookies();
+		await page.goto('/profile');
+
+		// The ~2h row is the earliest, so it renders first.
+		await page.getByRole('button', { name: 'Booking actions', exact: true }).first().click();
+		await expect(page.getByRole('menuitem', { name: /duplicate/i })).toBeVisible();
+		await expect(page.getByRole('menuitem', { name: /reschedule/i })).toBeVisible();
+		await expect(page.getByRole('menuitem', { name: /cancel booking/i })).toBeVisible();
+	});
+}

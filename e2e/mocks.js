@@ -1,19 +1,17 @@
 /**
  * Shared Playwright API mocks for tests that don't hit a real backend.
  * Call setupApiMocks(page) in beforeEach for offline/unit-style tests.
- * Call setupAuthToken(page) to inject a fake Employee JWT via initScript (setupAdminToken for Admin).
+ * Call setupAuthToken(page) to inject a fake Employee JWT via initScript (setupAdminToken for Admin,
+ * setupCustomerToken for Customer).
  */
 
-export const FAKE_TOKEN =
-	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' +
-	'.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6IkVtcGxveWVlIiwibmJmIjoxNzcwNDc1NjgwLCJleHAiOjI3NzA0NzkyODAsImlhdCI6MTc3MDQ3NTY4MCwiaXNzIjoiYm9vcXIiLCJhdWQiOiJodHRwczovL3d3dy5ib29xci5kayJ9' +
-	'.fake';
+// Unsigned fake JWT; the app reads only sub, role and exp. Same user (sub "1") for every role.
+const b64 = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
+const fakeJwt = (role) => `${b64({ alg: 'none' })}.${b64({ sub: '1', role, exp: 2770479280 })}.fake`;
 
-// Same as FAKE_TOKEN but with the Admin role (sub "1", so it is the same user).
-export const ADMIN_TOKEN =
-	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' +
-	'.eyJzdWIiOiIxIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNzcwNDc1NjgwLCJleHAiOjI3NzA0NzkyODAsImlhdCI6MTc3MDQ3NTY4MCwiaXNzIjoiYm9vcXIiLCJhdWQiOiJodHRwczovL3d3dy5ib29xci5kayJ9' +
-	'.fake';
+export const FAKE_TOKEN = fakeJwt('Employee');
+export const ADMIN_TOKEN = fakeJwt('Admin');
+export const CUSTOMER_TOKEN = fakeJwt('Customer');
 
 export const LOCATIONS = [
 	{ id: 1, name: 'Location A', address1: '1 Main Street', city: 'Springfield' },
@@ -222,6 +220,11 @@ export async function setupAuthToken(page, token = FAKE_TOKEN) {
 /** Injects an Admin JWT (see ADMIN_TOKEN). */
 export function setupAdminToken(page) {
 	return setupAuthToken(page, ADMIN_TOKEN);
+}
+
+/** Injects a Customer JWT (see CUSTOMER_TOKEN). */
+export function setupCustomerToken(page) {
+	return setupAuthToken(page, CUSTOMER_TOKEN);
 }
 
 /**
