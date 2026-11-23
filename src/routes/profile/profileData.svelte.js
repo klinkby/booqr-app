@@ -7,7 +7,8 @@ import { DateUtils } from '#lib/dateUtils.js';
 import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
 
-// A booking may be rescheduled or cancelled only while it is at least 24h away.
+// A customer may reschedule or cancel a booking only while it is at least 24h
+// away. Employees and admins are exempt.
 const MANAGE_CUTOFF_MS = 24 * 60 * 60 * 1000;
 
 /**
@@ -106,14 +107,15 @@ export function useProfileData() {
 					// @ location".
 					title: `${serviceName} (${employeeName}) @ ${locationName}`,
 					// `manageable` is the domain rule for whether a booking can still be
-					// rescheduled or cancelled: only if it starts at least 24h out.
+					// rescheduled or cancelled: employees and admins always may; customers
+					// only if it starts at least 24h out.
 					// Computed here (not in the presentational calendar) from the raw UTC
 					// startTime vs. now — both true epochs, so it's timezone-correct.
 					extendedProps: {
 						serviceName,
 						employeeName,
 						locationName,
-						manageable: Date.parse(b.startTime) - now >= MANAGE_CUTOFF_MS,
+						manageable: auth.isEmployee || Date.parse(b.startTime) - now >= MANAGE_CUTOFF_MS,
 						serviceId: b.serviceId,
 						employeeId: b.employeeId,
 						locationId: b.locationId,
