@@ -3,7 +3,8 @@
 	import './calendar.css';
 	import { untrack } from 'svelte';
 	import { m } from '#lib/paraglide/messages.js';
-	import { calendarTheme, menuItem, menuItemDanger, menuPanel, menuTrigger } from '#lib/ui.js';
+	import { calendarTheme } from '#lib/ui.js';
+	import BookingMenu from './BookingMenu.svelte';
 	import { getLocale } from '#lib/paraglide/runtime.js';
 
 	let {
@@ -15,51 +16,6 @@
 		onCancelEvent = undefined,
 		onDuplicateEvent = undefined,
 	} = $props();
-
-	// Overflow-menu open state: hold the info.event.id of the row whose menu is
-	// open (the eventContent snippet is instanced per row inside the calendar's
-	// DOM, so a single boolean can't distinguish rows). null = all closed.
-	let openMenuId = $state(null);
-	let menuTriggerEl; // the ⋮ button of the open row, for focus return on close
-
-	function toggleMenu(id, triggerEl) {
-		if (openMenuId === id) {
-			openMenuId = null;
-		} else {
-			openMenuId = id;
-			menuTriggerEl = triggerEl;
-		}
-	}
-	function closeMenu(returnFocus = false) {
-		openMenuId = null;
-		if (returnFocus && menuTriggerEl) menuTriggerEl.focus();
-	}
-
-	// Move focus to the first menuitem when the popup opens, so a keyboard user
-	// who activated the trigger lands inside the menu (standard ARIA-menu
-	// behaviour) instead of having to Tab into it. Runs on mount of the panel.
-	function focusFirst(node) {
-		node.querySelector('[role="menuitem"]')?.focus();
-	}
-
-	// Escape closes the open menu and returns focus to its trigger. Bound to the
-	// interactive controls themselves (trigger + menu items) rather than the
-	// role="menu" container, which would then be flagged as needing a tabindex.
-	function onMenuKeydown(e, id) {
-		if (e.key === 'Escape' && openMenuId === id) {
-			e.stopPropagation();
-			closeMenu(true);
-		}
-	}
-
-	// While a menu is open, close it on any outside click. The trigger's own
-	// onclick calls stopPropagation, so opening never immediately re-closes.
-	$effect(() => {
-		if (openMenuId === null) return;
-		const onDocClick = () => closeMenu();
-		document.addEventListener('click', onDocClick);
-		return () => document.removeEventListener('click', onDocClick);
-	});
 
 	let cal;
 	let hasEvents = $derived(events.length > 0);
@@ -177,11 +133,6 @@
 	     — the time range and service name bold, then the employee in parens and
 	     the location after "@". Parts come from event.extendedProps (see
 	     profileData). Plus the trailing overflow-menu trigger. -->
-	<!-- `manageable` (may this booking still be rescheduled/cancelled?) is decided
-	     by profileData; the calendar just reflects it. onKeydown is hoisted so the
-	     trigger and both menu items share one Escape handler bound to this row. -->
-	{@const manageable = info.event.extendedProps.manageable}
-	{@const onKeydown = (e) => onMenuKeydown(e, info.event.id)}
 	<div class="flex flex-1 items-center justify-between gap-2">
 		<span class="flex flex-wrap items-baseline gap-x-1">
 			<span class="font-bold">
@@ -191,80 +142,17 @@
 			<span>({info.event.extendedProps.employeeName})</span>
 			<span>@ {info.event.extendedProps.locationName}</span>
 		</span>
-		<!-- Overflow menu: trigger + top-right-anchored popup with booking actions.
-		     justify-between pushes the wrapper to the row's right padding edge,
-		     aligning the ⋮ with the date shown in the day header above. The trigger
-		     is always shown (every booking can be duplicated); within 24h of the
-		     booking the Reschedule/Cancel items are omitted from the popup, leaving
-		     only Duplicate. -->
-		<div class="relative shrink-0">
-			<button
-				type="button"
-				aria-label={m.bookingActions()}
-				aria-haspopup="menu"
-				aria-expanded={openMenuId === info.event.id}
-				aria-controls="booking-menu-{info.event.id}"
-				onclick={(e) => {
-					e.stopPropagation();
-					toggleMenu(info.event.id, e.currentTarget);
-				}}
-				onkeydown={onKeydown}
-				class={menuTrigger}
-			>
-				⋮
-			</button>
-			{#if openMenuId === info.event.id}
-				<div
-					use:focusFirst
-					id="booking-menu-{info.event.id}"
-					role="menu"
-					aria-label={m.bookingActions()}
-					class="absolute right-0 top-full mt-1 {menuPanel}"
-				>
-					<button
-						type="button"
-						role="menuitem"
-						onclick={(e) => {
-							e.stopPropagation();
-							onDuplicateEvent?.(info.event);
-							closeMenu();
-						}}
-						onkeydown={onKeydown}
-						class={menuItem}
-					>
-						{m.duplicateBooking()}
-					</button>
-					{#if manageable}
-						<button
-							type="button"
-							role="menuitem"
-							onclick={(e) => {
-								e.stopPropagation();
-								onMoveEvent?.(info.event);
-								closeMenu();
-							}}
-							onkeydown={onKeydown}
-							class={menuItem}
-						>
-							{m.rescheduleBooking()}
-						</button>
-						<button
-							type="button"
-							role="menuitem"
-							onclick={(e) => {
-								e.stopPropagation();
-								onCancelEvent?.(info.event);
-								closeMenu();
-							}}
-							onkeydown={onKeydown}
-							class={menuItemDanger}
-						>
-							{m.cancelBooking()}
-						</button>
-					{/if}
-				</div>
-			{/if}
-		</div>
+		<!-- Overflow menu: justify-between pushes it to the row's right padding edge,
+		     aligning the ⋮ with the date shown in the day header above. Always shown
+		     (every booking can be duplicated); `manageable` (decided by profileData)
+		     adds Reschedule and Cancel booking. -->
+		<BookingMenu
+			id={info.event.id}
+			manageable={info.event.extendedProps.manageable}
+			onduplicate={() => onDuplicateEvent?.(info.event)}
+			onreschedule={() => onMoveEvent?.(info.event)}
+			oncancelbooking={() => onCancelEvent?.(info.event)}
+		/>
 	</div>
 {/snippet}
 

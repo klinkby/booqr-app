@@ -120,3 +120,14 @@ describe('parseLocalDate', () => {
 		}
 	});
 });
+
+describe('formatLongDate', () => {
+	it('formats a local date with weekday, day, month and year', () => {
+		expect(DateUtils.formatLongDate('2026-11-25', 'en')).toBe('Wednesday, November 25, 2026');
+		expect(DateUtils.formatLongDate('2026-11-25', 'da')).toBe('onsdag den 25. november 2026');
+	});
+
+	it('returns an empty string for an empty date', () => {
+		expect(DateUtils.formatLongDate('', 'en')).toBe('');
+	});
+});

@@ -2,6 +2,7 @@
 	import { Form } from '#lib';
 	import { m } from '#lib/paraglide/messages.js';
 	import { getLocale } from '#lib/paraglide/runtime.js';
+	import { DateUtils } from '#lib/dateUtils.js';
 	import { cardSection, input, label, sectionHeading } from '#lib/ui.js';
 
 	let {
@@ -24,16 +25,7 @@
 
 	const timeError = $derived(startTime && endTime && endTime <= startTime ? m.endTimeAfterStart() : null);
 
-	const formattedDate = $derived(
-		date
-			? new Date(date + 'T00:00').toLocaleDateString(getLocale(), {
-					weekday: 'long',
-					year: 'numeric',
-					month: 'long',
-					day: 'numeric',
-				})
-			: '',
-	);
+	const formattedDate = $derived(DateUtils.formatLongDate(date, getLocale()));
 </script>
 
 <div class="sticky top-20">

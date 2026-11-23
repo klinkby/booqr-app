@@ -93,6 +93,13 @@ export function usePlanData(getRange, getEmployeeId) {
 	);
 	const deleteVacancy = useResourceMutation(queryKeys.vacancies.all, (id) => VacancyService.deleteVacancy(id));
 
+	// Cancelling a booking touches two resources: the bookings overlay and the
+	// vacancy the server re-opens for the freed slot (see the
+	// `vacancy-split-on-booking` project memory), so both are invalidated.
+	const cancelBooking = useResourceMutation([queryKeys.bookings.all, queryKeys.vacancies.all], (id) =>
+		BookingService.deleteBooking(id),
+	);
+
 	return {
 		get vacancies() {
 			return query.items;
@@ -124,6 +131,9 @@ export function usePlanData(getRange, getEmployeeId) {
 						customerId: b.customerId,
 						customerName,
 						serviceId: b.serviceId,
+						serviceName,
+						employeeId: b.employeeId,
+						locationId: b.locationId,
 						hasNotes: b.hasNotes,
 					},
 				};
@@ -137,11 +147,25 @@ export function usePlanData(getRange, getEmployeeId) {
 		},
 		addVacancy,
 		deleteVacancy,
+		cancelBooking,
 		// One-off, always-fresh detail fetch for the view panel.
 		getVacancy: (id) => fetchResource(() => VacancyService.getVacancyById(id)),
 		// The list only carries `hasNotes`; the note text comes from the booking
-		// itself (staff may read any booking), fetched fresh when the dialog opens.
-		getBookingNotes: async (bookingId) =>
-			(await fetchResource(() => BookingService.getBookingById(bookingId)))?.notes ?? '-',
+		// itself (staff may read any booking) and the contact details from the
+		// customer's user record. Both fetched fresh each time the panel opens.
+		// A failed booking fetch rejects; a failed customer lookup (e.g. a deleted
+		// account) is returned as `customerError` so the notes still show.
+		getBookingDetails: async (bookingId, customerId) => {
+			const [booking, customer] = await Promise.allSettled([
+				fetchResource(() => BookingService.getBookingById(bookingId)),
+				fetchResource(() => UserService.getUserById(customerId)),
+			]);
+			if (booking.status === 'rejected') throw booking.reason;
+			return {
+				notes: booking.value?.notes ?? '',
+				customer: customer.status === 'fulfilled' ? customer.value : null,
+				customerError: customer.status === 'rejected' ? customer.reason : null,
+			};
+		},
 	};
 }

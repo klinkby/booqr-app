@@ -6,6 +6,7 @@
 	import { useProfileData } from './profileData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
 	import { alert, card, cardSection, fileInput, input, label, link, sectionHeading, success } from '#lib/ui.js';
+	import { duplicateBookingPath, rescheduleBookingPath } from '#lib/bookingWizard.js';
 	import { importSummaryRows, parseTakeoutFile, takeoutFileName } from './takeout.js';
 
 	// Lazy-load the calendar (and its heavy `@event-calendar/core` dependency) so it
@@ -75,34 +76,11 @@
 	}
 
 	function handleMoveEvent(event) {
-		const { serviceId, employeeId, locationId } = event.extendedProps;
-		// Bind the rebook intent to a one-time nonce carried both in sessionStorage
-		// and in the wizard URL. The old booking is deleted on completion only when
-		// the two match, so an unrelated booking for the same service (started from
-		// any URL without this nonce) can never consume a stale token.
-		const nonce = crypto.randomUUID();
-		try {
-			sessionStorage.setItem('pendingRebook', JSON.stringify({ bookingId: event.id, nonce }));
-		} catch {
-			// sessionStorage unavailable — nothing to store
-		}
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
-		const params = new URLSearchParams();
-		params.set('employee', employeeId);
-		params.set('location', locationId);
-		params.set('rebook', nonce);
-
-		goto(resolve(`book/${serviceId}?${params.toString()}`));
+		goto(resolve(rescheduleBookingPath({ id: event.id, ...event.extendedProps })));
 	}
 
 	function handleDuplicateEvent(event) {
-		const { serviceId, employeeId, locationId } = event.extendedProps;
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral, built fresh for this one navigation call and discarded; not shared mutable state
-		const params = new URLSearchParams();
-		params.set('employee', employeeId);
-		params.set('location', locationId);
-
-		goto(resolve(`book/${serviceId}?${params.toString()}`));
+		goto(resolve(duplicateBookingPath(event.extendedProps)));
 	}
 
 	async function handleCancelEvent(event) {

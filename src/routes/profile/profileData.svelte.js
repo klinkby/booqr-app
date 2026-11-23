@@ -4,7 +4,7 @@ import { authedQueryFn } from '#lib/queryClient.js';
 import { queryKeys } from '#lib/queryKeys.js';
 import { fetchResource, useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
 import { DateUtils } from '#lib/dateUtils.js';
-import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
+import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { SvelteMap } from 'svelte/reactivity';
 
 // A customer may reschedule or cancel a booking only while it is at least 24h
@@ -37,18 +37,13 @@ export function useProfileData() {
 
 	// Cancelling a booking touches two resources: the user's my-bookings set and
 	// the vacancy the server re-opens for the freed slot (see the
-	// `vacancy-split-on-booking` project memory). `useResourceMutation`
-	// invalidates a single key, so this one is written out to invalidate both
-	// `bookings.all` and `vacancies.all` coarsely.
+	// `vacancy-split-on-booking` project memory), so both are invalidated.
+	const cancelBooking = useResourceMutation([queryKeys.bookings.all, queryKeys.vacancies.all], (id) =>
+		BookingService.deleteBooking(id),
+	);
+
+	// Restoring a backup invalidates the whole cache (see importTakeout below).
 	const queryClient = useQueryClient();
-	const cancelMutation = createMutation(() => ({
-		mutationFn: (id) => authedQueryFn(() => BookingService.deleteBooking(id)),
-		onSuccess: () =>
-			Promise.all([
-				queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all }),
-				queryClient.invalidateQueries({ queryKey: queryKeys.vacancies.all }),
-			]),
-	}));
 
 	// Bookings query — fetch the user's full my-bookings set with no query
 	// params; the server decides the result set and the calendar filters/pages
@@ -124,7 +119,7 @@ export function useProfileData() {
 			});
 		},
 		saveProfile: (payload) => saveProfile(payload),
-		cancelBooking: (id) => cancelMutation.mutateAsync(id),
+		cancelBooking,
 		// GDPR data portability: the user's own takeout document. Always fetched
 		// fresh and never cached — it holds PII and must reflect the current state.
 		exportMyTakeout: () => fetchResource(() => DataTakeoutService.exportMyTakeout()),

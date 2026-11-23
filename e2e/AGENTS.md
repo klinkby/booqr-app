@@ -50,7 +50,9 @@ await pageScreenshot(page, 'admin-services-edit');
 ```
 
 The helper (in `mocks.js`) owns the format/quality/path: full-page **WebP quality 80** written to
-`e2e/screenshots/<name>.webp`. These files are committed. To change format/quality/dir, edit the helper only.
+`e2e/screenshots/<name>.webp`. Pass `{ expand: true }` when the test scrolled to reach a below-the-fold control:
+it grows the viewport to the page height so the sticky header isn't painted mid-page (scroll-closing popups such
+as DataTable's menu would close, so don't use it for those). These files are committed. To change format/quality/dir, edit the helper only.
 
 **Naming:** `<url-slug>[-<action-or-state>]` — URL path slugified (`/` → `home`, `/admin/plan` →
 `admin-plan`, `/book/[serviceId]` → `book-service`), with a single-dash suffix **only when an action or

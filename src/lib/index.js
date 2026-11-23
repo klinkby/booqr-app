@@ -9,13 +9,14 @@ export { default as LimitedTextarea } from './components/LimitedTextarea.svelte'
 export { default as ContactFields } from './components/ContactFields.svelte';
 export { default as PhoneInput } from './components/PhoneInput.svelte';
 export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
-export { default as MessageDialog } from './components/MessageDialog.svelte';
 // Calendar and ListCalendar are intentionally NOT re-exported here: they pull the
 // heavy `@event-calendar/core` dependency (with a CSS side-effect import that defeats
 // tree-shaking across this barrel). Import them lazily by direct path instead —
 // `await import('#lib/components/Calendar.svelte')` — so they split into their own
 // chunk and stay out of the shared bundle. See /admin/plan and /profile pages.
 export { default as VacancyForm } from './components/VacancyForm.svelte';
+export { default as BookingDetails } from './components/BookingDetails.svelte';
+export { default as BookingMenu } from './components/BookingMenu.svelte';
 export { default as PasswordReset } from './components/PasswordReset.svelte';
 export { default as NavBar } from './components/NavBar.svelte';
 export { default as UserName } from './components/UserName.svelte';
