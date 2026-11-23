@@ -1,11 +1,11 @@
-import { BookingService, DataTakeoutService, LocationService, ServiceService, UserService } from '#lib/api/index.js';
+import { BookingService, DataTakeoutService, UserService } from '#lib/api/index.js';
 import { auth } from '#lib/auth.svelte.js';
+import { useBookingLookups } from '#lib/bookingLookups.svelte.js';
 import { authedQueryFn } from '#lib/queryClient.js';
 import { queryKeys } from '#lib/queryKeys.js';
 import { fetchResource, useResourceMutation, useResourceQuery } from '#lib/resourceQuery.svelte.js';
-import { DateUtils } from '#lib/dateUtils.js';
+import { toBookingEvents } from '#lib/bookingEvents.js';
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
-import { SvelteMap } from 'svelte/reactivity';
 
 // A customer may reschedule or cancel a booking only while it is at least 24h
 // away. Employees and admins are exempt.
@@ -54,21 +54,7 @@ export function useProfileData() {
 		fetcher: () => UserService.getMyBookings(auth.userId),
 	}));
 
-	// Name lookup lists — these are coarse and unfiltered, so they never change
-	const services = useResourceQuery(() => ({
-		queryKey: queryKeys.services.all,
-		fetcher: () => ServiceService.getServices(0, 100),
-	}));
-
-	const locations = useResourceQuery(() => ({
-		queryKey: queryKeys.locations.all,
-		fetcher: () => LocationService.getLocations(0, 100),
-	}));
-
-	const employees = useResourceQuery(() => ({
-		queryKey: queryKeys.users.employees,
-		fetcher: () => UserService.getUsers(undefined, 'Employee', undefined, 0, 100),
-	}));
+	const lookups = useBookingLookups();
 
 	return {
 		get user() {
@@ -81,42 +67,12 @@ export function useProfileData() {
 			return query.error;
 		},
 		get bookingEvents() {
-			// Transient id→name lookups rebuilt each time this getter is read.
-			// Join each booking's serviceId/employeeId/locationId to a title.
-			const serviceMap = new SvelteMap(services.items.map((s) => [s.id, s.name]));
-			const locationMap = new SvelteMap(locations.items.map((l) => [l.id, l.name]));
-			const employeeMap = new SvelteMap(employees.items.map((e) => [e.id, e.name]));
-
 			const now = Date.now();
-			return bookings.items.map((b) => {
-				const serviceName = serviceMap.get(b.serviceId) ?? '';
-				const employeeName = employeeMap.get(b.employeeId) ?? '';
-				const locationName = locationMap.get(b.locationId) ?? '';
-				return {
-					id: b.id,
-					start: DateUtils.utcToLocalIso(b.startTime),
-					end: DateUtils.utcToLocalIso(b.endTime),
-					// Plain title for the library's own use (accessible name, tooltip).
-					// The calendar's eventContent renders the styled variant from the
-					// separate parts below: "<time> <service>" bold, then "(employee)
-					// @ location".
-					title: `${serviceName} (${employeeName}) @ ${locationName}`,
-					// `manageable` is the domain rule for whether a booking can still be
-					// rescheduled or cancelled: employees and admins always may; customers
-					// only if it starts at least 24h out.
-					// Computed here (not in the presentational calendar) from the raw UTC
-					// startTime vs. now — both true epochs, so it's timezone-correct.
-					extendedProps: {
-						serviceName,
-						employeeName,
-						locationName,
-						manageable: auth.isEmployee || Date.parse(b.startTime) - now >= MANAGE_CUTOFF_MS,
-						serviceId: b.serviceId,
-						employeeId: b.employeeId,
-						locationId: b.locationId,
-					},
-				};
-			});
+			return toBookingEvents(
+				bookings.items,
+				lookups,
+				(b) => auth.isEmployee || Date.parse(b.startTime) - now >= MANAGE_CUTOFF_MS,
+			);
 		},
 		saveProfile: (payload) => saveProfile(payload),
 		cancelBooking,

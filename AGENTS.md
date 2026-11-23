@@ -159,6 +159,8 @@ Shared (do not duplicate per route):
   `<QueryClientProvider client={queryClient}>` once for the entire app.
 - `src/lib/queryKeys.js` — central `queryKeys` registry; one block per resource (`all` prefix + factory fns). Single
   source of truth so a query and its invalidation can't drift.
+- `src/lib/bookingLookups.svelte.js` — `useBookingLookups()`: shared services/locations/employees name lists; pass it
+  with bookings to `toBookingEvents` (`src/lib/bookingEvents.js`) to build `ListCalendar` events.
 - `src/lib/resourceQuery.svelte.js` — generic primitives:
   - `useResourceQuery(options)` — reactive collection fetch, unwraps `{ items }`, exposes `items`/`isLoading`/`isFetching`/`error`.
   - `usePagedResourceQuery(options)` — same as above but with internal `start` offset; also exposes `hasPreviousPage`/`hasNextPage`/`nextPage()`/`previousPage()` for use with `PaginatedTable`.
@@ -199,7 +201,10 @@ Shared (do not duplicate per route):
 - **Routes**:
   - `/` — Customer booking wizard step 1, "Select a service" (`ServiceList`); `/profile` — My Profile (edit
     name/phone and download a personal GDPR takeout, any logged-in user; admins also get a Backup panel to download
-    the organization backup and restore one via a dry-run preview + `ConfirmDialog`)
+    the organization backup and restore one via a dry-run preview + `ConfirmDialog`). Its `ListCalendar` lists the
+    user's bookings; a customer may Reschedule/Cancel only bookings starting ≥ 24h out (`MANAGE_CUTOFF_MS` in
+    `profileData.svelte.js`, sets `extendedProps.manageable`), otherwise only Duplicate. Employees and admins are
+    exempt, as is staff acting on a contact's bookings (`/admin/contacts/[id]/bookings`)
   - `/book/[serviceId]` — Wizard steps 2–4 (location → employee → month + times), one thin coordinator keyed entirely
     off URL params (`?location=&employee=&month=&date=`). Steps 2/3 auto-skip when only one option exists.
     `bookingData.svelte.js` / `useBookingData()` derives availability client-side from vacancies: `bookingId === null`
@@ -227,6 +232,9 @@ Shared (do not duplicate per route):
   - `/admin/log` — Activity log; **Admin only** (`AdminOnly` layout). Paged `ActivityService.getActivities` from
     `?from=YYYY-MM-DD` (local midnight, sent as UTC `FromTime`; defaults to today) picked with a native date input
     right-aligned above the table. User IDs link to `/admin/contacts/{id}`. Hook: `logData.svelte.js`.
+  - `/admin/contacts/[id]/bookings` — a contact's upcoming appointments (from now) in `ListCalendar`, reached by clicking
+    the contact's name in the contacts list. Book new / Duplicate / Reschedule run the wizard with `?customer=`; Cancel
+    deletes the booking. Hook: `bookingsData.svelte.js`.
 - **Layout**: `src/routes/+layout.svelte` — `<NavBar>` with `links` array derived from `auth.isEmployee` /
   `auth.isLoggedIn`. Admin links merged into main nav; no secondary sub-nav. Also renders the page `<h1>`
   and footer; app shell in [docs/design.md › Layout](docs/design.md#layout).
@@ -313,4 +321,5 @@ CI for regression detection.
   assertions timezone-independent; messages are stubbed globally in `vitest.config.js` (each `m.x()` returns `'x'`); `vi.mock('#lib/paraglide/messages.js', …)` only when asserting specific copy.
 - **Before committing**: `npm run lint` (ESLint + Prettier check) and `npm run format`.
 - **Linting rules**: `#each` blocks must have keys `(item.id)`; use `SvelteMap` instead of `new Map()` for reactive
-  state; no useless mustaches.
+  state; no useless mustaches. `prefer-svelte-reactivity` also flags `new Date()` in `.svelte.js` hooks — keep
+  non-reactive date work in plain `.js` (`DateUtils`, e.g. `DateUtils.nowUtcIso()`; `BookingAvailability`).

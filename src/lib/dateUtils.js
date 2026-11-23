@@ -43,6 +43,11 @@ export class DateUtils {
 		return `${DateUtils.#pad(d.getHours())}:${DateUtils.#pad(d.getMinutes())}`;
 	}
 
+	/** The current instant as a UTC ISO string, e.g. for an API `FromTime` of "now". */
+	static nowUtcIso() {
+		return new Date().toISOString();
+	}
+
 	static utcToLocalIso(utcString) {
 		const d = new Date(utcString);
 		return `${DateUtils.toLocalDate(d)}T${DateUtils.toLocalTime(d)}`;

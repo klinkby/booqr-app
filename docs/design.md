@@ -212,7 +212,7 @@ A list with no "Create" button but a single inline control (the `/admin/log` "Fr
 `PaginatedTable` → `DataTable` renders the table as a `card`: grey header row (`bg-gray-50`, `text-sm font-semibold`),
 rows divided with `divide-gray-900/10`, cells `px-4 py-4 sm:px-6`. Row actions sit behind a right-aligned "⋮"
 [overflow menu](#overflow-menu): extra page actions first (e.g. Book on contacts), then Edit, then Delete last in red,
-which opens the [confirmation dialog](#confirmation-dialog). Previous/Next sit in a grey bar inside the card's bottom edge, like a form's action bar. Loading and empty
+which opens the [confirmation dialog](#confirmation-dialog). Previous/Next sit in a grey bar inside the card's bottom edge, like a form's action bar. On contacts, the name cell links to the contact's upcoming appointments. Loading and empty
 states are a `card` with `text-sm text-gray-500`; errors use `alert`. Pages don't style tables themselves.
 
 ### Overflow menu

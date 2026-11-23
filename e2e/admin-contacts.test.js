@@ -46,7 +46,27 @@ test.describe('Admin Contacts Page', () => {
 		await pageScreenshot(page, 'admin-contacts');
 	});
 
-	test('lists name as plain text, phone as a tel: link, and a Book action', async ({ page }) => {
+	test("a contact's name links to their upcoming appointments", async ({ page }) => {
+		await setupAdminToken(page);
+		await page.route('**/api/users*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					items: [{ id: 'c1', name: 'Carla Contact', email: 'carla@example.com', role: 'Customer' }],
+				}),
+			}),
+		);
+
+		await page.goto('/admin/contacts');
+		const row = page.getByRole('table').getByRole('row', { name: /Carla Contact/ });
+		await expect(row.getByRole('link', { name: 'Carla Contact' })).toHaveAttribute(
+			'href',
+			'/admin/contacts/c1/bookings',
+		);
+	});
+
+	test('lists name as a link, phone as a tel: link, and a Book action', async ({ page }) => {
 		await setupAuthToken(page);
 		await page.route('**/api/users*', (route) =>
 			route.fulfill({
@@ -66,7 +86,6 @@ test.describe('Admin Contacts Page', () => {
 
 		await expect(table.getByRole('columnheader', { name: 'Phone' })).toBeVisible();
 		await expect(row.getByRole('cell', { name: 'Carla Contact' })).toBeVisible();
-		await expect(row.getByRole('link', { name: 'Carla Contact' })).toHaveCount(0);
 		await expect(row.getByRole('link', { name: '+45 12345678' })).toHaveAttribute('href', 'tel:+4512345678');
 
 		// Book, Edit and Delete live in the row's overflow menu.

@@ -30,6 +30,8 @@ export const queryKeys = {
 		byUser: (userId) => [...queryKeys.bookings.all, userId],
 		// A user's my-bookings scoped to a week range (admin plan overlay).
 		userRange: (userId, from, to) => [...queryKeys.bookings.all, userId, from, to],
+		// A user's upcoming bookings (from now), all pages — staff contact view.
+		upcomingByUser: (userId) => [...queryKeys.bookings.all, userId, 'upcoming'],
 	},
 	locations: {
 		all: ['locations'],
