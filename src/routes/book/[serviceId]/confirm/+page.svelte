@@ -15,6 +15,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { DateUtils } from '#lib/dateUtils.js';
+	import { PENDING_REBOOK_KEY } from '#lib/bookingWizard.js';
 	import { ApiError } from '#lib/api/index.js';
 	import { onMount } from 'svelte';
 	import { useConfirmData } from './confirmData.svelte.js';
@@ -166,7 +167,7 @@
 			// new booking already succeeded, so a delete failure is swallowed, and the
 			// token is consumed exactly once (cleared in finally).
 			try {
-				const raw = sessionStorage.getItem('pendingRebook');
+				const raw = sessionStorage.getItem(PENDING_REBOOK_KEY);
 				if (raw) {
 					const pending = JSON.parse(raw);
 					if (pending?.bookingId && pending.nonce && pending.nonce === rebookNonce) {
@@ -181,7 +182,7 @@
 				// sessionStorage unavailable — nothing to consume
 			} finally {
 				try {
-					sessionStorage.removeItem('pendingRebook');
+					sessionStorage.removeItem(PENDING_REBOOK_KEY);
 				} catch {
 					// ignore
 				}

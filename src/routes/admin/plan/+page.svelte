@@ -1,5 +1,6 @@
 <script>
-	import { auth, VacancyForm, apiError, ErrorMessage, MessageDialog } from '#lib';
+	import { auth, BookingDetails, VacancyForm, apiError, ErrorMessage } from '#lib';
+	import { duplicateBookingPath, rescheduleBookingPath } from '#lib/bookingWizard.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -7,7 +8,7 @@
 	import { DateUtils } from '#lib/dateUtils.js';
 	import { usePlanData } from './planData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
-	import { alert, eventBooked, eventFree, eventPending, input } from '#lib/ui.js';
+	import { alert, success, eventBooked, eventFree, eventPending, input } from '#lib/ui.js';
 
 	// Lazy-load the calendar (and its heavy `@event-calendar/core` dependency) so it
 	// splits into its own chunk instead of the shared bundle. Import the component's
@@ -134,33 +135,104 @@
 			locationId: defaultLocationId(),
 		};
 		formError = null;
+		closeAppointment();
 		showForm = true;
 	}
 
-	// Customer notes dialog for an appointment (opened by clicking an event with hasNotes).
-	let notesDialog = $state({ open: false, loading: false, error: null, text: '', customerName: '' });
-	let notesRequest = 0; // ignores a slow response once another dialog was opened
+	// Appointment details panel (opened by clicking an appointment). `appointment`
+	// holds what the calendar event already knows; the notes and contact details
+	// are fetched fresh each time it opens.
+	let appointment = $state(null);
+	let appointmentLoading = $state(false);
+	let appointmentError = $state(null);
+	let appointmentMessage = $state(null);
+	let appointmentRequest = 0; // ignores a slow response once another appointment was opened
 
-	async function showNotes(bookingId, customerName) {
-		const request = ++notesRequest;
-		notesDialog = { open: true, loading: true, error: null, text: '', customerName };
+	async function showAppointment(event) {
+		const request = ++appointmentRequest;
+		const p = event.extendedProps;
+		showForm = false;
+		appointmentError = null;
+		appointmentMessage = null;
+		appointmentLoading = true;
+		appointment = {
+			id: p.bookingId,
+			serviceId: p.serviceId,
+			employeeId: p.employeeId,
+			locationId: p.locationId,
+			customerId: p.customerId,
+			date: DateUtils.toLocalDate(event.start),
+			startTime: DateUtils.toLocalTime(event.start),
+			endTime: DateUtils.toLocalTime(event.end),
+			serviceName: p.serviceName,
+			customerName: p.customerName,
+			customerEmail: '',
+			customerPhone: '',
+			notes: '',
+		};
 		try {
-			const text = await plan.getBookingNotes(bookingId);
-			if (request === notesRequest) notesDialog = { ...notesDialog, loading: false, text };
+			const { notes, customer, customerError } = await plan.getBookingDetails(p.bookingId, p.customerId);
+			if (request !== appointmentRequest || !appointment) return;
+			if (customerError) appointmentError = apiError(customerError);
+			appointment = {
+				...appointment,
+				notes,
+				customerName: customer?.name || appointment.customerName,
+				customerEmail: customer?.email ?? '',
+				customerPhone: customer?.phone ?? '',
+			};
 		} catch (err) {
-			if (request === notesRequest) notesDialog = { ...notesDialog, loading: false, error: apiError(err) };
+			if (request === appointmentRequest) appointmentError = apiError(err);
+		} finally {
+			if (request === appointmentRequest) appointmentLoading = false;
+		}
+	}
+
+	// Closing (Close button, or opening another panel) also clears a stale
+	// "Booking cancelled." status.
+	function closeAppointment() {
+		appointmentRequest++;
+		appointment = null;
+		appointmentError = null;
+		appointmentMessage = null;
+		appointmentLoading = false;
+	}
+
+	function handleDuplicateAppointment() {
+		goto(resolve(duplicateBookingPath(appointment)));
+	}
+
+	function handleRescheduleAppointment() {
+		goto(resolve(rescheduleBookingPath(appointment)));
+	}
+
+	async function handleCancelAppointment() {
+		if (!appointment || appointmentLoading) return;
+		// Calendar clicks stay live while the DELETE runs; if another panel was
+		// opened (or this one closed) meanwhile, leave that panel alone.
+		const request = appointmentRequest;
+		appointmentError = null;
+		appointmentLoading = true;
+		try {
+			await plan.cancelBooking(appointment.id);
+			if (request !== appointmentRequest) return;
+			closeAppointment();
+			appointmentMessage = m.bookingCancelled();
+		} catch (err) {
+			if (request === appointmentRequest) appointmentError = apiError(err);
+		} finally {
+			if (request === appointmentRequest) appointmentLoading = false;
 		}
 	}
 
 	async function handleEventClick(info) {
 		if (info.event.id === 'preview') return;
-		// Appointments have no edit panel; clicking one shows the customer's notes, if any.
 		if (info.event.extendedProps?.eventType === 'appointment') {
-			if (info.event.extendedProps.hasNotes)
-				showNotes(info.event.extendedProps.bookingId, info.event.extendedProps.customerName);
+			showAppointment(info.event);
 			return;
 		}
 
+		closeAppointment();
 		formMode = 'view';
 		selectedVacancyId = info.event.id;
 		formError = null;
@@ -252,6 +324,9 @@
 			<ErrorMessage error={apiError(plan.error, m.errorLoadVacancies())} />
 		</div>
 	{/if}
+	{#if appointmentMessage}
+		<div role="status" aria-live="polite" class="{success} mb-4">{appointmentMessage}</div>
+	{/if}
 
 	<div class="flex flex-col gap-6 lg:flex-row">
 		<div class="flex-1 min-w-0 relative" aria-busy={plan.isLoading}>
@@ -303,15 +378,20 @@
 					ondelete={formMode === 'view' ? handleDelete : undefined}
 				/>
 			</div>
+		{:else if appointment}
+			<div class="w-full shrink-0 lg:w-80">
+				<BookingDetails
+					{...appointment}
+					locations={plan.locations}
+					employees={plan.employees}
+					error={appointmentError}
+					loading={appointmentLoading}
+					onclose={closeAppointment}
+					onduplicate={handleDuplicateAppointment}
+					onreschedule={handleRescheduleAppointment}
+					oncancelbooking={handleCancelAppointment}
+				/>
+			</div>
 		{/if}
 	</div>
-
-	<MessageDialog
-		open={notesDialog.open}
-		title={notesDialog.customerName ? m.noteFrom({ customer: notesDialog.customerName }) : m.notes()}
-		message={notesDialog.text}
-		loading={notesDialog.loading}
-		error={notesDialog.error}
-		onclose={() => (notesDialog.open = false)}
-	/>
 </div>

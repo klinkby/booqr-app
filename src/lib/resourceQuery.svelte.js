@@ -52,15 +52,18 @@ export function useResourceQuery(options) {
  *
  * Must be called once during component/hook setup.
  *
- * @param {Array} invalidateKey the resource's `.all` key (coarse invalidation)
+ * @param {Array} invalidateKey the resource's `.all` key (coarse invalidation),
+ *   or an array of such keys when the mutation touches several resources
+ *   (e.g. cancelling a booking also re-opens its vacancy).
  * @param {(variables: any) => Promise<unknown>} mutator
  * @returns {(variables: any) => Promise<unknown>}
  */
 export function useResourceMutation(invalidateKey, mutator) {
 	const queryClient = useQueryClient();
+	const keys = Array.isArray(invalidateKey[0]) ? invalidateKey : [invalidateKey];
 	const mutation = createMutation(() => ({
 		mutationFn: (variables) => authedQueryFn(() => mutator(variables)),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: invalidateKey }),
+		onSuccess: () => Promise.all(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey }))),
 	}));
 	return (variables) => mutation.mutateAsync(variables);
 }

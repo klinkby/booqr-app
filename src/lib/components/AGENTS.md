@@ -106,22 +106,6 @@ Native `<dialog>` confirmation, opened with `showModal()` while `open` is true. 
 Capped at the viewport height: the heading, message and buttons stay in view and `children` scrolls (`dialogScroll`
 token). Focus starts on Cancel.
 
-### MessageDialog (`src/lib/components/MessageDialog.svelte`)
-
-Read-only native `<dialog>` for a block of plain text (the plan calendar's customer notes). Same card layout as
-`ConfirmDialog`, with a single Close button (`m.close()`). The text keeps its line breaks (`whitespace-pre-wrap`); the
-dialog grows to the viewport height (less 1rem each side) and only the text scrolls beyond that, keeping the heading and
-Close in view. Escape and Close call `onclose`.
-
-| Prop      | Type               | Default  | Description                                       |
-| --------- | ------------------ | -------- | ------------------------------------------------- |
-| `open`    | `boolean`          | required | Shows (`showModal`) or closes the dialog          |
-| `title`   | `string`           | required | Heading; names the dialog (`aria-labelledby`)     |
-| `message` | `string`           | `''`     | Body text, rendered as plain text                 |
-| `loading` | `boolean`          | `false`  | Shows a `role="status"` "Loading" message instead |
-| `error`   | `string \| object` | `null`   | `apiError()` result, shown in an `alert` instead  |
-| `onclose` | `() => void`       | required | Close button, or Escape                           |
-
 ### RequiredInput (`src/lib/components/RequiredInput.svelte`)
 
 Required text input with the design-manual asterisk. Spreads all props onto the `<input>` (`id`, `name`, `type`,
@@ -185,6 +169,42 @@ Renders a section heading above a `<Form card>`; the parent sets the panel width
 | `ondelete`                  | `() => void`               | `undefined`    | Shown only in view mode                                 |
 
 In view mode the action bar is Cancel, then Delete; there is no submit button. Validates end > start. Panel: `sticky top-20` (clears the sticky header).
+
+### BookingDetails (`src/lib/components/BookingDetails.svelte`)
+
+Read-only side panel for a booking (an appointment on the plan calendar), laid out like `VacancyForm` in view mode:
+section heading "Appointment details", then a `card` whose `fieldset` is always `disabled`. First section: formatted
+date, Start/End, Location, Employee, Service; second: Customer, Email, Phone (`formatPhone`), Notes. Action bar: a `BookingMenu` floated left (opening upward, left-aligned) and Close on the right (Escape does too; labelled Close, not Cancel, so it can't be mistaken for Cancel booking). Fields use `appointment-*` ids. Parent sets the panel width.
+
+| Prop                                                       | Type               | Default        | Description                                                  |
+| ---------------------------------------------------------- | ------------------ | -------------- | ------------------------------------------------------------ |
+| `id`                                                       | `string \| number` | required       | Booking id; names the menu                                   |
+| `date` / `startTime` / `endTime`                           | `string`           | `''`           | `YYYY-MM-DD` / `HH:mm` local                                 |
+| `locationId` / `employeeId`                                | `string \| number` | `''`           | Selected in the disabled selects                             |
+| `serviceName` / `customerName` / `customerEmail` / `notes` | `string`           | `''`           | Shown as-is                                                  |
+| `customerPhone`                                            | `string`           | `''`           | API value; displayed via `formatPhone`                       |
+| `locations` / `employees`                                  | `Array`            | `[]`           | Same shapes as `VacancyForm`                                 |
+| `error` / `loading`                                        | —                  | `null`/`false` | `apiError()` result in a `cardAlert`; loading hides the menu |
+| `onclose`                                                  | `() => void`       | required       | Close button or Escape                                       |
+| `onduplicate` / `onreschedule` / `oncancelbooking`         | `() => void`       | `undefined`    | Forwarded to `BookingMenu`                                   |
+
+### BookingMenu (`src/lib/components/BookingMenu.svelte`)
+
+The booking "⋮" overflow menu (docs/design.md › Overflow menu): Duplicate, then Reschedule and a red Cancel booking when
+`manageable`. Owns its open state; opening one closes any other (capture-phase outside click). Escape closes it and
+returns focus to the trigger without reaching document-level Escape handlers. Used by `ListCalendar` rows and
+`BookingDetails`.
+
+| Prop                                               | Type                 | Default   | Description                                   |
+| -------------------------------------------------- | -------------------- | --------- | --------------------------------------------- |
+| `id`                                               | `string \| number`   | required  | Unique per page; popup id `booking-menu-{id}` |
+| `manageable`                                       | `boolean`            | `true`    | `false` leaves only Duplicate                 |
+| `placement`                                        | `'below' \| 'above'` | `'below'` | Popup side relative to the trigger            |
+| `align`                                            | `'right' \| 'left'`  | `'right'` | Popup edge aligned with the trigger's edge    |
+| `onduplicate` / `onreschedule` / `oncancelbooking` | `() => void`         | —         | Item callbacks; the menu closes first         |
+
+Build the wizard URLs for Duplicate/Reschedule with `duplicateBookingPath` / `rescheduleBookingPath` from
+`#lib/bookingWizard.js` (the latter stores the one-time rebook nonce).
 
 ### Customer booking wizard components
 

@@ -205,7 +205,9 @@ test.describe('Calendar UX Adjustments', () => {
 		await pageScreenshot(page, 'admin-plan-select-employee');
 	});
 
-	test('appointment with customer notes shows an (i) icon and opens the notes in a dialog', async ({ page }) => {
+	// Every appointment opens the read-only details panel; one with notes also
+	// carries the (i) icon. Shared setup for the panel tests below.
+	async function openAppointment(page, { notes = 'Sore left shoulder.\nPlease use unscented oil.' } = {}) {
 		const today = new Date();
 		const day = today.getDay();
 		const daysFromMonday = day === 0 ? 6 : day - 1;
@@ -221,34 +223,157 @@ test.describe('Calendar UX Adjustments', () => {
 			locationId: 1,
 			employeeId: 'emp1',
 			customerId: '1',
-			hasNotes: true,
+			hasNotes: !!notes,
 		};
-		const notes = 'Sore left shoulder.\nPlease use unscented oil.';
 
 		await page.route('**/api/users/*/my-bookings*', (route) =>
 			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [booking] }) }),
 		);
 		// The list only says hasNotes; the text comes from GET /api/bookings/{id} (a Booking).
 		await page.route('**/api/bookings/appt-notes', (route) =>
-			route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({ id: booking.id, customerId: booking.customerId, serviceId: booking.serviceId, notes }),
-			}),
+			route.request().method() === 'DELETE'
+				? route.fulfill({ status: 204 })
+				: route.fulfill({
+						status: 200,
+						contentType: 'application/json',
+						body: JSON.stringify({ id: booking.id, customerId: '1', serviceId: 'svc1', notes }),
+					}),
 		);
 
 		await page.goto('/admin/plan');
 		const appointment = page.locator('.ec-event', { hasText: 'Test Customer, Haircut' });
 		await expect(appointment).toBeVisible({ timeout: 5000 });
+		return appointment;
+	}
+
+	test('clicking an appointment opens its read-only details panel', async ({ page }) => {
+		const appointment = await openAppointment(page);
 		await expect(appointment.locator('[title="Notes"]')).toBeVisible();
 
 		await appointment.click();
-		const dialog = page.getByRole('dialog', { name: 'Note from Test Customer' });
-		await expect(dialog).toBeVisible();
-		await expect(dialog).toContainText('Please use unscented oil.');
-		await pageScreenshot(page, 'admin-plan-appointment-notes');
+		const panel = page.getByRole('group', { name: 'View appointment' });
+		await expect(page.getByRole('heading', { name: 'Appointment details' })).toBeVisible();
+		await expect(page.getByRole('dialog')).toHaveCount(0);
 
-		await dialog.getByRole('button', { name: 'Close' }).click();
-		await expect(dialog).toBeHidden();
+		await expect(panel.getByLabel('Start')).toHaveValue('09:00');
+		await expect(panel.getByLabel('End')).toHaveValue('09:45');
+		await expect(panel.getByLabel('Service')).toHaveValue('Haircut');
+		await expect(panel.getByLabel('Customer')).toHaveValue('Test Customer');
+		await expect(panel.getByLabel('Email')).toHaveValue('test@example.com');
+		await expect(panel.getByLabel('Phone')).toHaveValue('+45 12345678');
+		await expect(panel.getByLabel('Notes')).toHaveValue('Sore left shoulder.\nPlease use unscented oil.');
+		for (const field of ['Start', 'Location', 'Employee', 'Customer', 'Notes']) {
+			await expect(panel.getByLabel(field)).toBeDisabled();
+		}
+		await pageScreenshot(page, 'admin-plan-appointment-details');
+
+		await page.getByRole('button', { name: 'Close', exact: true }).click();
+		await expect(page.getByRole('heading', { name: 'Appointment details' })).toBeHidden();
+	});
+
+	test('appointment without notes still opens the details panel', async ({ page }) => {
+		const appointment = await openAppointment(page, { notes: null });
+		await expect(appointment.locator('[title="Notes"]')).toHaveCount(0);
+
+		await appointment.click();
+		await expect(page.getByRole('heading', { name: 'Appointment details' })).toBeVisible();
+		await expect(page.getByLabel('Notes')).toHaveValue('');
+	});
+
+	test('appointment actions menu offers duplicate, reschedule and cancel', async ({ page }) => {
+		const appointment = await openAppointment(page);
+		await appointment.click();
+
+		const kebab = page.getByRole('button', { name: 'Booking actions', exact: true });
+		await kebab.click();
+		const menu = page.getByRole('menu', { name: 'Booking actions' });
+		await expect(menu.getByRole('menuitem')).toHaveText(['Duplicate', 'Reschedule', 'Cancel booking']);
+		await pageScreenshot(page, 'admin-plan-appointment-menu-open', { expand: true });
+
+		// Escape closes only the menu, not the panel.
+		await page.keyboard.press('Escape');
+		await expect(menu).toBeHidden();
+		await expect(kebab).toBeFocused();
+		await expect(page.getByRole('heading', { name: 'Appointment details' })).toBeVisible();
+
+		// Cancel booking deletes it and closes the panel.
+		const deleted = page.waitForRequest(
+			(req) => req.method() === 'DELETE' && req.url().endsWith('/api/bookings/appt-notes'),
+		);
+		await kebab.click();
+		await menu.getByRole('menuitem', { name: 'Cancel booking' }).click();
+		await deleted;
+		await expect(page.getByRole('status').filter({ hasText: 'Booking cancelled.' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Appointment details' })).toBeHidden();
+
+		// The status clears once staff move on to another panel.
+		await page.locator('.ec-time-grid').first().click();
+		await expect(page.getByText('Create New Vacancy')).toBeVisible();
+		await expect(page.getByText('Booking cancelled.')).toBeHidden();
+	});
+
+	test('a cancel that settles after another panel opened leaves that panel alone', async ({ page }) => {
+		const appointment = await openAppointment(page);
+		// Hold the DELETE until the vacancy panel is open.
+		let releaseDelete;
+		const held = new Promise((resolve) => (releaseDelete = resolve));
+		await page.route('**/api/bookings/appt-notes', async (route) => {
+			if (route.request().method() !== 'DELETE') return route.fallback();
+			await held;
+			return route.fulfill({ status: 204 });
+		});
+
+		await appointment.click();
+		await page.getByRole('button', { name: 'Booking actions', exact: true }).click();
+		const deleted = page.waitForResponse(
+			(res) => res.request().method() === 'DELETE' && res.url().endsWith('/api/bookings/appt-notes'),
+		);
+		await page.getByRole('menuitem', { name: 'Cancel booking' }).click();
+
+		await page.locator('.ec-event', { hasText: 'Employee One @ Location A' }).first().click();
+		await expect(page.getByRole('heading', { name: 'Vacancy details' })).toBeVisible();
+
+		releaseDelete();
+		await deleted;
+		await expect(page.getByRole('heading', { name: 'Vacancy details' })).toBeVisible();
+		await expect(page.getByText('Booking cancelled.')).toBeHidden();
+	});
+
+	test('a failed customer lookup still shows the notes', async ({ page }) => {
+		const appointment = await openAppointment(page);
+		await page.route('**/api/users/1', (route) =>
+			route.fulfill({
+				status: 404,
+				contentType: 'application/problem+json',
+				body: JSON.stringify({ title: 'Not Found', status: 404 }),
+			}),
+		);
+
+		await appointment.click();
+		const panel = page.getByRole('group', { name: 'View appointment' });
+		await expect(panel.getByLabel('Notes')).toHaveValue('Sore left shoulder.\nPlease use unscented oil.');
+		await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toBeVisible();
+		await expect(panel.getByLabel('Customer')).toHaveValue('Test Customer');
+		await expect(panel.getByLabel('Email')).toHaveValue('');
+	});
+
+	test("duplicating an appointment books again on the customer's behalf", async ({ page }) => {
+		const appointment = await openAppointment(page);
+		await appointment.click();
+
+		await page.getByRole('button', { name: 'Booking actions', exact: true }).click();
+		await page.getByRole('menuitem', { name: 'Duplicate' }).click();
+		await expect(page).toHaveURL(/\/book\/svc1\?employee=emp1&location=1&customer=1$/);
+	});
+
+	test('rescheduling an appointment carries a rebook nonce for the customer', async ({ page }) => {
+		const appointment = await openAppointment(page);
+		await appointment.click();
+
+		await page.getByRole('button', { name: 'Booking actions', exact: true }).click();
+		await page.getByRole('menuitem', { name: 'Reschedule' }).click();
+		await expect(page).toHaveURL(/\/book\/svc1\?employee=emp1&location=1&customer=1&rebook=[0-9a-f-]+$/);
+		const pending = await page.evaluate(() => JSON.parse(sessionStorage.getItem('pendingRebook')));
+		expect(pending.bookingId).toBe('appt-notes');
 	});
 });

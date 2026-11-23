@@ -192,7 +192,7 @@ confirm label names the action (e.g. `m.changeRole()`), and the message states t
 this dialog itself.
 
 Dialogs never grow past the viewport (`max-h-[calc(100dvh-2rem)]`). The heading, message and action bar stay in view, and
-extra content (`ConfirmDialog` children, `MessageDialog` text) scrolls in a `dialogScroll` body. Focus starts on Cancel
+extra content (`ConfirmDialog` children) scrolls in a `dialogScroll` body. Focus starts on Cancel
 (or Close), the safe choice, not on the scroll body. Long machine output such as the restore preview's warning log is
 `text-xs` with no gap between items.
 
@@ -217,7 +217,7 @@ states are a `card` with `text-sm text-gray-500`; errors use `alert`. Pages don'
 
 ### Overflow menu
 
-Shared by `DataTable` rows and the `/profile` booking list (`ListCalendar`). A `menuTrigger` "⋮" `<button>`
+Shared by `DataTable` rows and the booking actions (`BookingMenu`: `/profile` list rows and the `/admin/plan` appointment panel, where the ⋮ sits at the left of the action bar, opposite Close (not "Cancel", which would read as cancelling the booking), and opens upward, left-aligned). A `menuTrigger` "⋮" `<button>`
 (`aria-haspopup="menu"`, `aria-expanded`, `aria-controls`) opens a `menuPanel` popup (`role="menu"`, right-aligned to
 the trigger) of `role="menuitem"` buttons or links styled `menuItem`; a destructive item uses `menuItemDanger` and comes
 last. Opening focuses the first item; Escape closes and returns focus to the trigger; an outside click closes it.
@@ -299,7 +299,7 @@ error, so use:
 | Appointment overlay         | `border-l-4 border-sky-500 bg-sky-50 text-sky-800`               | ≥ 6:1    |
 | Pending selection (unsaved) | `border border-dashed border-gray-400 bg-gray-100 text-gray-700` | ≥ 7:1    |
 
-Each is a token in `ui.js` passed through the event's `classNames`. Slots are 40px per 30 minutes (`slotHeight`; the library's 24px clips text), so a 45-minute event shows its time and two lines of title. An appointment whose customer left notes shows a `sky-600` information-circle icon in its top-right corner (hover title "Notes"); clicking the appointment opens the notes in a `MessageDialog` headed "Note from {customer}" (`m.noteFrom()`). The icon isn't its own button because the event is already the library's `role="button"`. Event text ("Booked", names, times) carries the
+Each is a token in `ui.js` passed through the event's `classNames`. Slots are 40px per 30 minutes (`slotHeight`; the library's 24px clips text), so a 45-minute event shows its time and two lines of title. An appointment whose customer left notes shows a `sky-600` information-circle icon in its top-right corner (hover title "Notes"); clicking any appointment opens the read-only `BookingDetails` side panel ("Appointment details") in place of the vacancy form, with the customer's contact details and notes, a Cancel button and the booking [overflow menu](#overflow-menu). The icon isn't its own button because the event is already the library's `role="button"`. Event text ("Booked", names, times) carries the
 meaning too, so colour is never the only signal. Around the calendar, the employee picker uses `input` and the
 "extend hours" button `buttonSecondary`; spacing follows the [scale](#spacing).
 

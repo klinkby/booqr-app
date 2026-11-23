@@ -232,6 +232,16 @@ export function setupCustomerToken(page) {
  * format/quality so individual tests only name the shot. `name` is the base
  * filename without extension (e.g. 'admin-services-edit').
  */
-export function pageScreenshot(page, name) {
+export async function pageScreenshot(page, name, { expand = false } = {}) {
+	// `expand` grows the viewport to the page height first. After Playwright has
+	// scrolled to reach a below-the-fold control, a full-page capture paints the
+	// sticky header and side panels at their scrolled positions (mid-page); with
+	// the whole page in view the scroll resets to the top. Opt-in only: scrolling
+	// closes some popups (DataTable's menu), so call it with such a popup closed
+	// or in a component that ignores scroll (BookingMenu).
+	if (expand) {
+		const height = await page.evaluate(() => document.documentElement.scrollHeight);
+		await page.setViewportSize({ width: page.viewportSize().width, height });
+	}
 	return page.screenshot({ path: `e2e/screenshots/${name}.webp`, type: 'webp', quality: 80, fullPage: true });
 }

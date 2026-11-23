@@ -162,7 +162,7 @@ Shared (do not duplicate per route):
 - `src/lib/resourceQuery.svelte.js` — generic primitives:
   - `useResourceQuery(options)` — reactive collection fetch, unwraps `{ items }`, exposes `items`/`isLoading`/`isFetching`/`error`.
   - `usePagedResourceQuery(options)` — same as above but with internal `start` offset; also exposes `hasPreviousPage`/`hasNextPage`/`nextPage()`/`previousPage()` for use with `PaginatedTable`.
-  - `useResourceMutation(invalidateKey, mutator)` — mutate + coarse `invalidateQueries` on the resource's `.all` key; returns `mutateAsync` so callers settle after refetch.
+  - `useResourceMutation(invalidateKey, mutator)` — mutate + coarse `invalidateQueries` on the resource's `.all` key (or an array of `.all` keys when one mutation touches several resources, e.g. cancelling a booking: `[bookings.all, vacancies.all]`); returns `mutateAsync` so callers settle after refetch.
   - `usePublicMutation(mutator)` — mutation for auth-flow / pre-auth endpoints; no `authedQueryFn`, no invalidation. Returns `mutateAsync`.
   - `fetchResource(operation)` — imperative one-off authed fetch, no caching — for always-fresh detail reads.
   - `fetchAllPages(fetcher)` — loops the `Start`/`Num` pagination below until a page returns fewer than `Num=100`
@@ -218,7 +218,9 @@ Shared (do not duplicate per route):
   - `/admin/` — Protected (login + Employee role)
   - `/admin/plan` — Weekly vacancy calendar, staff-facing (not the customer booking flow above). `planData.svelte.js`
     / `usePlanData()` fetches vacancies (range), locations and employees via svelte-query; mutations coarsely
-    invalidate `vacancies.all`
+    invalidate `vacancies.all`. Clicking an appointment opens the read-only `BookingDetails` panel; its menu's
+    Duplicate/Reschedule start the wizard with `?customer=` (booking on the customer's behalf) and Cancel booking
+    deletes it (invalidating `bookings.all` + `vacancies.all`)
   - `/admin/services/**`, `/admin/locations/**` — Service and location CRUD; **Admin only** (the API rejects writes from
     Employees). Each has a `+layout.svelte` wrapping `src/routes/admin/AdminOnly.svelte`; nav links shown only for
     `auth.isAdmin`.
@@ -308,7 +310,7 @@ CI for regression detection.
 - **E2E** (`npm run test:e2e`): Playwright; conventions in `e2e/AGENTS.md`.
 - **Unit** (`npm run test:unit`): Vitest (Node, `vitest.config.js`), files `src/**/*.test.js` colocated. Pure logic
   only — extract it from `*.svelte.js` hooks into plain `.js` (e.g. `bookingAvailability.js`), don't test runes. Keep
-  assertions timezone-independent; `vi.mock('#lib/paraglide/messages.js', …)` for messages.
+  assertions timezone-independent; messages are stubbed globally in `vitest.config.js` (each `m.x()` returns `'x'`); `vi.mock('#lib/paraglide/messages.js', …)` only when asserting specific copy.
 - **Before committing**: `npm run lint` (ESLint + Prettier check) and `npm run format`.
 - **Linting rules**: `#each` blocks must have keys `(item.id)`; use `SvelteMap` instead of `new Map()` for reactive
   state; no useless mustaches.

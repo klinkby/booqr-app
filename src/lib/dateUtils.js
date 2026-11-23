@@ -28,6 +28,17 @@ export class DateUtils {
 		return `${d.getDate()}. ${d.toLocaleDateString(locale, { month: 'long' })}`;
 	}
 
+	/** "Wednesday, November 25, 2026" from a local `YYYY-MM-DD`; '' when empty. Side-panel date line. */
+	static formatLongDate(date, locale) {
+		if (!date) return '';
+		return new Date(date + 'T00:00').toLocaleDateString(locale, {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		});
+	}
+
 	static toLocalTime(d) {
 		return `${DateUtils.#pad(d.getHours())}:${DateUtils.#pad(d.getMinutes())}`;
 	}

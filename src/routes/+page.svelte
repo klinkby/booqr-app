@@ -5,6 +5,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { PENDING_REBOOK_KEY } from '#lib/bookingWizard.js';
 	import { useHomeData } from './homeData.svelte.js';
 	import { m } from '#lib/paraglide/messages.js';
 
@@ -20,7 +21,7 @@
 		// Starting a fresh booking from the home page clears any abandoned rebook
 		// intent, so a new booking never deletes a previously-selected booking.
 		try {
-			sessionStorage.removeItem('pendingRebook');
+			sessionStorage.removeItem(PENDING_REBOOK_KEY);
 		} catch {
 			// sessionStorage unavailable — nothing to clear
 		}
