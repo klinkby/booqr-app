@@ -131,3 +131,16 @@ describe('formatLongDate', () => {
 		expect(DateUtils.formatLongDate('', 'en')).toBe('');
 	});
 });
+
+describe('formatMediumDate', () => {
+	// Midday UTC lands on the same calendar day in every common timezone.
+	it('formats an ISO timestamp as a medium date', () => {
+		expect(DateUtils.formatMediumDate('2027-02-25T12:00:00Z', 'en')).toBe('Feb 25, 2027');
+		expect(DateUtils.formatMediumDate('2027-02-25T12:00:00Z', 'da')).toBe('25. feb. 2027');
+	});
+
+	it('returns an empty string for an empty or invalid timestamp', () => {
+		expect(DateUtils.formatMediumDate('', 'en')).toBe('');
+		expect(DateUtils.formatMediumDate('not a date', 'en')).toBe('');
+	});
+});

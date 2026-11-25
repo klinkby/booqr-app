@@ -1,5 +1,7 @@
 <script>
 	import { auth, ConfirmDialog, ContactFields, Form, apiError, ErrorMessage } from '#lib';
+	import { DateUtils } from '#lib/dateUtils.js';
+	import { getLocale } from '#lib/paraglide/runtime.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
@@ -29,6 +31,9 @@
 	let bookingError = $state(null);
 	let bookingMessage = $state(null);
 	let cancelling = $state(false);
+	let copyingFeed = $state(false);
+	let feedError = $state(null);
+	let feedMessage = $state(null);
 	let exporting = $state(false);
 	let exportError = $state(null);
 	let backupBusy = $state(false);
@@ -97,6 +102,37 @@
 			bookingError = apiError(err);
 		} finally {
 			cancelling = false;
+		}
+	}
+
+	// Copy the signed calendar feed link to the clipboard. Where supported, the
+	// clipboard write starts synchronously with a promised payload so Safari
+	// keeps the click's user activation while the link is still being fetched.
+	async function handleCopyFeedLink() {
+		if (copyingFeed) return;
+		copyingFeed = true;
+		feedError = null;
+		feedMessage = null;
+		const linkPromise = profile.getCalendarFeedLink();
+		try {
+			if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+				const blob = linkPromise.then((link) => new Blob([link.url], { type: 'text/plain' }));
+				await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]);
+			} else {
+				await navigator.clipboard.writeText((await linkPromise).url);
+			}
+			const { expires } = await linkPromise;
+			feedMessage = m.calendarFeedLinkCopied({ date: DateUtils.formatMediumDate(expires, getLocale()) });
+		} catch (err) {
+			// Report the API failure rather than the clipboard's generic rejection.
+			feedError = apiError(
+				await linkPromise.then(
+					() => err,
+					(apiErr) => apiErr,
+				),
+			);
+		} finally {
+			copyingFeed = false;
 		}
 	}
 
@@ -210,6 +246,17 @@
 	</svg>
 {/snippet}
 
+{#snippet calendarIcon()}
+	<svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+		<path
+			d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+			stroke-width="1.5"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		></path>
+	</svg>
+{/snippet}
+
 {#if auth.isLoggedIn}
 	<div>
 		{#if profile.isLoading}
@@ -243,6 +290,28 @@
 						/>
 					{:else}
 						<p role="status" class="p-4 text-sm text-gray-500">{m.loading()}</p>
+					{/if}
+					<!-- Calendar feed: same inline-action pattern and card-padding inset as
+					     the GDPR export line. -->
+					<p class="{cardSection} flex items-center gap-1 text-sm text-gray-500">
+						{@render calendarIcon()}
+						<button
+							type="button"
+							class="{link} disabled:opacity-50"
+							onclick={handleCopyFeedLink}
+							disabled={copyingFeed}
+							aria-busy={copyingFeed}
+							aria-describedby="calendar-feed-rest"
+						>
+							{m.copy()}
+						</button>
+						<span id="calendar-feed-rest">{m.calendarFeedLinkRest()}</span>
+					</p>
+					{#if feedMessage}
+						<div role="status" aria-live="polite" class="{success} mt-2">{feedMessage}</div>
+					{/if}
+					{#if feedError}
+						<div role="alert" aria-live="assertive" class="{alert} mt-2"><ErrorMessage error={feedError} /></div>
 					{/if}
 				</section>
 

@@ -10,6 +10,7 @@ export { TakeoutWarningCode } from './models/TakeoutWarningCode';
 export { ActivityService } from './services/ActivityService';
 export { AuthenticationService } from './services/AuthenticationService';
 export { BookingService } from './services/BookingService';
+export { CalendarFeedService } from './services/CalendarFeedService';
 export { DataTakeoutService } from './services/DataTakeoutService';
 export { EmployeeService } from './services/EmployeeService';
 export { LocationService } from './services/LocationService';

@@ -41,6 +41,28 @@ export class UserService {
         });
     }
     /**
+     * Get my signed calendar feed (iCalendar) link
+     * User
+     * @param id
+     * @returns CalendarFeedLink OK
+     * @throws ApiError
+     */
+    static getCalendarFeedLink(id) {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/users/{id}/calendar-feed-link',
+            path: {
+                'id': id,
+            },
+            errors: {
+                400: `Bad Request`,
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+    /**
      * List my bookings
      * User
      * @param id
