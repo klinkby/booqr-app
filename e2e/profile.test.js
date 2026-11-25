@@ -97,6 +97,31 @@ test.describe('Profile Page', () => {
 		await expect(page.getByRole('alert')).toBeVisible();
 	});
 
+	test('calendar feed link is copied to the clipboard with its expiry', async ({ page, context }) => {
+		await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+		const feedUrl = 'https://acme.booqr.dk/api/calendar-feed.ics?token=signed';
+		await page.route('**/api/users/1/calendar-feed-link', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ url: feedUrl, expires: '2027-02-25T12:00:00Z' }),
+			}),
+		);
+		await page.goto('/profile');
+		await page.getByRole('button', { name: 'Copy', exact: true }).click();
+
+		await expect(page.getByRole('status').filter({ hasText: 'Link copied' })).toContainText('Feb 25, 2027');
+		expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(feedUrl);
+	});
+
+	test('calendar feed link shows an error when the request fails', async ({ page, context }) => {
+		await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+		await page.route('**/api/users/1/calendar-feed-link', (route) => route.fulfill({ status: 500, body: '' }));
+		await page.goto('/profile');
+		await page.getByRole('button', { name: 'Copy', exact: true }).click();
+		await expect(page.getByRole('alert')).toBeVisible();
+	});
+
 	test('non-admins do not see the backup panel', async ({ page }) => {
 		await page.goto('/profile');
 		await expect(page.locator('input[name="email"]')).toBeVisible();

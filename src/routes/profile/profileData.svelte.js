@@ -79,6 +79,9 @@ export function useProfileData() {
 		// GDPR data portability: the user's own takeout document. Always fetched
 		// fresh and never cached — it holds PII and must reflect the current state.
 		exportMyTakeout: () => fetchResource(() => DataTakeoutService.exportMyTakeout()),
+		// Signed calendar feed (iCalendar) link. The URL carries a token, so it is
+		// fetched on demand and never cached.
+		getCalendarFeedLink: () => fetchResource(() => UserService.getCalendarFeedLink(auth.userId)),
 		// Organization backup (admin only): same fresh, uncached read as above.
 		exportTenantTakeout: () => fetchResource(() => DataTakeoutService.exportTenantTakeout()),
 		// Restore a backup. A dry run only reports what would change. A real

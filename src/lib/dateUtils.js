@@ -39,6 +39,13 @@ export class DateUtils {
 		});
 	}
 
+	/** "Feb 25, 2027" / "25. feb. 2027" from an ISO timestamp; '' when empty or invalid. */
+	static formatMediumDate(iso, locale) {
+		const d = iso ? new Date(iso) : null;
+		if (!d || Number.isNaN(d.getTime())) return '';
+		return d.toLocaleDateString(locale, { dateStyle: 'medium' });
+	}
+
 	static toLocalTime(d) {
 		return `${DateUtils.#pad(d.getHours())}:${DateUtils.#pad(d.getMinutes())}`;
 	}
