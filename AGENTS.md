@@ -132,10 +132,10 @@ the sole authority — never assume a subdomain is valid client-side.
 - **XSS**: Svelte 5 auto-escapes. Avoid `{@html ...}`; use `DOMPurify` if unavoidable.
 - **CSP**: No `unsafe-inline`. Never write inline `style="…"` markup or inline scripts (`style:` directives and `el.style` are fine). The policy is a build-time `<meta>` from `vite.config.js`; `e2e/csp.test.js` guards it.
 - **Error Handling**: Show generic messages. Use `apiError(err, fallback)` from `#lib` for API errors — it returns
-  `{ message, helpUrl }` (`apiErrorMessage` handles ProblemDetails 400s and falls back safely; `apiErrorHelpUrl` keeps
+  `{ message, detail, helpUrl }` (`apiErrorMessage` uses ProblemDetails field `errors`, else `title`, else `detail`, and falls back safely; `apiErrorDetail` keeps `detail` for display under the title; `apiErrorHelpUrl` keeps
   the ProblemDetails `type` only when it is an absolute `https:` URL). Pass the result to `<Form error>` or render it
-  with `<ErrorMessage error>`, which adds an "Error details" info link to the problem type. To swap in custom copy
-  (e.g. a 409), keep the link: `{ ...apiError(err), message: m.x() }`.
+  with `<ErrorMessage error>`, which adds an "Error details" help link to the problem type. To swap in custom copy
+  (e.g. a 409), keep the link and drop the server detail: `{ ...apiError(err), message: m.x(), detail: null }`.
 - **No Console Logging**: Never log tokens, passwords, or PII.
 - **Credentials Scope**: `withCredentials: true` only for `/api/` paths.
 - **Input Validation**: Validate client-side before submission; server-side is authoritative.

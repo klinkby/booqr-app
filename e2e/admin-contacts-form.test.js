@@ -244,4 +244,34 @@ test.describe('Admin Contact Form (role change)', () => {
 		await expect(link).toHaveAttribute('target', '_blank');
 		await expect(link).toHaveAttribute('rel', 'external noopener noreferrer');
 	});
+
+	test('a ProblemDetails error without field errors shows its title and detail', async ({ page }) => {
+		await page.route(`**/api/users/${CONTACT.id}`, (route) => {
+			if (route.request().method() === 'GET') {
+				return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CONTACT) });
+			}
+			if (route.request().method() === 'PUT') {
+				return route.fulfill({
+					status: 400,
+					contentType: 'application/problem+json',
+					body: JSON.stringify({
+						type: 'https://www.booqr.dk/problems/phone-in-use',
+						title: 'Phone number in use',
+						detail: 'Another contact already has this phone number.',
+					}),
+				});
+			}
+			return route.fallback();
+		});
+
+		await page.goto(`/admin/contacts/${CONTACT.id}`);
+		await expect(page.locator('#name')).toHaveValue(CONTACT.name);
+		await page.locator('#phone').fill('12345678');
+		await page.getByRole('button', { name: 'Update', exact: true }).click();
+
+		const alert = page.getByRole('alert');
+		await expect(alert.locator('strong')).toHaveText('Phone number in use');
+		await expect(alert).toContainText('Another contact already has this phone number.');
+		await pageScreenshot(page, 'admin-contacts-edit-error');
+	});
 });

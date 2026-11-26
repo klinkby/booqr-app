@@ -5,7 +5,7 @@ vi.mock('#lib/paraglide/messages.js', () => ({
 	m: { errorDefault: () => 'default-error' },
 }));
 
-const { apiError, apiErrorHelpUrl, apiErrorMessage } = await import('./apiErrorMessage.js');
+const { apiError, apiErrorDetail, apiErrorHelpUrl, apiErrorMessage } = await import('./apiErrorMessage.js');
 
 /** Build an ApiError with a given ProblemDetails-ish body. */
 const makeError = (body) =>
@@ -35,8 +35,17 @@ describe('apiErrorMessage', () => {
 		expect(apiErrorMessage(err)).toBe('One or more validation errors occurred.');
 	});
 
-	it('prefers field errors over title when both are present', () => {
-		const err = makeError({ errors: { name: ['Required.'] }, title: 'Validation failed' });
+	it('uses only body.title when there is also a detail', () => {
+		const err = makeError({ title: 'Conflict', detail: 'The time slot is already booked.' });
+		expect(apiErrorMessage(err)).toBe('Conflict');
+	});
+
+	it('uses body.detail when there is no title', () => {
+		expect(apiErrorMessage(makeError({ detail: 'Only detail.' }))).toBe('Only detail.');
+	});
+
+	it('prefers field errors over title and detail when both are present', () => {
+		const err = makeError({ errors: { name: ['Required.'] }, title: 'Validation failed', detail: 'See errors.' });
 		expect(apiErrorMessage(err)).toBe('Required.');
 	});
 
@@ -48,6 +57,27 @@ describe('apiErrorMessage', () => {
 	it('falls back to the default when body.errors is empty', () => {
 		const err = makeError({ errors: {} });
 		expect(apiErrorMessage(err)).toBe('default-error');
+	});
+});
+
+describe('apiErrorDetail', () => {
+	it('returns body.detail when there is a title to show it under', () => {
+		const err = makeError({ title: 'Conflict', detail: 'The time slot is already booked.' });
+		expect(apiErrorDetail(err)).toBe('The time slot is already booked.');
+	});
+
+	it.each([
+		['no title (the detail is the message)', { detail: 'Only detail.' }],
+		['a detail repeating the title', { title: 'Same', detail: 'Same' }],
+		['field errors', { errors: { name: ['Required.'] }, title: 'Validation failed', detail: 'See errors.' }],
+		['no detail', { title: 'Conflict' }],
+	])('returns null for %s', (_, body) => {
+		expect(apiErrorDetail(makeError(body))).toBeNull();
+	});
+
+	it('returns null for non-ApiError input or a missing body', () => {
+		expect(apiErrorDetail(new Error('plain'))).toBeNull();
+		expect(apiErrorDetail(makeError(undefined))).toBeNull();
 	});
 });
 
@@ -73,10 +103,10 @@ describe('apiErrorHelpUrl', () => {
 describe('apiError', () => {
 	it('pairs the message with the help URL', () => {
 		const err = makeError({ title: 'Conflict', type: 'https://www.booqr.dk/problems/x' });
-		expect(apiError(err)).toEqual({ message: 'Conflict', helpUrl: 'https://www.booqr.dk/problems/x' });
+		expect(apiError(err)).toEqual({ message: 'Conflict', detail: null, helpUrl: 'https://www.booqr.dk/problems/x' });
 	});
 
 	it('uses the fallback and no link for non-API errors', () => {
-		expect(apiError(new Error('plain'), 'custom')).toEqual({ message: 'custom', helpUrl: null });
+		expect(apiError(new Error('plain'), 'custom')).toEqual({ message: 'custom', detail: null, helpUrl: null });
 	});
 });

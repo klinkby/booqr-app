@@ -70,7 +70,7 @@
 			confirmOpen = false;
 		} catch (err) {
 			confirmOpen = false;
-			error = err?.status === 409 ? { ...apiError(err), message: m.changeRoleConflict() } : apiError(err);
+			error = err?.status === 409 ? { ...apiError(err), message: m.changeRoleConflict(), detail: null } : apiError(err);
 		} finally {
 			roleLoading = false;
 		}

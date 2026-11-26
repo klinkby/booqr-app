@@ -1,6 +1,6 @@
 // place files you want to import through the `#lib` alias in this folder.
 export { auth } from './auth.svelte.js';
-export { apiError, apiErrorHelpUrl, apiErrorMessage } from './apiErrorMessage.js';
+export { apiError, apiErrorDetail, apiErrorHelpUrl, apiErrorMessage } from './apiErrorMessage.js';
 export { default as ErrorMessage } from './components/ErrorMessage.svelte';
 export { default as DataTable } from './components/DataTable.svelte';
 export { default as PaginatedTable } from './components/PaginatedTable.svelte';
