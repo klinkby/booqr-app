@@ -6,6 +6,7 @@
  */
 
 import { browser } from '$app/env';
+import { OpenAPI } from '#lib/api/index.js';
 import { getLocale, localStorageKey, setLocale } from '#lib/paraglide/runtime.js';
 
 const LEGACY_STORAGE_KEY = 'locale-override';
@@ -43,6 +44,12 @@ function activeLocale() {
 }
 
 migrateLegacyOverride();
+
+// Send the UI locale (not the browser default) so API messages match the selected language.
+// Resolved per request; a language switch reloads the SPA anyway.
+if (browser) {
+	OpenAPI.HEADERS = () => ({ 'Accept-Language': activeLocale() });
+}
 
 export const locale = {
 	/** The active locale: override if set, otherwise the browser default. */

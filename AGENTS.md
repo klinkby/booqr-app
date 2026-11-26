@@ -64,6 +64,8 @@ It follows secure, accessible, and simply standards-first principles.
 - **Initialization**: `src/lib/auth.svelte.js` configures `OpenAPI.TOKEN`, `WITH_CREDENTIALS`, and `CREDENTIALS` via
   `Object.defineProperty` getters bound to `auth` state (runs at module-init in the browser; `ssr = false` prevents
   server execution).
+- **Accept-Language**: `src/lib/locale.svelte.js` sets `OpenAPI.HEADERS` so every API request sends the selected UI
+  locale (`en`/`da`) rather than the browser default.
 - **Generated services**: `src/lib/api/services/` use `src/lib/api/core/request.js`.
 
 ## Authentication
