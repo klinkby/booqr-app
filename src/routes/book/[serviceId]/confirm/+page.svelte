@@ -119,7 +119,7 @@
 		} catch (err) {
 			authError =
 				err instanceof ApiError && err.status === 409
-					? { ...apiError(err), message: m.emailAlreadyRegistered() }
+					? { ...apiError(err), message: m.emailAlreadyRegistered(), detail: null }
 					: apiError(err);
 		} finally {
 			authLoading = false;

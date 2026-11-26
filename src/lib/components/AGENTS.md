@@ -80,8 +80,10 @@ Accessible form wrapper handling submission, errors, and loading state. Children
 
 ### ErrorMessage (`src/lib/components/ErrorMessage.svelte`)
 
-Inline error text for alerts. `error` is a plain string or `apiError(err)`'s `{ message, helpUrl }`; a `helpUrl` (the
-ProblemDetails `type`) adds an info-circle icon link after the message that opens the problem page in a new tab. The
+Inline error text for alerts. `error` is a plain string or `apiError(err)`'s `{ message, detail, helpUrl }`. With a
+`detail` (the ProblemDetails `detail`), the message (its `title`) renders as `<strong class="font-semibold">` and the
+detail as a `block` span on the line below; output stays phrasing content so it fits in a `<p>`. A `helpUrl` (the
+ProblemDetails `type`) adds a question-mark-circle (help) icon link, floated right on the last line of text, that opens the problem page in a new tab. The
 icon inherits the alert's red text colour; the link's sr-only name is "Error details (opens in a new tab)". Wrap it in
 the alert element yourself — `Form`, `PasswordReset` and `PaginatedTable` already do.
 

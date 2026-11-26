@@ -4,7 +4,7 @@ import { m } from '#lib/paraglide/messages.js';
 /**
  * Extracts a human-readable error message from an API error.
  * For ProblemDetails responses: uses field validation messages from `errors`,
- * falls back to `title`. If neither is available, returns `fallback`.
+ * falls back to `title`, then `detail`. If none is available, returns `fallback`.
  *
  * @param {unknown} err
  * @param {string} [fallback]
@@ -12,12 +12,31 @@ import { m } from '#lib/paraglide/messages.js';
  */
 export function apiErrorMessage(err, fallback = m.errorDefault()) {
 	if (err instanceof ApiError && err.body) {
-		const messages = err.body.errors && Object.values(err.body.errors).flat();
-		if (messages?.length > 0) return messages.join(' ');
+		const messages = fieldMessages(err.body);
+		if (messages.length > 0) return messages.join(' ');
 		if (err.body.title) return err.body.title;
+		if (err.body.detail) return err.body.detail;
 	}
 	return fallback;
 }
+
+/**
+ * Returns the ProblemDetails `detail` to show under the `title`, or null. Null when field
+ * validation `errors` are the message (the detail is then generic), when there is no title
+ * (`apiErrorMessage` already shows the detail) or when it just repeats the title.
+ *
+ * @param {unknown} err
+ * @returns {string | null}
+ */
+export function apiErrorDetail(err) {
+	if (!(err instanceof ApiError) || !err.body) return null;
+	const { title, detail } = err.body;
+	if (fieldMessages(err.body).length > 0 || !title || !detail || detail === title) return null;
+	return detail;
+}
+
+/** @param {{ errors?: Record<string, string[]> }} body */
+const fieldMessages = (body) => (body.errors ? Object.values(body.errors).flat() : []);
 
 /**
  * Returns the ProblemDetails `type` URI of an API error when it is a linkable
@@ -34,12 +53,14 @@ export function apiErrorHelpUrl(err) {
 }
 
 /**
- * Message plus optional ProblemDetails help link, for `ErrorMessage` and `Form`'s `error` prop.
+ * Message plus optional ProblemDetails detail and help link, for `ErrorMessage` and `Form`'s
+ * `error` prop. When swapping in custom copy, also drop the server detail:
+ * `{ ...apiError(err), message: m.x(), detail: null }`.
  *
  * @param {unknown} err
  * @param {string} [fallback]
- * @returns {{ message: string, helpUrl: string | null }}
+ * @returns {{ message: string, detail: string | null, helpUrl: string | null }}
  */
 export function apiError(err, fallback) {
-	return { message: apiErrorMessage(err, fallback), helpUrl: apiErrorHelpUrl(err) };
+	return { message: apiErrorMessage(err, fallback), detail: apiErrorDetail(err), helpUrl: apiErrorHelpUrl(err) };
 }
